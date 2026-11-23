@@ -33,15 +33,14 @@ ShellRoot {
             spacing: 8
 
             Tray { barWindow: bar }
+            Network {}
+            Volume {}
+            Battery {}
 
-            Card {
-                width: 90; height: 38
+            TextCard {
+                text: Qt.formatDateTime(clock.date, "HH:mm")
                 fill: "#e8335a"
-                Text {
-                    anchors.centerIn: parent
-                    text: Qt.formatDateTime(clock.date, "HH:mm")
-                    color: "#f2f0eb"; font.bold: true; font.pixelSize: 15
-                }
+                textColor: "#f2f0eb"
             }
         }
     }
