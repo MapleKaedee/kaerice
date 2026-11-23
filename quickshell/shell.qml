@@ -38,6 +38,13 @@ ShellRoot {
             Brightness {}
             Battery {}
 
+            // notification history: count + bell (bell-slash while do-not-disturb)
+            TextCard {
+                icon: String.fromCodePoint(notifs.dnd ? 0xf1f6 : 0xf0f3)
+                text: "" + notifs.count
+                MouseArea { anchors.fill: parent; onClicked: notifs.panelOpen = !notifs.panelOpen }
+            }
+
             TextCard {
                 text: Qt.formatDateTime(clock.date, "HH:mm")
                 icon: String.fromCodePoint(0xf017) // Nerd Font clock
@@ -47,7 +54,8 @@ ShellRoot {
         }
     }
 
-    NotificationPopups {}
+    Notifications { id: notifs }
+    Clipboard {}
     Launcher {}
     PowerMenu {}
     WifiMenu { id: wifiMenu }

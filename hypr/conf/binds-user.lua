@@ -15,3 +15,5 @@ hl.bind("SUPER + space", hl.dsp.exec_cmd("qs -c kaerice ipc call launcher toggle
 hl.bind("SUPER + X", hl.dsp.exec_cmd("qs -c kaerice ipc call power toggle"))
 hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd("qs -c kaerice ipc call power toggle"))
 hl.bind("SUPER + Y", hl.dsp.exec_cmd("qs -c kaerice ipc call wallpaper pick"))
+hl.bind("SUPER + N", hl.dsp.exec_cmd("qs -c kaerice ipc call notifications toggle"))
+hl.bind("SUPER + V", hl.dsp.exec_cmd("qs -c kaerice ipc call clipboard toggle"))
