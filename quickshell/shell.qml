@@ -51,4 +51,5 @@ ShellRoot {
     Launcher {}
     PowerMenu {}
     WifiMenu { id: wifiMenu }
+    Wallpaper {}
 }
