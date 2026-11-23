@@ -1,0 +1,1 @@
+-- Cursor theme overrides (copied from DMS into kaerice).
