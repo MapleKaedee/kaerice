@@ -35,6 +35,7 @@ ShellRoot {
             Tray { barWindow: bar }
             Network {}
             Volume {}
+            Brightness {}
             Battery {}
 
             TextCard {
