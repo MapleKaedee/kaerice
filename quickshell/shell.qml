@@ -47,4 +47,6 @@ ShellRoot {
     }
 
     NotificationPopups {}
+    Launcher {}
+    PowerMenu {}
 }
