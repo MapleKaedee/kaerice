@@ -100,7 +100,6 @@ hl.window_rule({
 })
 hl.window_rule({ match = { class = "^(zoom)$" }, float = true })
 hl.layer_rule({ match = { namespace = "^(quickshell)$" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "^dms:.*" }, no_anim = true })
 
 require("conf.colors")
 require("conf.outputs")
@@ -109,7 +108,6 @@ require("conf.cursor")
 require("conf.input")
 require("conf.binds")
 require("conf.binds-user")
-require("conf.windowrules")
 
 -- osu! lazer: tearing for lowest latency.
 -- No direct_scanout: in hybrid MUX mode it froze the screen (NVIDIA buffer can't be imported to AMD KMS);
