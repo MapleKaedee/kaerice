@@ -6,9 +6,10 @@ import QtQuick
 // Wallpaper on the background layer of every screen.
 // Change: qs -c kaerice ipc call wallpaper set ~/path/to/image.jpg
 // The choice is saved to Quickshell's state dir and restored on start.
+// Default: the wallpaper shipped in the repo's wallpapers/ folder (shellDir is the quickshell/ symlink, so ".." is the repo).
 Scope {
     id: root
-    readonly property string fallback: Quickshell.env("HOME") + "/ARCH/Kaenix/collection/wallpaperflare.com_wallpaper.jpg"
+    readonly property string fallback: Quickshell.shellDir + "/../wallpapers/wallhaven-gwq1w3_1920x1080.png"
     property string source: ""
 
     FileView {
