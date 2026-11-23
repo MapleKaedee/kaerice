@@ -6,9 +6,12 @@ import QtQuick
 // shortcut: polls networkctl every 5 s; switch to an event source if the delay bothers you.
 TextCard {
     id: root
+    property string kind: "wifi" // "eth" | "wifi" | "offline"
     text: "NET"
-    fill: text === "OFFLINE" ? "#1c1c1c" : "#f2f0eb"
-    textColor: text === "OFFLINE" ? "#f2f0eb" : "#1c1c1c"
+    // Nerd Font glyphs: ethernet port, wifi off, wifi
+    icon: String.fromCodePoint(kind === "eth" ? 0xf0200 : kind === "offline" ? 0xf05aa : 0xf1eb)
+    fill: kind === "offline" ? "#1c1c1c" : "#f2f0eb"
+    textColor: kind === "offline" ? "#f2f0eb" : "#1c1c1c"
 
     Process {
         id: proc
@@ -23,7 +26,8 @@ TextCard {
                 } catch (e) {}
                 const eth = up.find(i => i.Type === "ether");
                 const wifi = up.find(i => i.Type === "wlan");
-                root.text = eth ? "ETH" : wifi ? "WIFI " + (wifi.SSID ?? "").slice(0, 14) : "OFFLINE";
+                root.kind = eth ? "eth" : wifi ? "wifi" : "offline";
+                root.text = eth ? "ETH" : wifi ? (wifi.SSID ?? "WIFI").slice(0, 14) : "OFFLINE";
             }
         }
     }

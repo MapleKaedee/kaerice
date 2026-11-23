@@ -9,7 +9,9 @@ TextCard {
     readonly property int percent: Math.round((sink?.audio?.volume ?? 0) * 100)
 
     visible: !!sink
-    text: muted ? "MUTE" : "VOL " + percent + "%"
+    text: muted ? "MUTE" : percent + "%"
+    // Nerd Font glyphs: speaker off / low / high
+    icon: String.fromCodePoint(muted ? 0xf026 : percent < 50 ? 0xf027 : 0xf028)
     fill: muted ? "#1c1c1c" : "#f2f0eb"
     textColor: muted ? "#f2f0eb" : "#1c1c1c"
 

@@ -1,7 +1,6 @@
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Widgets
 import QtQuick
 
 // Power menu. Toggle: qs -c kaerice ipc call power toggle
@@ -12,10 +11,11 @@ Scope {
     property int current: 0
 
     readonly property var actions: [
-        { label: "Logout", icon: "system-log-out", cmd: ["sh", "-c", "loginctl terminate-session \"$XDG_SESSION_ID\""] },
-        { label: "Suspend", icon: "system-suspend", cmd: ["systemctl", "suspend"] },
-        { label: "Reboot", icon: "system-reboot", cmd: ["systemctl", "reboot"] },
-        { label: "Shutdown", icon: "system-shutdown", cmd: ["systemctl", "poweroff"] },
+        // icon = Nerd Font code point: sign-out, moon, refresh, power
+        { label: "Logout", icon: 0xf08b, cmd: ["sh", "-c", "loginctl terminate-session \"$XDG_SESSION_ID\""] },
+        { label: "Suspend", icon: 0xf186, cmd: ["systemctl", "suspend"] },
+        { label: "Reboot", icon: 0xf021, cmd: ["systemctl", "reboot"] },
+        { label: "Shutdown", icon: 0xf011, cmd: ["systemctl", "poweroff"] },
     ]
 
     function run(i) {
@@ -77,11 +77,12 @@ Scope {
                         anchors.centerIn: parent
                         spacing: 12
 
-                        IconImage {
+                        Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            implicitSize: 40
-                            source: Quickshell.iconPath(btn.modelData.icon, true)
-                            visible: source != ""
+                            text: String.fromCodePoint(btn.modelData.icon)
+                            color: btn.selected ? "#f2f0eb" : "#1c1c1c"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 44
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter

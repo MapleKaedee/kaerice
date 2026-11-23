@@ -39,6 +39,7 @@ ShellRoot {
 
             TextCard {
                 text: Qt.formatDateTime(clock.date, "HH:mm")
+                icon: String.fromCodePoint(0xf017) // Nerd Font clock
                 fill: "#e8335a"
                 textColor: "#f2f0eb"
             }
