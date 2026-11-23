@@ -6,6 +6,7 @@ import QtQuick
 // shortcut: polls networkctl every 5 s; switch to an event source if the delay bothers you.
 TextCard {
     id: root
+    signal clicked()
     property string kind: "wifi" // "eth" | "wifi" | "offline"
     text: "NET"
     // Nerd Font glyphs: ethernet port, wifi off, wifi
@@ -38,5 +39,10 @@ TextCard {
         repeat: true
         triggeredOnStart: true
         onTriggered: proc.running = true
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: root.clicked()
     }
 }

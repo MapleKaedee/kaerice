@@ -33,7 +33,7 @@ ShellRoot {
             spacing: 8
 
             Tray { barWindow: bar }
-            Network {}
+            Network { onClicked: wifiMenu.open = !wifiMenu.open }
             Volume {}
             Brightness {}
             Battery {}
@@ -50,4 +50,5 @@ ShellRoot {
     NotificationPopups {}
     Launcher {}
     PowerMenu {}
+    WifiMenu { id: wifiMenu }
 }
