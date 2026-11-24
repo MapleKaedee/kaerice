@@ -37,6 +37,16 @@ Scope {
         function brightnessDown(): void { Brightness.step(-5); Osd.show("brightness"); }
     }
 
+    // media keys: active MPRIS player (no playerctl needed)
+    IpcHandler {
+        target: "media"
+        function playPause(): void { Media.togglePlaying(); }
+        function next(): void { Media.next(); }
+        function previous(): void { Media.previous(); }
+        function volumeUp(): void { Media.stepVolume(0.03); }
+        function volumeDown(): void { Media.stepVolume(-0.03); }
+    }
+
     IpcHandler {
         target: "clipboard"
         function toggle(): void { Ui.clipboard = !Ui.clipboard; }

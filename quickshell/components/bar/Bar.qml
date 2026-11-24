@@ -1,7 +1,7 @@
 import Quickshell
 import QtQuick
 
-// Top bar: workspaces on the left, status cards on the right.
+// Top bar: workspaces on the left, media in the center, status cards on the right.
 PanelWindow {
     id: bar
     anchors { top: true; left: true; right: true }
@@ -10,6 +10,10 @@ PanelWindow {
 
     Workspaces {
         anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
+    }
+
+    MediaCard {
+        anchors.centerIn: parent
     }
 
     Row {
