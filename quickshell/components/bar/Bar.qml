@@ -39,6 +39,7 @@ PanelWindow {
         anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
         spacing: 8
 
+        PrivacyCard {}
         Tray { barWindow: bar }
         NetworkCard {}
         VolumeCard {}
