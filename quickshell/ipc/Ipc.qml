@@ -84,6 +84,12 @@ Scope {
     }
 
     IpcHandler {
+        target: "idle"
+        function toggleKeepAwake(): void { Idle.keepAwake = !Idle.keepAwake; }
+        function keepAwake(): bool { return Idle.keepAwake; }
+    }
+
+    IpcHandler {
         target: "lock"
         function lock(): void { Lock.lock(); }
     }

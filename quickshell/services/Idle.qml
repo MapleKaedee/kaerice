@@ -2,6 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Services.UPower
 import Quickshell.Wayland
 import QtQuick
@@ -10,9 +11,20 @@ import QtQuick
 // Input undoes dim and screen off. Idle inhibitors (video players, fullscreen video) pause every stage.
 // Suspend only on battery: on AC the machine stays reachable (Remote Control, downloads).
 // keepAwake (control center) pauses every stage. shell.qml reads it at startup so the monitors run from the start.
+// keepAwake survives reloads and restarts within one login: it is saved with the session id, so a new login starts off.
 Singleton {
     id: root
-    property bool keepAwake: false
+    readonly property string session: Quickshell.env("XDG_SESSION_ID") || "on"
+    property bool keepAwake: saved.text().trim() === session
+    onKeepAwakeChanged: saved.setText(keepAwake ? session : "")
+
+    FileView {
+        id: saved
+        path: Quickshell.statePath("keep-awake")
+        blockLoading: true
+        printErrors: false
+    }
+
     readonly property int dimAfter: 150
     readonly property int lockAfter: 300
     readonly property int screenOffAfter: 330
