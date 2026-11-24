@@ -56,6 +56,8 @@ Scope {
         function toggleMute(): void { Audio.toggleMute(); Osd.show("volume"); }
         function brightnessUp(): void { Brightness.step(5); Osd.show("brightness"); }
         function brightnessDown(): void { Brightness.step(-5); Osd.show("brightness"); }
+        function capsLock(): void { LockKeys.released("capsLock"); }
+        function numLock(): void { LockKeys.released("numLock"); }
     }
 
     // media keys: active MPRIS player (no playerctl needed)

@@ -3,10 +3,10 @@ pragma Singleton
 import Quickshell
 import QtQuick
 
-// Which level the OSD shows, and for how long. show() restarts the hide timer.
+// Which OSD shows, and for how long. show() restarts the hide timer.
 Singleton {
     id: root
-    property string kind: ""     // "volume" | "brightness"
+    property string kind: ""     // "volume" | "brightness" (LevelOsd), "capsLock" | "numLock" (LockKeysOsd)
     property bool shown: false
     property int timeout: 1500   // ms after the last change
 

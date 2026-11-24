@@ -27,3 +27,6 @@ hl.bind("ALT + Tab", hl.dsp.global("quickshell:switcherNext"), { description = "
 hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:switcherPrev"), { description = "Shell: switch window back" })
 hl.bind("SUPER + Tab", hl.dsp.exec_cmd("qs -c kaerice ipc call switcher overview"), { description = "Shell: overview" })
 hl.bind("SUPER + slash", hl.dsp.exec_cmd("qs -c kaerice ipc call keybinds toggle"), { description = "Shell: keybind cheat sheet" })
+-- Caps / Num Lock popup: on release (the state settles there), with any modifier, never swallowing the key
+hl.bind("Caps_Lock", hl.dsp.exec_cmd("qs -c kaerice ipc call osd capsLock"), { release = true, non_consuming = true, ignore_mods = true, locked = true, description = "Display: Caps Lock popup" })
+hl.bind("Num_Lock", hl.dsp.exec_cmd("qs -c kaerice ipc call osd numLock"), { release = true, non_consuming = true, ignore_mods = true, locked = true, description = "Display: Num Lock popup" })

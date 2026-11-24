@@ -39,6 +39,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
 | `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
 | Volume / mute / brightness keys | Change level and show the OSD |
+| `Caps Lock` / `Num Lock` | Show ON / OFF in the OSD |
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window, straight into the editor (arrow, marker, crop). `Enter` saves one file to `~/Pictures/Screenshots` + copies, `Ctrl+C` copies only, `Esc` discards |
 
@@ -67,7 +68,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
@@ -75,7 +76,7 @@ quickshell/
     lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
-    osd/              volume/brightness level popup
+    osd/              volume/brightness and Caps/Num Lock popups
     overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, keybinds, calendar, control center, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds

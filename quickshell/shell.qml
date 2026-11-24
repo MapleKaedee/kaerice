@@ -23,11 +23,14 @@ ShellRoot {
     readonly property bool keepAwake: Idle.keepAwake
     // same for Battery: its warnings must not depend on the bar card
     readonly property int batteryPercent: Battery.percent
+    // and LockKeys: it needs the lock state from before the first key press
+    readonly property bool lockKeyOn: LockKeys.on
 
     WallpaperLayer {}
     Bar {}
     NotificationPopups {}
     LevelOsd {}
+    LockKeysOsd {}
 
     NotificationCenter {}
     Dashboard {}

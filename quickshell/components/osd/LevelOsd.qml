@@ -13,7 +13,7 @@ PanelWindow {
     readonly property bool muted: isVolume && Audio.muted
     readonly property int percent: Math.max(0, Math.min(100, isVolume ? Audio.percent : Brightness.percent))
 
-    visible: Osd.shown
+    visible: Osd.shown && (isVolume || Osd.kind === "brightness")
     anchors.bottom: true
     margins.bottom: 80
     exclusionMode: ExclusionMode.Ignore

@@ -41,7 +41,7 @@ Overlay {
         "mouse:272": "LMB", "mouse:273": "RMB", mouse_down: "Wheel ↓", mouse_up: "Wheel ↑",
         XF86AudioRaiseVolume: "Vol +", XF86AudioLowerVolume: "Vol -", XF86AudioMute: "Mute", XF86AudioMicMute: "Mic mute",
         XF86AudioPlay: "Play", XF86AudioPause: "Pause", XF86AudioPrev: "Prev", XF86AudioNext: "Next",
-        XF86MonBrightnessUp: "Bright +", XF86MonBrightnessDown: "Bright -"
+        Caps_Lock: "Caps Lock", Num_Lock: "Num Lock", XF86MonBrightnessUp: "Bright +", XF86MonBrightnessDown: "Bright -"
     })
 
     function parse(json) {
