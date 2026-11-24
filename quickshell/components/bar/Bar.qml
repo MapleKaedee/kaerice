@@ -1,15 +1,19 @@
 import Quickshell
 import QtQuick
 
-// Top bar: workspaces on the left, media in the center, status cards on the right.
+// Top bar: workspaces + window title on the left, media in the center, status cards on the right.
 PanelWindow {
     id: bar
     anchors { top: true; left: true; right: true }
     implicitHeight: 52
     color: "transparent"
 
-    Workspaces {
+    Row {
         anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
+        spacing: 8
+
+        Workspaces {}
+        WindowTitle {}
     }
 
     MediaCard {

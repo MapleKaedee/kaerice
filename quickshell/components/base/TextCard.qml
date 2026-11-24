@@ -7,7 +7,8 @@ Card {
     property alias text: label.text
     property string icon: ""
     property color textColor: Theme.ink
-    width: row.implicitWidth + 28 + offset
+    property int maxTextWidth: 0 // 0 = no limit; longer text is elided
+    width: row.width + 28 + offset
     height: 38
 
     Row {
@@ -26,6 +27,8 @@ Card {
         Text {
             id: label
             anchors.verticalCenter: parent.verticalCenter
+            width: root.maxTextWidth > 0 ? Math.min(implicitWidth, root.maxTextWidth) : implicitWidth
+            elide: Text.ElideRight
             color: root.textColor
             font.pixelSize: 14; font.bold: true
         }
