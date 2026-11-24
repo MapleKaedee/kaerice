@@ -14,7 +14,7 @@ Column {
 
     Component.onCompleted: Wallpaper.scan() // picks up new files
 
-    SettingRow { label: "Wallpaper"; hint: "Images in the wallpapers folder of kaerice" }
+    SettingRow { label: "Wallpaper"; hint: "SUPER+Y opens them all, and Wallhaven" }
     ListView { // Tab focuses it, Left/Right or a click pick
         id: strip
         width: parent.width; height: 108

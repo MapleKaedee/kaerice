@@ -1,5 +1,6 @@
 import QtQuick
 import qs.services
+import qs.components.base
 
 // Popup time and place, Silent (the same toggle as in the control center).
 Column {

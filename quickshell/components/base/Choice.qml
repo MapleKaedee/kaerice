@@ -1,6 +1,5 @@
 import QtQuick
 import qs.config
-import qs.components.base
 
 // Pick one of a few values: a row of cells, the current one filled. An option with a color is a swatch, checked when current.
 // Tab focuses it (accent border), Left/Right change it, a click picks.

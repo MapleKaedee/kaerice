@@ -3,96 +3,68 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Wallpaper picker: thumbnails from wallpapers/. Arrows/click to choose, Enter to apply, Esc to close.
-// The current wallpaper has an accent frame.
+// Wallpaper picker: images on this computer, or Wallhaven. Tab switches between them, Esc closes.
 Overlay {
     id: root
-
-    function apply(path) {
-        if (!path) return;
-        Wallpaper.apply(path);
-        Ui.wallpaperPicker = false;
-    }
-
     name: "wallpaper-picker"
     color: Theme.scrim
     visible: Ui.wallpaperPicker
-    focusItem: grid
+    focusItem: local
     onDismissed: Ui.wallpaperPicker = false
-    onVisibleChanged: if (visible) Wallpaper.scan()
+    onVisibleChanged: {
+        if (!visible) return;
+        Wallpaper.scan();
+        local.selectCurrent();
+        show("local");
+    }
 
-    // start the selection on the current wallpaper
-    Connections {
-        target: Wallpaper
-        function onImagesChanged() {
-            grid.currentIndex = Math.max(0, Wallpaper.images.findIndex(i => Wallpaper.base(i) === Wallpaper.base(Wallpaper.source)));
-        }
+    property string tab: "local"
+    readonly property int cols: Math.max(1, Math.min(4, Math.floor((width - 100) / 256)))
+    function show(t) {
+        tab = t;
+        (t === "local" ? local : wallhaven).enter();
     }
 
     Card {
+        id: panel
+        // on the panel itself, so keys a focused field does not use still arrive here
+        Keys.onEscapePressed: root.dismissed()
+        Keys.onTabPressed: root.show(root.tab === "local" ? "wallhaven" : "local")
         anchors.centerIn: parent
-        width: Math.max(grid.width, 300) + 24 + offset
-        height: col.implicitHeight + 24 + offset
+        width: root.cols * 256 + 24 + offset
+        height: Math.min(760, parent.height - 80)
         offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
-        Column {
-            id: col
+        Choice {
+            id: tabs
             x: 12; y: 12
-            spacing: 12
+            options: [{ value: "local", label: "Wallpaper" }, { value: "wallhaven", label: "Wallhaven" }]
+            value: root.tab
+            onPicked: v => root.show(v)
+        }
+        IconButton {
+            anchors { right: parent.right; rightMargin: 18; verticalCenter: tabs.verticalCenter }
+            text: String.fromCodePoint(0xf00d) // xmark
+            font.pixelSize: 18
+            onClicked: root.dismissed()
+        }
 
-            Text {
-                text: "Wallpaper"
-                color: Theme.text
-                font.pixelSize: 18; font.bold: true
+        Item {
+            anchors { fill: parent; leftMargin: 12; rightMargin: 12; topMargin: 62; bottomMargin: 12 }
+            LocalWallpapers {
+                id: local
+                anchors.fill: parent
+                visible: root.tab === "local"
+                cols: root.cols
+                onApplied: root.dismissed()
             }
-            Text {
-                visible: Wallpaper.images.length === 0
-                text: "No images in wallpapers/"
-                color: Theme.text
-                opacity: 0.75
-                font.pixelSize: 13
-            }
-
-            GridView {
-                id: grid
-                readonly property int cols: Math.max(1, Math.min(3, count))
-                width: cols * cellWidth
-                height: Math.min(Math.ceil(count / cols), 3) * cellHeight
-                cellWidth: 256
-                cellHeight: 156
-                visible: count > 0
-                clip: true
-                model: Wallpaper.images
-
-                Keys.onEscapePressed: root.dismissed()
-                Keys.onReturnPressed: root.apply(Wallpaper.images[currentIndex])
-                Keys.onEnterPressed: root.apply(Wallpaper.images[currentIndex])
-
-                delegate: Item {
-                    id: cell
-                    required property string modelData
-                    required property int index
-                    readonly property bool selected: GridView.isCurrentItem
-                    width: grid.cellWidth
-                    height: grid.cellHeight
-
-                    WallpaperThumb {
-                        path: cell.modelData
-                        x: 6; y: 6
-                        width: parent.width - 12
-                        height: parent.height - 12
-                        offset: Theme.depth(cell.selected ? 7 : 4)
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: grid.currentIndex = cell.index
-                        onClicked: root.apply(cell.modelData)
-                    }
-                }
+            WallhavenBrowser {
+                id: wallhaven
+                anchors.fill: parent
+                visible: root.tab === "wallhaven"
+                cols: root.cols
             }
         }
     }

@@ -16,7 +16,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `quickshell/` | `~/.config/quickshell/kaerice` |
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`,
+Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
 Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
@@ -34,7 +34,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
 | `SUPER+SHIFT+N` | Temp note (saved automatically) |
 | `SUPER+N` | Notification history |
-| `SUPER+Y` | Wallpaper picker |
+| `SUPER+Y` | Wallpaper picker, two tabs (`Tab` switches): images from `wallpapers/` and `~/Pictures/Wallpapers` (`Del` twice moves one to the Trash), and Wallhaven (search and filters; `Enter` or a click downloads and uses, `D` only downloads) |
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu: hold `Enter` or the mouse button on Suspend / Logout / Reboot / Shutdown (2 s longer, with a warning, while a package manager or download runs). Lock needs no hold |
 | `SUPER+ALT+L` | Lock screen |
 | `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
@@ -69,9 +69,9 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
-    base/             Card, TextCard, TextButton, IconButton, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextCard, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     editor/           screenshot editor
     lock/             session lock surface
@@ -80,7 +80,7 @@ quickshell/
     osd/              volume/brightness and Caps/Num Lock popups
     overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, keybinds, calendar, control center, window switcher + overview
     settings/         settings overlay and its pages
-    wallpaper/        background layer, picker
+    wallpaper/        background layer, picker (local images, Wallhaven)
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)
 settings/             settings.json: only values that differ from the defaults (services/SettingsSchema.js)
