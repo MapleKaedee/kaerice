@@ -19,7 +19,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
-Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
+Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; qs -c kaerice` (`qs kill` shortly after a hot reload crashes Quickshell 0.3.2)
 
 ## Keys
 
