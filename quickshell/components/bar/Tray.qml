@@ -16,6 +16,8 @@ Card {
     width: row.implicitWidth + Theme.bar(20) + offset
     height: Theme.bar(38); offset: Theme.bar(Theme.shadow)
 
+    TrayMenu { id: menu; screen: root.barWindow.screen }
+
     Row {
         id: row
         anchors.centerIn: parent
@@ -42,8 +44,7 @@ Card {
                     onClicked: mouse => {
                         if (mouse.button === Qt.RightButton || slot.modelData.onlyMenu) {
                             if (!slot.modelData.hasMenu) return;
-                            const p = slot.mapToItem(null, 0, BarLayout.atTop ? slot.height + 8 : -8);
-                            slot.modelData.display(root.barWindow, p.x, p.y);
+                            menu.open(slot.modelData, slot.mapToItem(null, 0, 0).x);
                         } else {
                             slot.modelData.activate();
                         }

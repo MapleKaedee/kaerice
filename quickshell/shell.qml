@@ -1,5 +1,3 @@
-//@ pragma UseQApplication
-// UseQApplication: required for tray right-click menus (platform menus); needs a qs restart
 
 // Layout:
 //   config/      design tokens (Theme)
