@@ -71,13 +71,13 @@ Overlay {
     component Keycap: Rectangle {
         property alias text: label.text
         width: label.implicitWidth + 14; height: 24
-        radius: 4
-        color: Theme.paper
-        border.width: 2; border.color: Theme.ink
+        radius: Theme.corner(4)
+        color: Theme.face
+        border.width: Theme.stroke(2); border.color: Theme.line
         Text {
             id: label
             anchors.centerIn: parent
-            color: Theme.ink
+            color: Theme.text
             font.pixelSize: 11; font.bold: true
         }
     }
@@ -87,7 +87,7 @@ Overlay {
         y: parent.height * 0.1
         width: 760
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
@@ -100,13 +100,13 @@ Overlay {
             Card {
                 width: parent.width
                 height: 50
-                offset: 3
+                offset: Theme.depth(3)
 
                 TextInput {
                     id: search
                     anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                     verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                     Keys.onEscapePressed: root.dismissed()
                     Keys.onUpPressed: list.flick(0, 900)
@@ -142,7 +142,7 @@ Overlay {
                         anchors.bottom: parent.bottom
                         bottomPadding: 4
                         text: (row.modelData.header ?? "").toUpperCase()
-                        color: Theme.accent
+                        color: Theme.highlight
                         font.pixelSize: 13; font.bold: true
                     }
 
@@ -152,7 +152,7 @@ Overlay {
                         width: parent.width - combos.width - 16
                         elide: Text.ElideRight
                         text: row.header ? "" : row.modelData.action.charAt(0).toUpperCase() + row.modelData.action.slice(1)
-                        color: Theme.ink
+                        color: Theme.text
                         font.pixelSize: 14; font.bold: true
                     }
 

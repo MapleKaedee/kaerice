@@ -24,11 +24,11 @@ PanelWindow {
 
     Card {
         id: card
-        readonly property color text: LockKeys.on ? Theme.paper : Theme.ink
+        readonly property color text: LockKeys.on ? Theme.accentText : Theme.text
         width: 240
         height: 64
-        offset: 6
-        fill: LockKeys.on ? Theme.accent : Theme.paper
+        offset: Theme.depth(6)
+        fill: LockKeys.on ? Theme.accent : Theme.face
 
         Row {
             anchors.centerIn: parent

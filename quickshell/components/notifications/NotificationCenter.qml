@@ -14,7 +14,7 @@ Overlay {
         y: 60
         width: 400
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the panel
 
@@ -32,7 +32,7 @@ Overlay {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Notifications"
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                 }
 
@@ -41,23 +41,23 @@ Overlay {
                     spacing: 8
 
                     Card {
-                        width: 38; height: 36; offset: 3
-                        fill: Notifs.dnd ? Theme.accent : Theme.paper
+                        width: 38; height: 36; offset: Theme.depth(3)
+                        fill: Notifs.dnd ? Theme.accent : Theme.face
                         Text {
                             anchors.centerIn: parent
                             text: String.fromCodePoint(Notifs.dnd ? 0xf1f6 : 0xf0f3) // bell-slash / bell
-                            color: Notifs.dnd ? Theme.paper : Theme.ink
+                            color: Notifs.dnd ? Theme.accentText : Theme.text
                             font.family: Theme.iconFont; font.pixelSize: 16
                         }
                         MouseArea { anchors.fill: parent; onClicked: Notifs.dnd = !Notifs.dnd }
                     }
                     Card {
                         visible: Notifs.count > 0
-                        width: 38; height: 36; offset: 3
+                        width: 38; height: 36; offset: Theme.depth(3)
                         Text {
                             anchors.centerIn: parent
                             text: String.fromCodePoint(0xf1f8) // trash
-                            color: Theme.ink
+                            color: Theme.text
                             font.family: Theme.iconFont; font.pixelSize: 16
                         }
                         MouseArea { anchors.fill: parent; onClicked: Notifs.clearAll() }
@@ -68,7 +68,7 @@ Overlay {
             Text {
                 visible: Notifs.count === 0 || Notifs.dnd
                 text: Notifs.count === 0 ? "No notifications" : "Do not disturb is on"
-                color: Theme.ink
+                color: Theme.text
                 opacity: 0.75
                 font.pixelSize: 13
             }

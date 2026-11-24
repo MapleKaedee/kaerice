@@ -9,15 +9,15 @@ Rectangle {
     signal moved(real v)
 
     height: 22
-    radius: 6
-    color: Theme.paper
-    border.width: Theme.border; border.color: Theme.ink
+    radius: Theme.corner(6)
+    color: Theme.face
+    border.width: Theme.border; border.color: Theme.line
 
     Rectangle {
         x: Theme.border; y: Theme.border
         height: parent.height - 2 * Theme.border
         width: Math.max(0, (parent.width - 2 * Theme.border) * Math.min(1, Math.max(0, root.value)))
-        radius: 3
+        radius: Math.max(0, parent.radius - Theme.border)
         color: Theme.accent
     }
 

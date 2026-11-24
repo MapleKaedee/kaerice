@@ -28,7 +28,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+,` | Settings (Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
+| `SUPER+,` | Settings (Theme, Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
 | `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, output and input (click the tile to pick a device, its icon to mute), quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
@@ -66,7 +66,7 @@ If the lock ever refuses a correct password:
 hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
-  config/Theme.qml    colors, fonts, card shape. Change the look here.
+  config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
   services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui

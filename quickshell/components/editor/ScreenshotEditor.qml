@@ -108,13 +108,13 @@ Overlay {
         property int glyph
         property bool active
         signal clicked()
-        width: 46; height: 42; offset: 3
-        fill: active ? Theme.accent : Theme.paper
+        width: 46; height: 42; offset: Theme.depth(3)
+        fill: active ? Theme.accent : Theme.face
         opacity: enabled ? 1 : 0.4
         Text {
             anchors.centerIn: parent
             text: String.fromCodePoint(btn.glyph)
-            color: btn.active ? Theme.paper : Theme.ink
+            color: btn.active ? Theme.accentText : Theme.text
             font.family: Theme.iconFont; font.pixelSize: 18
         }
         MouseArea { anchors.fill: parent; onClicked: btn.clicked() }
@@ -123,13 +123,13 @@ Overlay {
     component Swatch: Rectangle {
         id: sw
         width: 32; height: 32
-        radius: 6
-        border.width: root.ink === String(sw.color) ? 5 : 2
-        border.color: Theme.ink
+        radius: Theme.corner(6)
+        border.width: root.ink === String(sw.color) ? Theme.stroke(5) : Theme.stroke(2)
+        border.color: Theme.line
         MouseArea { anchors.fill: parent; onClicked: root.ink = String(sw.color) }
     }
 
-    component Divider: Rectangle { width: 3; height: 34; color: Theme.ink }
+    component Divider: Rectangle { width: Theme.border; height: 34; color: Theme.line }
 
     Card {
         id: toolbar
@@ -137,7 +137,7 @@ Overlay {
         y: 40
         width: tools.implicitWidth + 28 + offset
         height: 66
-        offset: 5
+        offset: Theme.depth(5)
 
         Row {
             id: tools
@@ -166,7 +166,7 @@ Overlay {
         y: toolbar.y + toolbar.height + 24 + Math.max(0, (root.height - toolbar.y - toolbar.height - 64 - height) / 2)
         width: view.width + 2 * Theme.border + offset
         height: view.height + 2 * Theme.border + offset
-        offset: 8
+        offset: Theme.depth(8)
         fill: Theme.ink
 
         Item {

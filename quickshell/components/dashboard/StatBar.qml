@@ -14,28 +14,28 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         width: 22
         text: String.fromCodePoint(root.glyph)
-        color: Theme.ink
+        color: Theme.text
         font.family: Theme.iconFont; font.pixelSize: 16
     }
     Text {
         anchors.verticalCenter: parent.verticalCenter
         width: 44
         text: root.label
-        color: Theme.ink
+        color: Theme.text
         font.pixelSize: 14; font.bold: true
     }
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         width: root.width - 22 - 44 - 96 - 3 * root.spacing
         height: 16
-        radius: 4
-        color: Theme.paper
-        border.width: 2; border.color: Theme.ink
+        radius: Theme.corner(4)
+        color: Theme.face
+        border.width: Theme.stroke(2); border.color: Theme.line
         Rectangle {
-            x: 2; y: 2
-            height: parent.height - 4
-            width: Math.max(0, (parent.width - 4) * Math.min(1, Math.max(0, root.value)))
-            radius: 2
+            x: parent.border.width; y: x
+            height: parent.height - 2 * x
+            width: Math.max(0, (parent.width - 2 * x) * Math.min(1, Math.max(0, root.value)))
+            radius: Theme.corner(2)
             color: Theme.accent
             Behavior on width { NumberAnimation { duration: 200 } }
         }
@@ -45,7 +45,7 @@ Row {
         width: 96
         horizontalAlignment: Text.AlignRight
         text: root.detail
-        color: Theme.ink
+        color: Theme.text
         font.pixelSize: 13; font.bold: true
     }
 }

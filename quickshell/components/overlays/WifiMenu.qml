@@ -34,7 +34,7 @@ Overlay {
         y: 60
         width: 380
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the menu
 
@@ -52,7 +52,7 @@ Overlay {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Wi-Fi" + (Wifi.device ? "  ·  " + Wifi.device : "")
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                 }
 
@@ -62,23 +62,23 @@ Overlay {
 
                     Card {
                         visible: Wifi.powered
-                        width: 38; height: 36; offset: 3
+                        width: 38; height: 36; offset: Theme.depth(3)
                         Text {
                             anchors.centerIn: parent
                             text: String.fromCodePoint(0xf021) // refresh
-                            color: Theme.ink
+                            color: Theme.text
                             font.family: Theme.iconFont; font.pixelSize: 16
                         }
                         MouseArea { anchors.fill: parent; onClicked: Wifi.scan() }
                     }
                     Card {
                         visible: Wifi.device !== ""
-                        width: 38; height: 36; offset: 3
-                        fill: Wifi.powered ? Theme.accent : Theme.paper
+                        width: 38; height: 36; offset: Theme.depth(3)
+                        fill: Wifi.powered ? Theme.accent : Theme.face
                         Text {
                             anchors.centerIn: parent
                             text: String.fromCodePoint(0xf011) // power
-                            color: Wifi.powered ? Theme.paper : Theme.ink
+                            color: Wifi.powered ? Theme.accentText : Theme.text
                             font.family: Theme.iconFont; font.pixelSize: 16
                         }
                         MouseArea { anchors.fill: parent; onClicked: Wifi.togglePower() }
@@ -92,7 +92,7 @@ Overlay {
                 text: Wifi.status || (!Wifi.device ? "No Wi-Fi device found"
                                     : !Wifi.powered ? "Wi-Fi is off"
                                     : Wifi.scanning ? "Scanning…" : "")
-                color: Theme.ink
+                color: Theme.text
                 opacity: 0.75
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
@@ -111,17 +111,17 @@ Overlay {
                     id: row
                     required property var modelData
                     readonly property bool isOpen: root.expanded === modelData.path
-                    readonly property color fg: modelData.connected ? Theme.paper : Theme.ink
+                    readonly property color fg: modelData.connected ? Theme.accentText : Theme.text
                     width: list.width
                     spacing: 6
 
                     Rectangle {
                         width: parent.width
                         height: 42
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: row.modelData.connected ? Theme.accent : hover.containsMouse ? Theme.hover : "transparent"
                         border.width: row.modelData.connected || row.isOpen ? Theme.border : 0
-                        border.color: Theme.ink
+                        border.color: Theme.line
 
                         MouseArea {
                             id: hover
@@ -185,14 +185,14 @@ Overlay {
                         visible: row.isOpen
                         width: parent.width
                         height: 44
-                        offset: 3
+                        offset: Theme.depth(3)
 
                         TextInput {
                             id: pass
                             anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
                             verticalAlignment: TextInput.AlignVCenter
                             echoMode: TextInput.Password
-                            color: Theme.ink
+                            color: Theme.text
                             font.pixelSize: 14
                             onVisibleChanged: if (visible) { text = ""; forceActiveFocus(); }
                             Keys.onReturnPressed: if (text) { root.expanded = ""; Wifi.connect(row.modelData, text); }

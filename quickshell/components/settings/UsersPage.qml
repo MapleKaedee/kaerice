@@ -35,7 +35,7 @@ Item {
     }
 
     component Label: Text {
-        color: Theme.ink
+        color: Theme.text
         font.pixelSize: 15; font.bold: true
     }
 
@@ -52,7 +52,7 @@ Item {
                 spacing: 4
                 Text {
                     text: Account.name
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 20; font.bold: true
                 }
                 Text {
@@ -69,7 +69,7 @@ Item {
         Row {
             spacing: 12
             Card {
-                width: 320; height: 38; offset: 3
+                width: 320; height: 38; offset: Theme.depth(3)
                 TextInput {
                     id: name
                     anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
@@ -79,8 +79,8 @@ Item {
                     activeFocusOnTab: true
                     selectByMouse: true
                     selectionColor: Theme.accent
-                    selectedTextColor: Theme.paper
-                    color: Theme.ink
+                    selectedTextColor: Theme.accentText
+                    color: Theme.text
                     font.pixelSize: 15; font.bold: true
                     Component.onCompleted: text = Account.realName
                     onAccepted: Account.setName(text)
@@ -116,7 +116,7 @@ Item {
         Card {
             visible: Account.error !== ""
             width: parent.width; height: err.implicitHeight + 20 + offset
-            offset: 3
+            offset: Theme.depth(3)
             fill: Theme.accent
             Text {
                 id: err
@@ -124,7 +124,7 @@ Item {
                 width: parent.width - 24
                 wrapMode: Text.Wrap
                 text: Account.error
-                color: Theme.paper
+                color: Theme.accentText
                 font.pixelSize: 13; font.bold: true
             }
         }

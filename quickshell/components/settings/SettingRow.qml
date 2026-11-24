@@ -19,7 +19,7 @@ Item {
             width: parent.width
             wrapMode: Text.Wrap
             text: root.label
-            color: Theme.ink
+            color: Theme.text
             font.pixelSize: 15; font.bold: true
         }
         Text {

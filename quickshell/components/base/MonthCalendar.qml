@@ -41,11 +41,11 @@ Item {
                 id: arrow
                 property int glyph
                 signal clicked()
-                width: 38; height: 36; offset: 3
+                width: 38; height: 36; offset: Theme.depth(3)
                 Text {
                     anchors.centerIn: parent
                     text: String.fromCodePoint(arrow.glyph)
-                    color: Theme.ink
+                    color: Theme.text
                     font.family: Theme.iconFont; font.pixelSize: 16
                 }
                 MouseArea { anchors.fill: parent; onClicked: arrow.clicked() }
@@ -55,7 +55,7 @@ Item {
             Text {
                 anchors.centerIn: parent
                 text: root.locale.standaloneMonthName(root.shown.getMonth()) + " " + root.shown.getFullYear()
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 18; font.bold: true
                 MouseArea { anchors.fill: parent; onClicked: root.reset() }
             }
@@ -92,11 +92,11 @@ Item {
                     radius: Theme.radius
                     color: isToday ? Theme.accent : "transparent"
                     border.width: isToday ? Theme.border : 0
-                    border.color: Theme.ink
+                    border.color: Theme.line
                     Text {
                         anchors.centerIn: parent
                         text: parent.day.getDate()
-                        color: parent.isToday ? Theme.paper : parent.inMonth ? Theme.ink : Theme.muted
+                        color: parent.isToday ? Theme.accentText : parent.inMonth ? Theme.text : Theme.muted
                         font.pixelSize: 14; font.bold: parent.inMonth
                     }
                 }

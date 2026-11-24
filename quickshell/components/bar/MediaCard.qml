@@ -52,7 +52,7 @@ Card {
             width: Math.min(implicitWidth, root.maxTextWidth)
             elide: Text.ElideRight
             text: !Media.active ? "No media playing" : Media.artist ? Media.title + " - " + Media.artist : Media.title
-            color: Media.playing ? Theme.ink : Theme.muted
+            color: Media.playing ? Theme.text : Theme.muted
             font.pixelSize: 14; font.bold: true
         }
     }

@@ -5,8 +5,8 @@ import qs.config
 // Children are placed inside the face.
 Item {
     id: root
-    property color fill: Theme.paper
-    property color ink: Theme.ink
+    property color fill: Theme.face
+    property color line: Theme.line
     property int offset: Theme.shadow
     default property alias content: face.data
 
@@ -15,7 +15,7 @@ Item {
         width: root.width - root.offset
         height: root.height - root.offset
         radius: Theme.radius
-        color: root.ink
+        color: root.line
     }
     Rectangle {
         id: face
@@ -24,6 +24,6 @@ Item {
         radius: Theme.radius
         color: root.fill
         border.width: Theme.border
-        border.color: root.ink
+        border.color: root.line
     }
 }

@@ -16,14 +16,16 @@ Overlay {
     onVisibleChanged: if (visible) { Account.refresh(); SystemInfo.refresh(); }
 
     property int current: 0
-    // icon: Nerd Font music f001, power f011, bell f0f3, user f007, circle-info f05a
+    // icon: Nerd Font paint-brush f1fc, music f001, power f011, bell f0f3, user f007, circle-info f05a
     readonly property var pages: [
+        { title: "Theme", icon: 0xf1fc, page: theme },
         { title: "Sound & media", icon: 0xf001, page: sound },
         { title: "Power", icon: 0xf011, page: power },
         { title: "Notifications", icon: 0xf0f3, page: notifications },
         { title: "Users & accounts", icon: 0xf007, page: users },
         { title: "About", icon: 0xf05a, page: about }
     ]
+    Component { id: theme; ThemePage {} }
     Component { id: sound; SoundPage {} }
     Component { id: power; PowerPage {} }
     Component { id: notifications; NotificationsPage {} }
@@ -41,7 +43,7 @@ Overlay {
         anchors.centerIn: parent
         width: Math.min(860, parent.width - 60)
         height: Math.min(560, parent.height - 60)
-        offset: 8
+        offset: Theme.depth(8)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the panel
 
@@ -57,7 +59,7 @@ Overlay {
                 leftPadding: 10
                 verticalAlignment: Text.AlignVCenter
                 text: "Settings"
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 22; font.bold: true
             }
 
@@ -69,10 +71,10 @@ Overlay {
                     required property int index
                     readonly property bool selected: root.current === index
                     width: nav.width; height: 42
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: selected ? Theme.accent : area.containsMouse ? Theme.hover : "transparent"
                     border.width: selected ? Theme.border : 0
-                    border.color: Theme.ink
+                    border.color: Theme.line
                     Row {
                         anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
                         spacing: 12
@@ -81,13 +83,13 @@ Overlay {
                             width: 20
                             horizontalAlignment: Text.AlignHCenter
                             text: String.fromCodePoint(item.modelData.icon)
-                            color: item.selected ? Theme.paper : Theme.ink
+                            color: item.selected ? Theme.accentText : Theme.text
                             font.family: Theme.iconFont; font.pixelSize: 16
                         }
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: item.modelData.title
-                            color: item.selected ? Theme.paper : Theme.ink
+                            color: item.selected ? Theme.accentText : Theme.text
                             font.pixelSize: 14; font.bold: true
                         }
                     }
@@ -99,7 +101,7 @@ Overlay {
         Rectangle { // divider
             anchors { left: nav.right; leftMargin: 14; top: parent.top; bottom: parent.bottom }
             width: Theme.border
-            color: Theme.ink
+            color: Theme.line
         }
 
         // page
@@ -112,7 +114,7 @@ Overlay {
                 height: 44
                 verticalAlignment: Text.AlignVCenter
                 text: root.pages[root.current].title
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 22; font.bold: true
             }
             IconButton {
@@ -128,6 +130,16 @@ Overlay {
                 contentHeight: page.implicitHeight
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
+
+                // scroll a control reached with Tab into view
+                readonly property Item focused: Window.activeFocusItem
+                onFocusedChanged: {
+                    let p = focused;
+                    while (p && p !== page) p = p.parent;
+                    if (!p) return;
+                    const top = focused.mapToItem(page, 0, 0).y - 8, bottom = top + focused.height + 16;
+                    contentY = Math.max(0, Math.min(top, Math.max(contentY, bottom - height)));
+                }
                 Loader {
                     id: page
                     width: flick.width

@@ -25,11 +25,11 @@ Card {
         // cover (falls back to a music glyph)
         Rectangle {
             width: height; height: parent.height
-            radius: 4
+            radius: Theme.corner(4)
             color: Theme.ink
             Image {
                 id: art
-                anchors { fill: parent; margins: 3 }
+                anchors { fill: parent; margins: Theme.border }
                 source: root.player?.trackArtUrl ?? ""
                 fillMode: Image.PreserveAspectCrop
                 sourceSize: Qt.size(208, 208)
@@ -52,7 +52,7 @@ Card {
                 width: parent.width
                 elide: Text.ElideRight
                 text: Media.active ? Media.title : "Nothing playing"
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 16; font.bold: true
             }
             Text {
@@ -98,14 +98,14 @@ Card {
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 84 - parent.spacing
                     height: 10
-                    radius: 3
-                    color: Theme.paper
-                    border.width: 2; border.color: Theme.ink
+                    radius: Theme.corner(3)
+                    color: Theme.face
+                    border.width: Theme.stroke(2); border.color: Theme.line
                     Rectangle {
-                        x: 2; y: 2
-                        height: parent.height - 4
-                        width: (parent.width - 4) * Math.min(1, root.hasLength ? (root.player?.position ?? 0) / root.player.length : 0)
-                        radius: 1
+                        x: parent.border.width; y: x
+                        height: parent.height - 2 * x
+                        width: (parent.width - 2 * x) * Math.min(1, root.hasLength ? (root.player?.position ?? 0) / root.player.length : 0)
+                        radius: Theme.corner(1)
                         color: Theme.accent
                     }
                 }

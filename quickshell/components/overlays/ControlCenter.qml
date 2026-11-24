@@ -32,11 +32,11 @@ Overlay {
         id: sq
         property int glyph
         signal clicked()
-        width: 48; height: 48; offset: 3
+        width: 48; height: 48; offset: Theme.depth(3)
         Text {
             anchors.centerIn: parent
             text: String.fromCodePoint(sq.glyph)
-            color: Theme.ink
+            color: Theme.text
             font.family: Theme.iconFont; font.pixelSize: 18
         }
         MouseArea { anchors.fill: parent; onClicked: sq.clicked() }
@@ -52,20 +52,20 @@ Overlay {
         property bool iconButton: false
         signal clicked()
         signal iconClicked()
-        width: (root.panelWidth - 32 - root.gap) / 2; height: 66; offset: 3
+        width: (root.panelWidth - 32 - root.gap) / 2; height: 66; offset: Theme.depth(3)
         MouseArea { anchors.fill: parent; onClicked: tile.clicked() } // first: below the icon's
         Row {
             anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
             spacing: 12
             Rectangle {
                 width: 42; height: 42
-                radius: 6
-                color: tile.active ? Theme.accent : Theme.paper
-                border.width: 2; border.color: Theme.ink
+                radius: Theme.corner(6)
+                color: tile.active ? Theme.accent : Theme.face
+                border.width: Theme.stroke(2); border.color: Theme.line
                 Text {
                     anchors.centerIn: parent
                     text: String.fromCodePoint(tile.glyph)
-                    color: tile.active ? Theme.paper : Theme.ink
+                    color: tile.active ? Theme.accentText : Theme.text
                     font.family: Theme.iconFont; font.pixelSize: 17
                 }
                 MouseArea { anchors.fill: parent; enabled: tile.iconButton; onClicked: tile.iconClicked() }
@@ -76,7 +76,7 @@ Overlay {
                     width: tile.width - tile.offset - 76
                     elide: Text.ElideRight
                     text: tile.title
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 14; font.bold: true
                 }
                 Text {
@@ -97,21 +97,21 @@ Overlay {
         property string label
         property bool active
         signal clicked()
-        width: (root.panelWidth - 32 - 4 * root.gap) / 5; height: 64; offset: 3
-        fill: active ? Theme.accent : Theme.paper
+        width: (root.panelWidth - 32 - 4 * root.gap) / 5; height: 64; offset: Theme.depth(3)
+        fill: active ? Theme.accent : Theme.face
         Column {
             anchors.centerIn: parent
             spacing: 4
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: String.fromCodePoint(tog.glyph)
-                color: tog.active ? Theme.paper : Theme.ink
+                color: tog.active ? Theme.accentText : Theme.text
                 font.family: Theme.iconFont; font.pixelSize: 18
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: tog.label
-                color: tog.active ? Theme.paper : Theme.ink
+                color: tog.active ? Theme.accentText : Theme.text
                 font.pixelSize: 11; font.bold: true
             }
         }
@@ -133,7 +133,7 @@ Overlay {
             anchors.verticalCenter: parent.verticalCenter
             width: 24
             text: String.fromCodePoint(lvl.glyph)
-            color: Theme.ink
+            color: Theme.text
             font.family: Theme.iconFont; font.pixelSize: 18
             MouseArea { anchors.fill: parent; onClicked: lvl.iconClicked() }
         }
@@ -149,7 +149,7 @@ Overlay {
             width: 52
             horizontalAlignment: Text.AlignRight
             text: lvl.valueText
-            color: Theme.ink
+            color: Theme.text
             font.pixelSize: 14; font.bold: true
         }
     }
@@ -157,9 +157,9 @@ Overlay {
     Card {
         x: parent.width - width - 14
         y: 60
-        width: root.panelWidth
+        width: root.panelWidth - 6 + offset // 6: the default shadow; the content keeps its width
         height: col.implicitHeight + 32 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the panel
 
@@ -178,7 +178,7 @@ Overlay {
                     spacing: 3
                     Text {
                         text: Account.name
-                        color: Theme.ink
+                        color: Theme.text
                         font.pixelSize: 18; font.bold: true
                     }
                     Text {
@@ -237,7 +237,7 @@ Overlay {
                             width: 84
                             elide: Text.ElideRight
                             text: app.modelData.name
-                            color: Theme.ink
+                            color: Theme.text
                             font.pixelSize: 13; font.bold: true
                         }
                         LevelSlider {
@@ -253,7 +253,7 @@ Overlay {
                             width: 52
                             horizontalAlignment: Text.AlignRight
                             text: app.muted ? "MUTE" : Math.round((app.audio?.volume ?? 0) * 100) + "%"
-                            color: Theme.ink
+                            color: Theme.text
                             font.pixelSize: 13; font.bold: true
                         }
                     }
@@ -304,7 +304,7 @@ Overlay {
                 id: devices
                 readonly property bool output: root.openDevices === "output"
                 visible: root.openDevices !== ""
-                width: parent.width; height: devicesCol.implicitHeight + 24 + offset; offset: 3
+                width: parent.width; height: devicesCol.implicitHeight + 24 + offset; offset: Theme.depth(3)
                 Column {
                     id: devicesCol
                     x: 14; y: 12
@@ -315,7 +315,7 @@ Overlay {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: devices.output ? "Output" : "Input"
-                            color: Theme.ink
+                            color: Theme.text
                             font.pixelSize: 15; font.bold: true
                         }
                         IconButton {

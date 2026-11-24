@@ -34,7 +34,7 @@ Overlay {
         y: parent.height * 0.2
         width: 560
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
@@ -47,13 +47,13 @@ Overlay {
             Card {
                 width: parent.width
                 height: 50
-                offset: 3
+                offset: Theme.depth(3)
 
                 TextInput {
                     id: search
                     anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                     verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                     onTextChanged: { root.query = text; grid.currentIndex = 0; }
                     Keys.onEscapePressed: root.dismissed()
@@ -91,10 +91,10 @@ Overlay {
                     readonly property bool current: GridView.isCurrentItem
                     width: grid.cellWidth - 4
                     height: grid.cellHeight - 4
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: current ? Theme.accent : "transparent"
                     border.width: current ? Theme.border : 0
-                    border.color: Theme.ink
+                    border.color: Theme.line
 
                     Text {
                         anchors.centerIn: parent

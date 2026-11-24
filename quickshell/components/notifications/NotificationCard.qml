@@ -12,9 +12,9 @@ Card {
     signal activated()
 
     readonly property bool critical: notification.urgency === NotificationUrgency.Critical
-    readonly property color fg: critical ? Theme.paper : Theme.ink
+    readonly property color fg: critical ? Theme.accentText : Theme.text
     height: content.implicitHeight + 24 + offset
-    fill: critical ? Theme.accent : Theme.paper
+    fill: critical ? Theme.accent : Theme.face
 
     MouseArea { anchors.fill: parent; onClicked: card.activated() }
 
@@ -27,7 +27,7 @@ Card {
         Text {
             width: parent.width - (card.closable ? 22 : 0)
             text: card.notification.appName + (card.time ? "  ·  " + card.time : "")
-            color: card.critical ? Theme.paper : Theme.accent
+            color: card.critical ? Theme.accentText : Theme.highlight
             font.bold: true; font.pixelSize: 11
             elide: Text.ElideRight
         }

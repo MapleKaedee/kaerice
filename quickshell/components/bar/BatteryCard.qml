@@ -15,6 +15,6 @@ TextCard {
     // Nerd Font glyphs: bolt on AC, otherwise battery full/three-quarters/half/quarter/empty
     icon: String.fromCodePoint(!UPower.onBattery ? 0xf0e7
         : percent >= 88 ? 0xf240 : percent >= 63 ? 0xf241 : percent >= 38 ? 0xf242 : percent >= 13 ? 0xf243 : 0xf244)
-    fill: low ? Theme.accent : Theme.paper
-    textColor: low ? Theme.paper : Theme.ink
+    fill: low ? Theme.accent : Theme.face
+    textColor: low ? Theme.accentText : Theme.text
 }

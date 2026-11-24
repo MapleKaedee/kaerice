@@ -24,20 +24,20 @@ Item {
 
         Card {
             width: 380; height: 160
-            offset: 8
+            offset: Theme.depth(8)
             fill: Theme.accent
             Column {
                 anchors.centerIn: parent
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDateTime(clock.date, "HH:mm")
-                    color: Theme.paper
+                    color: Theme.accentText
                     font.pixelSize: 72; font.bold: true
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDateTime(clock.date, "dddd, d MMMM yyyy")
-                    color: Theme.paper
+                    color: Theme.accentText
                     font.pixelSize: 16; font.bold: true
                 }
             }
@@ -45,14 +45,14 @@ Item {
 
         Card {
             width: 380; height: 62
-            offset: 6
+            offset: Theme.depth(6)
             Row {
                 anchors { fill: parent; leftMargin: 18; rightMargin: 18 }
                 spacing: 14
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: String.fromCodePoint(0xf023) // Nerd Font lock
-                    color: Theme.ink
+                    color: Theme.text
                     font.family: Theme.iconFont; font.pixelSize: 20
                 }
                 TextInput {
@@ -63,7 +63,7 @@ Item {
                     passwordCharacter: "•"
                     enabled: !Lock.busy
                     focus: true
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                     Component.onCompleted: forceActiveFocus()
                     onAccepted: { Lock.unlock(text); text = ""; }
@@ -85,7 +85,6 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             width: Math.min(errText.implicitWidth + 32, 380) + offset
             height: errText.height + 20 + offset
-            offset: 4
             fill: Theme.accent
             Text {
                 id: errText
@@ -94,7 +93,7 @@ Item {
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
                 text: Lock.error
-                color: Theme.paper
+                color: Theme.accentText
                 font.pixelSize: 14; font.bold: true
             }
         }

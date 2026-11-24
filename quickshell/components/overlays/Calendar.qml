@@ -1,4 +1,5 @@
 import QtQuick
+import qs.config
 import qs.services
 import qs.components.base
 
@@ -16,7 +17,7 @@ Overlay {
         y: 60
         width: cal.implicitWidth + 24 + offset
         height: cal.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the panel
 

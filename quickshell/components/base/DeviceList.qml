@@ -25,9 +25,9 @@ Column {
             id: row
             required property var modelData
             readonly property bool active: modelData === root.current
-            width: root.width; height: 52; offset: 3
-            fill: active ? Theme.accent : area.containsMouse ? Theme.hover : Theme.paper
-            ink: activeFocus ? Theme.accent : Theme.ink
+            width: root.width; height: 52; offset: Theme.depth(3)
+            fill: active ? Theme.accent : area.containsMouse ? Theme.hover : Theme.face
+            line: activeFocus ? Theme.accent : Theme.line
             activeFocusOnTab: true
             Keys.onReturnPressed: root.picked(modelData)
             Keys.onEnterPressed: root.picked(modelData)
@@ -39,7 +39,7 @@ Column {
                 width: 26
                 horizontalAlignment: Text.AlignHCenter
                 text: String.fromCodePoint(root.glyph)
-                color: row.active ? Theme.paper : Theme.ink
+                color: row.active ? Theme.accentText : Theme.text
                 font.family: Theme.iconFont; font.pixelSize: 17
             }
             Column {
@@ -48,12 +48,12 @@ Column {
                     width: parent.width
                     elide: Text.ElideRight
                     text: Audio.deviceName(row.modelData)
-                    color: row.active ? Theme.paper : Theme.ink
+                    color: row.active ? Theme.accentText : Theme.text
                     font.pixelSize: 13; font.bold: true
                 }
                 Text {
                     text: row.active ? "Active" : "Available"
-                    color: row.active ? Theme.paper : Theme.muted
+                    color: row.active ? Theme.accentText : Theme.muted
                     font.pixelSize: 11; font.bold: true
                 }
             }

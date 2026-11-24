@@ -87,15 +87,15 @@ Overlay {
                     readonly property bool selected: root.current === index
                     width: 150
                     height: 150
-                    offset: selected ? 8 : 5
-                    fill: selected ? Theme.accent : Theme.paper
+                    offset: Theme.depth(selected ? 8 : 5)
+                    fill: selected ? Theme.accent : Theme.face
 
                     Rectangle { // hold progress, filling up from the bottom
                         anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: Theme.border }
                         height: (parent.height - 2 * Theme.border) * root.progress
                         visible: root.holding === btn.index
                         radius: Math.max(0, Theme.radius - Theme.border)
-                        color: Theme.ink
+                        color: Qt.colorEqual(Theme.accentText, Theme.paper) ? Theme.ink : Theme.paper // the label stays readable
                     }
 
                     Column {
@@ -105,14 +105,14 @@ Overlay {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: String.fromCodePoint(btn.modelData.icon)
-                            color: btn.selected ? Theme.paper : Theme.ink
+                            color: btn.selected ? Theme.accentText : Theme.text
                             font.family: Theme.iconFont
                             font.pixelSize: 44
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: btn.modelData.label
-                            color: btn.selected ? Theme.paper : Theme.ink
+                            color: btn.selected ? Theme.accentText : Theme.text
                             font.pixelSize: 20; font.bold: true
                         }
                     }
@@ -141,7 +141,7 @@ Overlay {
                 id: hint
                 anchors.centerIn: parent
                 text: "Hold Enter or the mouse button for " + root.holdMs(root.current) / 1000 + " s"
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 14; font.bold: true
             }
         }
@@ -151,7 +151,7 @@ Overlay {
             visible: root.warned
             width: warn.implicitWidth + 40 + offset
             height: warn.implicitHeight + 28 + offset
-            offset: 5
+            offset: Theme.depth(5)
             fill: Theme.accent
             Column {
                 id: warn
@@ -164,7 +164,7 @@ Overlay {
                         anchors.horizontalCenter: parent.horizontalCenter
                         // Nerd Font triangle-exclamation f071
                         text: String.fromCodePoint(0xf071) + "  " + modelData
-                        color: Theme.paper
+                        color: Theme.accentText
                         font.pixelSize: 16; font.bold: true
                     }
                 }

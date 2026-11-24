@@ -40,7 +40,16 @@ TestCase {
             { tag: "idle too short", key: "idle.lock", bad: 10 },
             { tag: "idle negative", key: "idle.suspend", bad: -1 },
             { tag: "hold too long", key: "power.hold", bad: 60000 },
-            { tag: "no such position", key: "notifications.position", bad: "bottom-center" }
+            { tag: "no such position", key: "notifications.position", bad: "bottom-center" },
+            { tag: "dark as text", key: "theme.dark", bad: "dark" },
+            { tag: "accent without #", key: "theme.accent", bad: "e8335a" },
+            { tag: "accent by name", key: "theme.accent", bad: "red" },
+            { tag: "accent with alpha", key: "theme.accent", bad: "#80e8335a" },
+            { tag: "accent with 3 digits", key: "theme.accent", bad: "#e35" },
+            { tag: "accent as number", key: "theme.accent", bad: 123456 },
+            { tag: "radius too big", key: "theme.radius", bad: 40 },
+            { tag: "no border", key: "theme.border", bad: 0 },
+            { tag: "shadow negative", key: "theme.shadow", bad: -1 }
         ];
     }
     function test_bad_values(d) {

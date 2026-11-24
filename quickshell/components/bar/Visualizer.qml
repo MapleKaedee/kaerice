@@ -18,9 +18,9 @@ Row {
             width: (root.width - (root.count - 1) * root.spacing) / root.count
             height: (Cava.bars[index] ?? 0) / 100 * root.maxHeight
             visible: height > 2
-            radius: 2
+            radius: Theme.corner(2)
             color: Theme.accent
-            border.width: 2; border.color: Theme.ink
+            border.width: Theme.stroke(2); border.color: Theme.line
             Behavior on height { NumberAnimation { duration: 60 } }
         }
     }

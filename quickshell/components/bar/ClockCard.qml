@@ -9,7 +9,7 @@ TextCard {
     text: Qt.formatDateTime(clock.date, "d MMM yyyy  ·  HH:mm")
     icon: String.fromCodePoint(0xf017) // Nerd Font clock
     fill: Theme.accent
-    textColor: Theme.paper
+    textColor: Theme.accentText
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
     MouseArea { anchors.fill: parent; onClicked: Ui.calendar = !Ui.calendar }

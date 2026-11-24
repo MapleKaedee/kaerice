@@ -9,8 +9,8 @@ TextCard {
     text: Audio.muted ? "MUTE" : Audio.percent + "%"
     // Nerd Font glyphs: speaker off / low / high
     icon: String.fromCodePoint(Audio.muted ? 0xf026 : Audio.percent < 50 ? 0xf027 : 0xf028)
-    fill: Audio.muted ? Theme.ink : Theme.paper
-    textColor: Audio.muted ? Theme.paper : Theme.ink
+    fill: Audio.muted ? Theme.text : Theme.face
+    textColor: Audio.muted ? Theme.face : Theme.text
 
     MouseArea {
         anchors.fill: parent

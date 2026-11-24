@@ -13,14 +13,14 @@ Column {
         spacing: 18
         Text {
             text: String.fromCodePoint(SystemInfo.logo)
-            color: Theme.accent
+            color: Theme.highlight
             font.family: Theme.iconFont; font.pixelSize: 64
         }
         Column {
             anchors.verticalCenter: parent.verticalCenter
             Text {
                 text: SystemInfo.distro
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 20; font.bold: true
             }
             Text {
@@ -43,7 +43,7 @@ Column {
             }
             Text {
                 text: SystemInfo.versions[parent.modelData[1]] || "--"
-                color: Theme.ink
+                color: Theme.text
                 font.pixelSize: 14; font.bold: true
             }
         }
@@ -52,7 +52,7 @@ Column {
     Item { width: 1; height: 4 }
     Text {
         text: "Settings file"
-        color: Theme.ink
+        color: Theme.text
         font.pixelSize: 15; font.bold: true
     }
     Text {

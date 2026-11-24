@@ -11,5 +11,5 @@ TextCard {
     text: Privacy.apps.join(", ")
     maxTextWidth: 180
     fill: Theme.accent
-    textColor: Theme.paper
+    textColor: Theme.accentText
 }

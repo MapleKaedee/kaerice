@@ -9,8 +9,8 @@ TextCard {
     text: Network.label
     // Nerd Font glyphs: ethernet port, wifi off, wifi
     icon: String.fromCodePoint(Network.kind === "eth" ? 0xf0200 : offline ? 0xf05aa : 0xf1eb)
-    fill: offline ? Theme.ink : Theme.paper
-    textColor: offline ? Theme.paper : Theme.ink
+    fill: offline ? Theme.text : Theme.face
+    textColor: offline ? Theme.face : Theme.text
 
     MouseArea { anchors.fill: parent; onClicked: Ui.wifi = !Ui.wifi }
 }

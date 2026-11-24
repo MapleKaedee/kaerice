@@ -45,7 +45,7 @@ Overlay {
         y: parent.height * 0.2
         width: 560
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
@@ -58,13 +58,13 @@ Overlay {
             Card {
                 width: parent.width
                 height: 50
-                offset: 3
+                offset: Theme.depth(3)
 
                 TextInput {
                     id: search
                     anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                     verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 18; font.bold: true
                     onTextChanged: { root.query = text; list.currentIndex = 0; }
                     Keys.onEscapePressed: root.dismissed()
@@ -99,10 +99,10 @@ Overlay {
                     readonly property bool current: ListView.isCurrentItem
                     width: list.width
                     height: 46
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: current ? Theme.accent : "transparent"
                     border.width: current ? Theme.border : 0
-                    border.color: Theme.ink
+                    border.color: Theme.line
 
                     Row {
                         anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
@@ -116,7 +116,7 @@ Overlay {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: row.modelData.name
-                            color: row.current ? Theme.paper : Theme.ink
+                            color: row.current ? Theme.accentText : Theme.text
                             font.pixelSize: 15; font.bold: true
                         }
                     }

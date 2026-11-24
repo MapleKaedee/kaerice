@@ -39,7 +39,7 @@ Overlay {
         y: parent.height * 0.15
         width: 620
         height: col.implicitHeight + 24 + offset
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
@@ -56,13 +56,13 @@ Overlay {
                 Card {
                     width: parent.width - wipeButton.width - 10
                     height: 50
-                    offset: 3
+                    offset: Theme.depth(3)
 
                     TextInput {
                         id: search
                         anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                         verticalAlignment: TextInput.AlignVCenter
-                        color: Theme.ink
+                        color: Theme.text
                         font.pixelSize: 17; font.bold: true
                         onTextChanged: { root.query = text; list.currentIndex = 0; }
                         Keys.onEscapePressed: root.dismissed()
@@ -92,12 +92,12 @@ Overlay {
                     visible: Clipboard.entries.length > 0
                     width: root.confirmWipe ? 150 : 50
                     height: 50
-                    offset: 3
-                    fill: root.confirmWipe ? Theme.accent : Theme.paper
+                    offset: Theme.depth(3)
+                    fill: root.confirmWipe ? Theme.accent : Theme.face
                     Text {
                         anchors.centerIn: parent
                         text: root.confirmWipe ? "Clear all?" : String.fromCodePoint(0xf1f8)
-                        color: root.confirmWipe ? Theme.paper : Theme.ink
+                        color: root.confirmWipe ? Theme.accentText : Theme.text
                         font.family: Theme.iconFont
                         font.pixelSize: root.confirmWipe ? 14 : 18
                         font.bold: true
@@ -117,7 +117,7 @@ Overlay {
                 visible: !Clipboard.available || root.results.length === 0
                 text: !Clipboard.available ? "cliphist is not installed: sudo pacman -S cliphist"
                     : Clipboard.entries.length === 0 ? "Clipboard history is empty" : "No match"
-                color: Theme.ink
+                color: Theme.text
                 opacity: 0.75
                 font.pixelSize: 13
             }
@@ -137,13 +137,13 @@ Overlay {
                     required property int index
                     readonly property bool current: ListView.isCurrentItem
                     readonly property bool binary: modelData.text.startsWith("[[ binary data")
-                    readonly property color fg: current ? Theme.paper : Theme.ink
+                    readonly property color fg: current ? Theme.accentText : Theme.text
                     width: list.width
                     height: 44
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: current ? Theme.accent : "transparent"
                     border.width: current ? Theme.border : 0
-                    border.color: Theme.ink
+                    border.color: Theme.line
 
                     MouseArea {
                         anchors.fill: parent

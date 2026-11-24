@@ -5,6 +5,7 @@
 function int(min, max) { return v => Number.isInteger(v) && v >= min && v <= max; }
 function bool(v) { return typeof v === "boolean"; }
 function oneOf(values) { return v => values.includes(v); }
+function color(v) { return typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v); }
 // seconds, 0 = never; the order of the stages is kept by the Power page (IdleStages.js)
 function idle(v) { return v === 0 || int(30, 86400)(v); }
 
@@ -12,6 +13,11 @@ function idle(v) { return v === 0 || int(30, 86400)(v); }
 const positions = ["top-left", "top-center", "top-right", "bottom-left", "bottom-right"];
 
 const schema = {
+    "theme.dark": { def: false, ok: bool },                      // the shell only; apps: AppTheme
+    "theme.accent": { def: "#e8335a", ok: color },
+    "theme.radius": { def: 8, ok: int(0, 16) },                  // px
+    "theme.border": { def: 3, ok: int(1, 5) },                   // px
+    "theme.shadow": { def: 4, ok: int(0, 8) },                   // px
     "sound.volumeStep": { def: 3, ok: int(1, 20) },              // percent per key press or scroll
     "sound.visualizer": { def: true, ok: bool },                 // cava behind the bar while music plays
     "idle.dim": { def: 150, ok: idle },

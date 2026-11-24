@@ -15,7 +15,7 @@ ClippingRectangle {
 
     radius: Theme.radius
     color: Theme.accent
-    border.width: Theme.border; border.color: Theme.ink
+    border.width: Theme.border; border.color: Theme.line
 
     Image {
         id: face
@@ -29,7 +29,7 @@ ClippingRectangle {
         anchors.centerIn: parent
         visible: face.status !== Image.Ready
         text: root.user.charAt(0).toUpperCase()
-        color: Theme.paper
+        color: Theme.accentText
         font.pixelSize: root.height * 0.45; font.bold: true
     }
 }

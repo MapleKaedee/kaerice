@@ -26,7 +26,7 @@ Overlay {
         anchors.centerIn: parent
         width: 680
         height: 500
-        offset: 6
+        offset: Theme.depth(6)
 
         MouseArea { anchors.fill: parent } // swallow clicks inside the card
 
@@ -40,7 +40,7 @@ Overlay {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Note"
-                    color: Theme.ink
+                    color: Theme.text
                     font.pixelSize: 20; font.bold: true
                 }
                 Row {
@@ -68,7 +68,7 @@ Overlay {
             Card {
                 width: parent.width
                 height: 380
-                offset: 3
+                offset: Theme.depth(3)
 
                 Flickable {
                     id: flick
@@ -88,9 +88,9 @@ Overlay {
                         width: flick.width
                         wrapMode: TextEdit.Wrap
                         selectByMouse: true
-                        color: Theme.ink
+                        color: Theme.text
                         selectionColor: Theme.accent
-                        selectedTextColor: Theme.paper
+                        selectedTextColor: Theme.accentText
                         font.pixelSize: 16
                         onTextChanged: Note.text = text
                         onCursorRectangleChanged: flick.follow(cursorRectangle)

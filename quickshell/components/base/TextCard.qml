@@ -6,7 +6,7 @@ Card {
     id: root
     property alias text: label.text
     property string icon: ""
-    property color textColor: Theme.ink
+    property color textColor: Theme.text
     property int maxTextWidth: 0 // 0 = no limit; longer text is elided
     width: row.width + 28 + offset
     height: 38

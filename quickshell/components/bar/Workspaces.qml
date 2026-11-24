@@ -13,8 +13,8 @@ Row {
         Card {
             required property HyprlandWorkspace modelData
             width: 40; height: 38
-            fill: modelData.focused ? Theme.accent : Theme.paper
-            Text { anchors.centerIn: parent; text: modelData.id; font.bold: true }
+            fill: modelData.focused ? Theme.accent : Theme.face
+            Text { anchors.centerIn: parent; text: modelData.id; color: modelData.focused ? Theme.accentText : Theme.text; font.bold: true }
             MouseArea { anchors.fill: parent; onClicked: modelData.activate() }
         }
     }

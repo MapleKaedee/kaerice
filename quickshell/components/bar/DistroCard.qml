@@ -7,12 +7,12 @@ import qs.components.base
 Card {
     id: root
     width: 40 + offset; height: 38
-    fill: Ui.controlCenter ? Theme.accent : Theme.paper
+    fill: Ui.controlCenter ? Theme.accent : Theme.face
 
     Text {
         anchors.centerIn: parent
         text: String.fromCodePoint(SystemInfo.logo)
-        color: Ui.controlCenter ? Theme.paper : Theme.ink
+        color: Ui.controlCenter ? Theme.accentText : Theme.text
         font.family: Theme.iconFont; font.pixelSize: 19
     }
 

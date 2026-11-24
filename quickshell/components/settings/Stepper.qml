@@ -12,8 +12,8 @@ Card {
     signal picked(real value)
     readonly property var lower: values.filter(v => v < value).pop()
     readonly property var higher: values.find(v => v > value)
-    width: 180; height: 38; offset: 3
-    ink: activeFocus ? Theme.accent : Theme.ink
+    width: 180; height: 38; offset: Theme.depth(3)
+    line: activeFocus ? Theme.accent : Theme.line
     activeFocusOnTab: true
 
     function pick(v) { if (v !== undefined) picked(v); }
@@ -33,7 +33,7 @@ Card {
     Text {
         anchors.centerIn: parent
         text: root.format(root.value)
-        color: Theme.ink
+        color: Theme.text
         font.pixelSize: 14; font.bold: true
     }
     Button { // plus

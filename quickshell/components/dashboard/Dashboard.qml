@@ -40,7 +40,7 @@ Overlay {
                         spacing: 4
                         Text {
                             text: Account.name
-                            color: Theme.ink
+                            color: Theme.text
                             font.pixelSize: 20; font.bold: true
                         }
                         Text {
@@ -61,13 +61,13 @@ Overlay {
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: Qt.formatDateTime(clock.date, "HH:mm")
-                        color: Theme.paper
+                        color: Theme.accentText
                         font.pixelSize: 60; font.bold: true
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: Qt.formatDateTime(clock.date, "dddd, d MMMM yyyy")
-                        color: Theme.paper
+                        color: Theme.accentText
                         font.pixelSize: 15; font.bold: true
                     }
                 }
@@ -90,7 +90,7 @@ Overlay {
                     spacing: 12
                     Text {
                         text: "System"
-                        color: Theme.ink
+                        color: Theme.text
                         font.pixelSize: 18; font.bold: true
                     }
                     // Nerd Font: microchip f2db, memory efc5, hard-drive f0a0
