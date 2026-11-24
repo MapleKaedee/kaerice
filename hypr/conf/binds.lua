@@ -143,9 +143,11 @@ hl.bind("SUPER + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relativ
 hl.bind("SUPER + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true })
 
 -- === Screenshots ===
-hl.bind("Print", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | wl-copy]]))
-hl.bind("CTRL + Print", hl.dsp.exec_cmd("grim - | wl-copy"))
-hl.bind("ALT + Print", hl.dsp.exec_cmd([[grim -g "$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" - | wl-copy]]))
+-- screenshots: saved to ~/Pictures/Screenshots + clipboard; click the notification to edit (kaerice editor)
+local shot = os.getenv("HOME") .. "/.config/quickshell/kaerice/scripts/screenshot.sh "
+hl.bind("Print", hl.dsp.exec_cmd(shot .. "region"))
+hl.bind("CTRL + Print", hl.dsp.exec_cmd(shot .. "screen"))
+hl.bind("ALT + Print", hl.dsp.exec_cmd(shot .. "window"))
 
 -- === System Controls ===
 hl.bind("SUPER + SHIFT + P", hl.dsp.dpms({ action = "toggle" }))

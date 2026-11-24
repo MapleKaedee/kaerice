@@ -4,11 +4,12 @@
 // Layout:
 //   config/      design tokens (Theme)
 //   services/    state + actions, no UI (singletons)
-//   components/  UI: base/ primitives, bar/, dashboard/, lock/, notifications/, osd/, overlays/, wallpaper/
+//   components/  UI: base/ primitives, bar/, dashboard/, editor/, lock/, notifications/, osd/, overlays/, wallpaper/
 //   ipc/         IPC entry points for keybinds
 import Quickshell
 import qs.components.bar
 import qs.components.dashboard
+import qs.components.editor
 import qs.components.lock
 import qs.components.notifications
 import qs.components.osd
@@ -36,6 +37,7 @@ ShellRoot {
     PowerMenu {}
     WallpaperPicker {}
     WindowSwitcher {}
+    ScreenshotEditor {}
 
     Ipc {}
     LockScreen {}

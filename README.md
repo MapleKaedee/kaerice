@@ -37,7 +37,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
 | Volume / mute / brightness keys | Change level and show the OSD |
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
-| `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
+| `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window, straight into the editor (arrow, marker, crop). `Enter` saves one file to `~/Pictures/Screenshots` + copies, `Ctrl+C` copies only, `Esc` discards |
 
 Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
 The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
@@ -63,10 +63,11 @@ quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
+    editor/           screenshot editor
     lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
@@ -74,6 +75,7 @@ quickshell/
     overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, control center, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
+  scripts/            shell helpers run by keybinds (screenshot.sh)
 wallpapers/           images for the picker
 systemd/              DMS drop-in
 ```

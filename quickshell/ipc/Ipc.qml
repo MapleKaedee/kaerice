@@ -90,6 +90,15 @@ Scope {
     }
 
     IpcHandler {
+        target: "screenshot"
+        function take(mode: string): void { Screenshot.take(mode); } // region | screen | window
+        function edit(path: string): void { Screenshot.edit(path); }
+        function save(): void { Screenshot.finishRequested(true); }
+        function copy(): void { Screenshot.finishRequested(false); }
+        function discard(): void { if (Screenshot.editing) Screenshot.discard(); }
+    }
+
+    IpcHandler {
         target: "lock"
         function lock(): void { Lock.lock(); }
     }

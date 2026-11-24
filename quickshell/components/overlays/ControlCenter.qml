@@ -236,7 +236,7 @@ Overlay {
                 Toggle { glyph: 0xf0f4; label: "Awake"; active: Idle.keepAwake; onClicked: Idle.keepAwake = !Idle.keepAwake }
                 Toggle {
                     glyph: 0xf030; label: "Capture"
-                    onClicked: root.then(() => Quickshell.execDetached(["sh", "-c", "sleep 0.3; grim -g \"$(slurp)\" - | wl-copy"]))
+                    onClicked: root.then(() => Screenshot.take("region"))
                 }
                 Toggle { glyph: 0xf03e; label: "Wallpaper"; onClicked: root.then(() => Ui.wallpaperPicker = true) }
             }
