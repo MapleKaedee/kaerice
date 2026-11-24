@@ -28,7 +28,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
+| `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
 | `SUPER+SHIFT+N` | Temp note (saved automatically) |

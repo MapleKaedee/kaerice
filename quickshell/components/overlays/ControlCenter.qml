@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import QtQuick
 import qs.config
 import qs.services
@@ -193,6 +194,55 @@ Overlay {
                 value: Audio.volume
                 valueText: Audio.muted ? "MUTE" : Audio.percent + "%"
                 onMoved: v => Audio.setVolume(v)
+            }
+
+            // volume mixer: one row per app that plays audio; click the icon to mute it
+            Column {
+                visible: Audio.apps.length > 0
+                width: parent.width
+                spacing: 8
+                Repeater {
+                    model: Audio.apps
+                    Row {
+                        id: app
+                        required property var modelData
+                        readonly property var audio: modelData.nodes[0]?.audio ?? null
+                        readonly property bool muted: audio?.muted ?? false
+                        width: parent.width
+                        spacing: 12
+                        IconImage {
+                            anchors.verticalCenter: parent.verticalCenter
+                            implicitSize: 24
+                            opacity: app.muted ? 0.35 : 1
+                            source: Quickshell.iconPath(DesktopEntries.heuristicLookup(app.modelData.id)?.icon ?? "", true)
+                                || Quickshell.iconPath("application-x-executable")
+                            MouseArea { anchors.fill: parent; onClicked: Audio.toggleAppMute(app.modelData) }
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 84
+                            elide: Text.ElideRight
+                            text: app.modelData.name
+                            color: Theme.ink
+                            font.pixelSize: 13; font.bold: true
+                        }
+                        LevelSlider {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 24 - 84 - 52 - 3 * parent.spacing
+                            height: 18
+                            value: app.audio?.volume ?? 0
+                            onMoved: v => Audio.setAppVolume(app.modelData, v)
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 52
+                            horizontalAlignment: Text.AlignRight
+                            text: app.muted ? "MUTE" : Math.round((app.audio?.volume ?? 0) * 100) + "%"
+                            color: Theme.ink
+                            font.pixelSize: 13; font.bold: true
+                        }
+                    }
+                }
             }
 
             Grid {
