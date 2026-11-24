@@ -18,3 +18,6 @@ hl.bind("SUPER + Y", hl.dsp.exec_cmd("qs -c kaerice ipc call wallpaper pick"))
 hl.bind("SUPER + N", hl.dsp.exec_cmd("qs -c kaerice ipc call notifications toggle"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("qs -c kaerice ipc call clipboard toggle"))
 hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("qs -c kaerice ipc call lock lock"))
+-- Alt+Tab switcher: global shortcuts (ordered, no process per press); releasing Alt switches
+hl.bind("ALT + Tab", hl.dsp.global("quickshell:switcherNext"))
+hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:switcherPrev"))

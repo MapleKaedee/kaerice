@@ -29,6 +29,7 @@ ShellRoot {
     ClipboardMenu {}
     PowerMenu {}
     WallpaperPicker {}
+    WindowSwitcher {}
 
     Ipc {}
     Idle {}

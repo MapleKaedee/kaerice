@@ -31,6 +31,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+Y` | Wallpaper picker |
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
 | `SUPER+ALT+L` | Lock screen |
+| `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
 | Volume / mute / brightness keys | Change level and show the OSD |
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
@@ -58,14 +59,14 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Ui; Idle (stages)
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, Ui; Idle (stages)
   components/
     base/             Card, TextCard, Overlay (full-screen layer with Esc/backdrop close)
     lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar
+    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, window switcher
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
 wallpapers/           images for the picker

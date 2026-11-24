@@ -1,10 +1,30 @@
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
 
 // Every IPC entry point (Hyprland keybinds call these): qs -c kaerice ipc call <target> <function> [args]
 // List them with: qs -c kaerice ipc show
 Scope {
+    // Alt+Tab uses Hyprland global shortcuts (hl.dsp.global("quickshell:<name>")), not `qs ipc`:
+    // they arrive in order and without spawning a process, so fast Tab presses are not lost.
+    GlobalShortcut {
+        name: "switcherNext"
+        onPressed: Switcher.step(1)
+    }
+    GlobalShortcut {
+        name: "switcherPrev"
+        onPressed: Switcher.step(-1)
+    }
+
+    IpcHandler {
+        target: "switcher"
+        function next(): void { Switcher.step(1); }
+        function prev(): void { Switcher.step(-1); }
+        function commit(): void { Switcher.commit(); }
+        function cancel(): void { Switcher.cancel(); }
+    }
+
     IpcHandler {
         target: "launcher"
         function toggle(): void { Ui.launcher = !Ui.launcher; }
