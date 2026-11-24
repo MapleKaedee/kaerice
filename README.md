@@ -28,14 +28,14 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+,` | Settings (Users & accounts, About); also the gear in the control center |
+| `SUPER+,` | Settings (Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
 | `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
 | `SUPER+SHIFT+N` | Temp note (saved automatically) |
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
-| `SUPER+X`, `SUPER+SHIFT+E` | Power menu (warns when a package manager or download is running; then Logout / Reboot / Shutdown need a second press) |
+| `SUPER+X`, `SUPER+SHIFT+E` | Power menu: hold `Enter` or the mouse button on Suspend / Logout / Reboot / Shutdown (2 s longer, with a warning, while a package manager or download runs). Lock needs no hold |
 | `SUPER+ALT+L` | Lock screen |
 | `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
 | `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
@@ -51,9 +51,9 @@ All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 ## Lock and idle
 
 The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend.
-Idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
+Default idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
 suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage, and so does Awake in the control center.
-Change the times in `quickshell/services/Idle.qml`.
+Change the times in settings, Power.
 
 If the lock ever refuses a correct password:
 1. Switch to a TTY (`CTRL+ALT+F3`) and log in.
@@ -71,7 +71,7 @@ quickshell/
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
   services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
-    base/             Card, TextCard, TextButton, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextCard, TextButton, IconButton, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     editor/           screenshot editor
     lock/             session lock surface

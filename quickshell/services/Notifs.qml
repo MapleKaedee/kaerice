@@ -1,17 +1,19 @@
 pragma Singleton
 
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
 
 // Notification daemon (owns org.freedesktop.Notifications) and history.
 // Notifications stay in `list` until dismissed; `shown` holds the ids currently shown as popups.
 // Do not disturb: no popups except critical ones, but everything still lands in the history.
-// dnd and arrival times survive a config reload (PersistentProperties), like the notifications themselves.
+// dnd is saved (state file "silent"); arrival times survive a config reload, like the notifications themselves.
 Singleton {
     id: root
     readonly property int timeout: Settings.get("notifications.timeout") // ms a popup stays; critical popups stay until clicked
-    property alias dnd: persist.dnd
+    property bool dnd: saved.text().trim() === "1"
+    onDndChanged: saved.setText(dnd ? "1" : "0")
     property var shown: []     // ids of notifications currently shown as popups
     readonly property var times: JSON.parse(persist.times) // id -> "HH:mm" of arrival
     readonly property var list: server.trackedNotifications // oldest first
@@ -29,10 +31,16 @@ Singleton {
     // copy first: dismissing changes the model while we iterate
     function clearAll() { server.trackedNotifications.values.slice().forEach(n => n.dismiss()); }
 
+    FileView {
+        id: saved
+        path: Quickshell.statePath("silent")
+        blockLoading: true
+        printErrors: false
+    }
+
     PersistentProperties {
         id: persist
         reloadableId: "notifs"
-        property bool dnd: false
         property string times: "{}" // JSON: objects in a var property do not survive a reload
     }
 

@@ -3,11 +3,12 @@ import Quickshell.Services.Notifications
 import QtQuick
 import qs.services
 
-// Popup cards at top-right for fresh notifications (Notifs.shown). Each hides after Notifs.timeout.
+// Popup cards for fresh notifications (Notifs.shown), in the corner chosen in settings. Each hides after Notifs.timeout.
 PanelWindow {
+    readonly property var position: Settings.get("notifications.position").split("-") // e.g. ["top", "right"]; center = neither side
     visible: Notifs.shown.length > 0
-    anchors { top: true; right: true }
-    margins { top: 8; right: 14 }
+    anchors { top: position[0] === "top"; bottom: position[0] === "bottom"; left: position[1] === "left"; right: position[1] === "right" }
+    margins { top: 8; bottom: 8; left: 14; right: 14 }
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: 0
     implicitWidth: 360

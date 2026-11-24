@@ -5,10 +5,10 @@ import Quickshell.Io
 import QtQuick
 
 // Audio spectrum from cava (config/cava.conf: 64 bars, values 0..100).
-// cava runs only while a media player is playing; bars is empty otherwise.
+// cava runs only while a media player is playing (and the visualizer is on in settings); bars is empty otherwise.
 Singleton {
     id: root
-    readonly property bool active: Media.playing
+    readonly property bool active: Media.playing && Settings.get("sound.visualizer")
     property var bars: []
 
     onActiveChanged: if (!active) root.bars = []

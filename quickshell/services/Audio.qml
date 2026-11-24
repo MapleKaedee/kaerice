@@ -15,13 +15,24 @@ Singleton {
     readonly property int percent: Math.round(volume * 100)
 
     function setVolume(v) { if (ready) sink.audio.volume = Math.max(0, Math.min(1, v)); }
-    function step(delta) { setVolume(volume + delta); }
+    readonly property real stepSize: Settings.get("sound.volumeStep") / 100
+    function step(direction) { setVolume(volume + direction * stepSize); } // 1 or -1
     function toggleMute() { if (ready) sink.audio.muted = !sink.audio.muted; }
 
     readonly property var source: Pipewire.defaultAudioSource
     readonly property bool micMuted: source?.audio?.muted ?? false
-    readonly property int micPercent: Math.round((source?.audio?.volume ?? 0) * 100)
+    readonly property real micVolume: source?.audio?.volume ?? 0
+    readonly property int micPercent: Math.round(micVolume * 100)
+    function setMicVolume(v) { if (source?.audio) source.audio.volume = Math.max(0, Math.min(1, v)); }
     function toggleMicMute() { if (source?.audio) source.audio.muted = !source.audio.muted; }
+
+    // devices to choose from; WirePlumber remembers the choice
+    readonly property var sinks: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioSink)
+    readonly property var sources: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioSource)
+    function useSink(node) { Pipewire.preferredDefaultAudioSink = node; }
+    function useSource(node) { Pipewire.preferredDefaultAudioSource = node; }
+    function deviceName(node) { return node.description || node.nickname || node.name; }
+    function shortName(node) { return node?.nickname || node?.description || ""; } // no "Analog Stereo"
 
     readonly property var streams: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioOutStream && n.audio)
     // [{ name, id (for the icon lookup), nodes }]; one row per app even when it has several streams

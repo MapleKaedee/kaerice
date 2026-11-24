@@ -32,6 +32,23 @@ TestCase {
         compare(r.problems.length, d.problems);
     }
 
+    function test_bad_values_data() {
+        return [
+            { tag: "volume step 0", key: "sound.volumeStep", bad: 0 },
+            { tag: "volume step fraction", key: "sound.volumeStep", bad: 2.5 },
+            { tag: "visualizer as text", key: "sound.visualizer", bad: "true" },
+            { tag: "idle too short", key: "idle.lock", bad: 10 },
+            { tag: "idle negative", key: "idle.suspend", bad: -1 },
+            { tag: "hold too long", key: "power.hold", bad: 60000 },
+            { tag: "no such position", key: "notifications.position", bad: "bottom-center" }
+        ];
+    }
+    function test_bad_values(d) {
+        const r = Schema.load(JSON.stringify({ [d.key]: d.bad }));
+        compare(r.values[d.key], Schema.schema[d.key].def);
+        compare(r.problems, [d.key]);
+    }
+
     function test_dump_keeps_only_changes_and_unknown_keys() {
         const r = Schema.load('{"notifications.timeout": 3000, "future.key": [1, 2]}');
         compare(JSON.parse(Schema.dump(r.values, r.unknown)), { "notifications.timeout": 3000, "future.key": [1, 2] });

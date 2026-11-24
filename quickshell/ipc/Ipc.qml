@@ -51,8 +51,8 @@ Scope {
     // media keys: change the level and show the OSD
     IpcHandler {
         target: "osd"
-        function volumeUp(): void { Audio.step(0.03); Osd.show("volume"); }
-        function volumeDown(): void { Audio.step(-0.03); Osd.show("volume"); }
+        function volumeUp(): void { Audio.step(1); Osd.show("volume"); }
+        function volumeDown(): void { Audio.step(-1); Osd.show("volume"); }
         function toggleMute(): void { Audio.toggleMute(); Osd.show("volume"); }
         function brightnessUp(): void { Brightness.step(5); Osd.show("brightness"); }
         function brightnessDown(): void { Brightness.step(-5); Osd.show("brightness"); }
@@ -66,8 +66,8 @@ Scope {
         function playPause(): void { Media.togglePlaying(); }
         function next(): void { Media.next(); }
         function previous(): void { Media.previous(); }
-        function volumeUp(): void { Media.stepVolume(0.03); }
-        function volumeDown(): void { Media.stepVolume(-0.03); }
+        function volumeUp(): void { Media.stepVolume(1); }
+        function volumeDown(): void { Media.stepVolume(-1); }
     }
 
     IpcHandler {

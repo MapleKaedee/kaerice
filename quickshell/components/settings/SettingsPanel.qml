@@ -5,7 +5,7 @@ import qs.services
 import qs.components.base
 
 // Settings: menu on the left, page on the right. No scrim and never over the bar, so changes show at once.
-// Keys: Up/Down switch pages, Tab reaches fields and buttons, Esc closes. Add a page: one line in `pages` + a Component.
+// Keys: Up/Down switch pages, Tab reaches the controls, Left/Right change the focused one, Esc closes. Add a page: one line in `pages` + a Component.
 Overlay {
     id: root
     name: "settings"
@@ -16,11 +16,17 @@ Overlay {
     onVisibleChanged: if (visible) { Account.refresh(); SystemInfo.refresh(); }
 
     property int current: 0
-    // icon: Nerd Font user f007, circle-info f05a
+    // icon: Nerd Font music f001, power f011, bell f0f3, user f007, circle-info f05a
     readonly property var pages: [
+        { title: "Sound & media", icon: 0xf001, page: sound },
+        { title: "Power", icon: 0xf011, page: power },
+        { title: "Notifications", icon: 0xf0f3, page: notifications },
         { title: "Users & accounts", icon: 0xf007, page: users },
         { title: "About", icon: 0xf05a, page: about }
     ]
+    Component { id: sound; SoundPage {} }
+    Component { id: power; PowerPage {} }
+    Component { id: notifications; NotificationsPage {} }
     Component { id: users; UsersPage {} }
     Component { id: about; AboutPage {} }
 

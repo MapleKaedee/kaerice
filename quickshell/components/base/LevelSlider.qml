@@ -5,6 +5,7 @@ import qs.config
 Rectangle {
     id: root
     property real value: 0
+    property real step: 0.05 // per scroll
     signal moved(real v)
 
     height: 22
@@ -25,6 +26,6 @@ Rectangle {
         function pick(mx) { root.moved(Math.max(0, Math.min(1, (mx - Theme.border) / (width - 2 * Theme.border)))); }
         onPressed: mouse => pick(mouse.x)
         onPositionChanged: mouse => { if (pressed) pick(mouse.x); }
-        onWheel: wheel => root.moved(Math.max(0, Math.min(1, root.value + (wheel.angleDelta.y > 0 ? 0.05 : -0.05))))
+        onWheel: wheel => root.moved(Math.max(0, Math.min(1, root.value + (wheel.angleDelta.y > 0 ? root.step : -root.step))))
     }
 }

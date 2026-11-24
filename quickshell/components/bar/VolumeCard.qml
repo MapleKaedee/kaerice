@@ -3,7 +3,7 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Default output volume. Scroll = +/-3%, click = mute toggle.
+// Default output volume. Scroll changes it, click = mute toggle.
 TextCard {
     visible: !!Audio.sink
     text: Audio.muted ? "MUTE" : Audio.percent + "%"
@@ -15,6 +15,6 @@ TextCard {
     MouseArea {
         anchors.fill: parent
         onClicked: Audio.toggleMute()
-        onWheel: wheel => Audio.step(wheel.angleDelta.y > 0 ? 0.03 : -0.03)
+        onWheel: wheel => Audio.step(wheel.angleDelta.y > 0 ? 1 : -1)
     }
 }

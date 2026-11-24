@@ -16,8 +16,8 @@ Singleton {
     function togglePlaying() { if (active && player.canTogglePlaying) player.togglePlaying(); }
     function next() { if (active && player.canGoNext) player.next(); }
     function previous() { if (active && player.canGoPrevious) player.previous(); }
-    function stepVolume(delta) {
+    function stepVolume(direction) { // 1 or -1
         if (active && player.canControl && player.volumeSupported)
-            player.volume = Math.max(0, Math.min(1, player.volume + delta));
+            player.volume = Math.max(0, Math.min(1, player.volume + direction * Audio.stepSize));
     }
 }
