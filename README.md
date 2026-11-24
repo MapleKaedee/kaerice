@@ -34,7 +34,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+SHIFT+N` | Temp note (saved automatically) |
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
-| `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
+| `SUPER+X`, `SUPER+SHIFT+E` | Power menu (warns when a package manager or download is running; then Logout / Reboot / Shutdown need a second press) |
 | `SUPER+ALT+L` | Lock screen |
 | `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
 | `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
@@ -67,7 +67,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
