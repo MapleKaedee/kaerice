@@ -33,6 +33,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
 | `SUPER+ALT+L` | Lock screen |
 | `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
+| `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
 | Volume / mute / brightness keys | Change level and show the OSD |
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
@@ -68,7 +69,7 @@ quickshell/
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, window switcher
+    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
 wallpapers/           images for the picker

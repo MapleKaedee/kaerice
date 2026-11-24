@@ -23,6 +23,7 @@ Scope {
         function prev(): void { Switcher.step(-1); }
         function commit(): void { Switcher.commit(); }
         function cancel(): void { Switcher.cancel(); }
+        function overview(): void { Switcher.toggleOverview(); }
     }
 
     IpcHandler {

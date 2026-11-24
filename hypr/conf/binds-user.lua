@@ -22,3 +22,4 @@ hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("qs -c kaerice ipc call lock lock"))
 -- Alt+Tab switcher: global shortcuts (ordered, no process per press); releasing Alt switches
 hl.bind("ALT + Tab", hl.dsp.global("quickshell:switcherNext"))
 hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:switcherPrev"))
+hl.bind("SUPER + Tab", hl.dsp.exec_cmd("qs -c kaerice ipc call switcher overview"))
