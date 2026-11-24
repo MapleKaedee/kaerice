@@ -21,6 +21,8 @@ import qs.services
 ShellRoot {
     // reading Idle creates the singleton, so the idle stages run from startup
     readonly property bool keepAwake: Idle.keepAwake
+    // same for Battery: its warnings must not depend on the bar card
+    readonly property int batteryPercent: Battery.percent
 
     WallpaperLayer {}
     Bar {}

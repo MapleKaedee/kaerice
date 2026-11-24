@@ -43,7 +43,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window, straight into the editor (arrow, marker, crop). `Enter` saves one file to `~/Pictures/Screenshots` + copies, `Ctrl+C` copies only, `Esc` discards |
 
 Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
-A red card with the app name shows while the mic is recorded or a screen/camera is shared. The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
+A red card with the app name shows while the mic is recorded or a screen/camera is shared. Battery notifications come at 20 / 10 / 5 / 3 % and when the charger is connected or disconnected (warnings only). The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
 ## Lock and idle
@@ -67,7 +67,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
@@ -81,6 +81,7 @@ quickshell/
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)
 wallpapers/           images for the picker
+tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
 systemd/              DMS drop-in
 ```
 
