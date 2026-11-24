@@ -9,8 +9,9 @@ TP_PREFIX=${TP%-touchpad} # the touchpad's own "-mouse" node is internal, not ex
 apply() {
 	local json state
 	json=$(hyprctl devices -j) || exit 0 # Hyprland gone: stop watching
+	# the SayoDevice keypad and the Wacom tablet have mouse nodes but are not mice
 	if jq -e --arg p "$TP_PREFIX" \
-		'[.mice[].name | select((startswith($p) or test("virtual")) | not)] | length > 0' \
+		'[.mice[].name | select((startswith($p) or test("virtual|sayodevice|wacom")) | not)] | length > 0' \
 		<<<"$json" >/dev/null; then
 		state=false
 	else
