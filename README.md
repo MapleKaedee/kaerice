@@ -29,6 +29,8 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
 | `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles |
 | `SUPER+V` | Clipboard history |
+| `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
+| `SUPER+SHIFT+N` | Temp note (saved automatically) |
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
@@ -63,7 +65,8 @@ quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Lock, Switcher, SysStats, Idle, Ui
+  config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
@@ -72,7 +75,7 @@ quickshell/
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, control center, window switcher + overview
+    overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, calendar, control center, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)

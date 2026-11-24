@@ -12,6 +12,8 @@ Singleton {
     property bool calendar: false
     property bool dashboard: false
     property bool controlCenter: false
+    property bool emoji: false
+    property bool note: false
     property bool clipboard: false
     property bool wallpaperPicker: false
 }

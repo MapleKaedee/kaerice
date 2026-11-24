@@ -14,6 +14,7 @@ Singleton {
     readonly property color scrimLight: "#661c1c1c"
 
     readonly property string iconFont: "JetBrainsMono Nerd Font"
+    readonly property string emojiFont: "Noto Color Emoji"
 
     readonly property int radius: 8
     readonly property int border: 3

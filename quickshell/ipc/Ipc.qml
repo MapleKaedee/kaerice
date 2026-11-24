@@ -104,6 +104,16 @@ Scope {
     }
 
     IpcHandler {
+        target: "emoji"
+        function toggle(): void { Ui.emoji = !Ui.emoji; }
+    }
+
+    IpcHandler {
+        target: "note"
+        function toggle(): void { Ui.note = !Ui.note; }
+    }
+
+    IpcHandler {
         target: "clipboard"
         function toggle(): void { Ui.clipboard = !Ui.clipboard; }
     }

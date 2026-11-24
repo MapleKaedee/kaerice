@@ -34,6 +34,8 @@ ShellRoot {
     WifiMenu {}
     Launcher {}
     ClipboardMenu {}
+    EmojiPicker {}
+    TempNote {}
     PowerMenu {}
     WallpaperPicker {}
     WindowSwitcher {}
