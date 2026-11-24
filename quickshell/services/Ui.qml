@@ -14,6 +14,7 @@ Singleton {
     property bool controlCenter: false
     property bool emoji: false
     property bool note: false
+    property bool keybinds: false
     property bool clipboard: false
     property bool wallpaperPicker: false
 }

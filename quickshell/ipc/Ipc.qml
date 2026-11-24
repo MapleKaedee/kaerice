@@ -104,6 +104,11 @@ Scope {
     }
 
     IpcHandler {
+        target: "keybinds"
+        function toggle(): void { Ui.keybinds = !Ui.keybinds; }
+    }
+
+    IpcHandler {
         target: "emoji"
         function toggle(): void { Ui.emoji = !Ui.emoji; }
     }

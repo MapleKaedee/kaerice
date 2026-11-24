@@ -25,6 +25,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 
 | Key | Action |
 | --- | --- |
+| `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
 | `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
@@ -75,7 +76,7 @@ quickshell/
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, calendar, control center, window switcher + overview
+    overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, keybinds, calendar, control center, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)

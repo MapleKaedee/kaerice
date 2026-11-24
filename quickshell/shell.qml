@@ -36,6 +36,7 @@ ShellRoot {
     ClipboardMenu {}
     EmojiPicker {}
     TempNote {}
+    Keybinds {}
     PowerMenu {}
     WallpaperPicker {}
     WindowSwitcher {}
