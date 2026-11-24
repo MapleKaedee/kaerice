@@ -1,7 +1,8 @@
 import Quickshell
 import QtQuick
 
-// Top bar: workspaces + window title on the left, media in the center, status cards on the right.
+// Top bar: workspaces + window title on the left, status cards on the right,
+// media centered in the free space between them (it shrinks its title to fit, hides below a minimum).
 PanelWindow {
     id: bar
     anchors { top: true; left: true; right: true }
@@ -9,6 +10,7 @@ PanelWindow {
     color: "transparent"
 
     Row {
+        id: leftRow
         anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
         spacing: 8
 
@@ -16,11 +18,19 @@ PanelWindow {
         WindowTitle {}
     }
 
-    MediaCard {
-        anchors.centerIn: parent
+    Item {
+        id: middle
+        anchors { left: leftRow.right; right: rightRow.left; leftMargin: 8; rightMargin: 8; top: parent.top; bottom: parent.bottom }
+
+        MediaCard {
+            anchors.centerIn: parent
+            maxTextWidth: Math.min(260, middle.width - 120) // 120: controls, padding, shadow
+            visible: maxTextWidth >= 60
+        }
     }
 
     Row {
+        id: rightRow
         anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
         spacing: 8
 
@@ -30,6 +40,7 @@ PanelWindow {
         BrightnessCard {}
         BatteryCard {}
         NotificationBell {}
+        DistroCard {}
         ClockCard {}
     }
 }

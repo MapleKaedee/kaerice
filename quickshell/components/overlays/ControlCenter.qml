@@ -1,0 +1,263 @@
+import Quickshell
+import Quickshell.Bluetooth
+import Quickshell.Hyprland
+import QtQuick
+import qs.config
+import qs.services
+import qs.components.base
+
+// Control center (top-right, opened from the distro card): profile + lock/power, brightness and volume
+// sliders, network / Bluetooth / speaker / mic tiles, quick toggles, disk and window count.
+Overlay {
+    id: root
+    name: "control-center"
+    visible: Ui.controlCenter
+    onDismissed: Ui.controlCenter = false
+
+    readonly property int panelWidth: 460
+    readonly property int gap: 12
+    readonly property var adapter: Bluetooth.defaultAdapter
+    readonly property var btConnected: Bluetooth.devices.values.filter(d => d.connected)
+    readonly property int windowCount: Hyprland.toplevels.values.length
+
+    // close the panel, then run an action that opens something else
+    function then(fn) { Ui.controlCenter = false; fn(); }
+
+    // square icon button with a hard shadow
+    component SquareButton: Card {
+        id: sq
+        property int glyph
+        signal clicked()
+        width: 48; height: 48; offset: 3
+        Text {
+            anchors.centerIn: parent
+            text: String.fromCodePoint(sq.glyph)
+            color: Theme.ink
+            font.family: Theme.iconFont; font.pixelSize: 18
+        }
+        MouseArea { anchors.fill: parent; onClicked: sq.clicked() }
+    }
+
+    // icon box + title + subtitle; the icon box turns accent while active
+    component Tile: Card {
+        id: tile
+        property int glyph
+        property string title
+        property string subtitle
+        property bool active
+        signal clicked()
+        width: (root.panelWidth - 32 - root.gap) / 2; height: 66; offset: 3
+        Row {
+            anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+            spacing: 12
+            Rectangle {
+                width: 42; height: 42
+                radius: 6
+                color: tile.active ? Theme.accent : Theme.paper
+                border.width: 2; border.color: Theme.ink
+                Text {
+                    anchors.centerIn: parent
+                    text: String.fromCodePoint(tile.glyph)
+                    color: tile.active ? Theme.paper : Theme.ink
+                    font.family: Theme.iconFont; font.pixelSize: 17
+                }
+            }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                Text {
+                    text: tile.title
+                    color: Theme.ink
+                    font.pixelSize: 14; font.bold: true
+                }
+                Text {
+                    width: tile.width - tile.offset - 76
+                    elide: Text.ElideRight
+                    text: tile.subtitle
+                    color: Theme.muted
+                    font.pixelSize: 12; font.bold: true
+                }
+            }
+        }
+        MouseArea { anchors.fill: parent; onClicked: tile.clicked() }
+    }
+
+    // icon over a short label; accent fill while on
+    component Toggle: Card {
+        id: tog
+        property int glyph
+        property string label
+        property bool active
+        signal clicked()
+        width: (root.panelWidth - 32 - 3 * root.gap) / 4; height: 64; offset: 3
+        fill: active ? Theme.accent : Theme.paper
+        Column {
+            anchors.centerIn: parent
+            spacing: 4
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: String.fromCodePoint(tog.glyph)
+                color: tog.active ? Theme.paper : Theme.ink
+                font.family: Theme.iconFont; font.pixelSize: 18
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: tog.label
+                color: tog.active ? Theme.paper : Theme.ink
+                font.pixelSize: 11; font.bold: true
+            }
+        }
+        MouseArea { anchors.fill: parent; onClicked: tog.clicked() }
+    }
+
+    // slider row: glyph, bar, percent
+    component LevelRow: Row {
+        id: lvl
+        property int glyph
+        property real value
+        property string valueText
+        signal moved(real v)
+        width: root.panelWidth - 32
+        spacing: 12
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 24
+            text: String.fromCodePoint(lvl.glyph)
+            color: Theme.ink
+            font.family: Theme.iconFont; font.pixelSize: 18
+        }
+        LevelSlider {
+            anchors.verticalCenter: parent.verticalCenter
+            width: lvl.width - 24 - 52 - 2 * lvl.spacing
+            value: lvl.value
+            onMoved: v => lvl.moved(v)
+        }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 52
+            horizontalAlignment: Text.AlignRight
+            text: lvl.valueText
+            color: Theme.ink
+            font.pixelSize: 14; font.bold: true
+        }
+    }
+
+    Card {
+        x: parent.width - width - 14
+        y: 60
+        width: root.panelWidth
+        height: col.implicitHeight + 32 + offset
+        offset: 6
+
+        MouseArea { anchors.fill: parent } // swallow clicks inside the panel
+
+        Column {
+            id: col
+            x: 16; y: 16
+            width: root.panelWidth - 32
+            spacing: root.gap
+
+            // profile, lock, power
+            Item {
+                width: parent.width; height: 60
+                Avatar { id: avatar; width: 60; height: 60 }
+                Column {
+                    anchors { left: avatar.right; leftMargin: 14; verticalCenter: parent.verticalCenter }
+                    spacing: 3
+                    Text {
+                        text: avatar.user
+                        color: Theme.ink
+                        font.pixelSize: 18; font.bold: true
+                    }
+                    Text {
+                        text: (Quickshell.env("XDG_CURRENT_DESKTOP") || "Hyprland") + (SysStats.uptime ? "  ·  " + SysStats.uptimeText : "")
+                        color: Theme.muted
+                        font.pixelSize: 12; font.bold: true
+                    }
+                }
+                Row {
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    spacing: 10
+                    SquareButton { glyph: 0xf023; onClicked: root.then(() => Lock.lock()) }        // lock
+                    SquareButton { glyph: 0xf011; onClicked: root.then(() => Ui.power = true) }   // power
+                }
+            }
+
+            LevelRow {
+                glyph: 0xf185 // sun
+                value: Math.max(0, Brightness.percent) / 100
+                valueText: Brightness.percent < 0 ? "--" : Brightness.percent + "%"
+                onMoved: v => Brightness.set(v * 100)
+            }
+            LevelRow {
+                glyph: Audio.muted ? 0xf026 : 0xf028
+                value: Audio.volume
+                valueText: Audio.muted ? "MUTE" : Audio.percent + "%"
+                onMoved: v => Audio.setVolume(v)
+            }
+
+            Grid {
+                columns: 2
+                spacing: root.gap
+                Tile {
+                    // ethernet port / wifi off / wifi
+                    glyph: Network.kind === "eth" ? 0xf0200 : Network.kind === "offline" ? 0xf05aa : 0xf1eb
+                    title: Network.kind === "eth" ? "Ethernet" : "Wi-Fi"
+                    subtitle: Network.kind === "eth" ? "Connected" : Network.kind === "offline" ? "Offline" : Network.label
+                    active: Network.kind !== "offline"
+                    onClicked: root.then(() => Ui.wifi = true)
+                }
+                Tile {
+                    glyph: 0xf293 // bluetooth
+                    title: "Bluetooth"
+                    subtitle: !root.adapter ? "No adapter" : !root.adapter.enabled ? "Off"
+                        : root.btConnected.length ? root.btConnected.map(d => d.name).join(", ") : "On"
+                    active: root.adapter?.enabled ?? false
+                    onClicked: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
+                }
+                Tile {
+                    glyph: Audio.muted ? 0xf026 : 0xf028
+                    title: "Speakers"
+                    subtitle: Audio.muted ? "Muted" : Audio.percent + "%"
+                    active: !Audio.muted
+                    onClicked: Audio.toggleMute()
+                }
+                Tile {
+                    glyph: Audio.micMuted ? 0xf131 : 0xf130
+                    title: "Microphone"
+                    subtitle: Audio.micMuted ? "Muted" : Audio.micPercent + "%"
+                    active: !Audio.micMuted
+                    onClicked: Audio.toggleMicMute()
+                }
+            }
+
+            Row {
+                spacing: root.gap
+                Toggle { glyph: 0xf1f6; label: "Silent"; active: Notifs.dnd; onClicked: Notifs.dnd = !Notifs.dnd }
+                Toggle { glyph: 0xf0f4; label: "Awake"; active: Idle.keepAwake; onClicked: Idle.keepAwake = !Idle.keepAwake }
+                Toggle {
+                    glyph: 0xf030; label: "Capture"
+                    onClicked: root.then(() => Quickshell.execDetached(["sh", "-c", "sleep 0.3; grim -g \"$(slurp)\" - | wl-copy"]))
+                }
+                Toggle { glyph: 0xf03e; label: "Wallpaper"; onClicked: root.then(() => Ui.wallpaperPicker = true) }
+            }
+
+            Grid {
+                columns: 2
+                spacing: root.gap
+                Tile {
+                    glyph: 0xf0a0 // hard drive
+                    title: "/"
+                    subtitle: SysStats.diskTotalGb
+                        ? SysStats.diskUsedGb.toFixed(0) + " / " + SysStats.diskTotalGb.toFixed(0) + " GB (" + Math.round(SysStats.disk * 100) + "%)"
+                        : "--"
+                }
+                Tile {
+                    glyph: 0xf2d2 // window-restore
+                    title: root.windowCount + (root.windowCount === 1 ? " window" : " windows")
+                    subtitle: "Overview"
+                    onClicked: root.then(() => Switcher.toggleOverview())
+                }
+            }
+        }
+    }
+}

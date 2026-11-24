@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// CPU / RAM / root-disk usage and uptime, polled every 2 s while the dashboard is open.
+// CPU / RAM / root-disk usage and uptime, polled every 2 s while the dashboard or control center is open.
 Singleton {
     id: root
     property real cpu: -1          // 0..1, -1 until two samples exist
@@ -12,7 +12,13 @@ Singleton {
     property real memUsedGb: 0
     property real memTotalGb: 0
     property real disk: 0
+    property real diskUsedGb: 0
+    property real diskTotalGb: 0
     property int uptime: 0         // seconds
+    readonly property string uptimeText: {
+        const d = Math.floor(uptime / 86400), h = Math.floor(uptime % 86400 / 3600), m = Math.floor(uptime % 3600 / 60);
+        return "up " + (d ? d + "d " : "") + (d || h ? h + "h " : "") + m + "m";
+    }
     property string host: hostFile.text().trim()
     property var lastCpu: null     // [idle, total] of the previous /proc/stat sample
 
@@ -30,7 +36,10 @@ Singleton {
         root.memTotalGb = memTotal / 1048576;
         root.memUsedGb = (memTotal - memAvail) / 1048576;
 
-        root.disk = parseInt(lines[3].split(/\s+/)[4]) / 100;
+        const df = lines[3].split(/\s+/); // 1K-blocks used available capacity
+        root.disk = parseInt(df[4]) / 100;
+        root.diskTotalGb = Number(df[1]) / 1048576;
+        root.diskUsedGb = Number(df[2]) / 1048576;
         root.uptime = Math.floor(Number(lines[4].split(" ")[0]));
     }
 
@@ -42,7 +51,7 @@ Singleton {
 
     Timer {
         interval: 2000; repeat: true; triggeredOnStart: true
-        running: Ui.dashboard
+        running: Ui.dashboard || Ui.controlCenter
         onTriggered: proc.running = true
         onRunningChanged: if (!running) { root.lastCpu = null; root.cpu = -1; }
     }

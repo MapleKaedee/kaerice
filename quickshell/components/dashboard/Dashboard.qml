@@ -1,5 +1,4 @@
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import qs.config
 import qs.services
@@ -16,14 +15,6 @@ Overlay {
 
     readonly property int colWidth: 400
     readonly property string user: Quickshell.env("USER")
-    // avatar candidates, first readable wins; falls back to the initial
-    readonly property var faces: [Quickshell.env("HOME") + "/.face", "/var/lib/AccountsService/icons/" + user]
-    property int faceIndex: 0
-
-    function uptime(s) {
-        const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-        return "up " + (d ? d + "d " : "") + (d || h ? h + "h " : "") + m + "m";
-    }
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
@@ -44,27 +35,7 @@ Overlay {
                     anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
                     spacing: 16
 
-                    ClippingRectangle {
-                        width: 68; height: 68
-                        radius: Theme.radius
-                        color: Theme.accent
-                        border.width: Theme.border; border.color: Theme.ink
-                        Image {
-                            id: face
-                            anchors.fill: parent
-                            source: root.faceIndex < root.faces.length ? "file://" + root.faces[root.faceIndex] : ""
-                            fillMode: Image.PreserveAspectCrop
-                            sourceSize: Qt.size(136, 136)
-                            onStatusChanged: if (status === Image.Error) root.faceIndex++
-                        }
-                        Text {
-                            anchors.centerIn: parent
-                            visible: face.status !== Image.Ready
-                            text: root.user.charAt(0).toUpperCase()
-                            color: Theme.paper
-                            font.pixelSize: 30; font.bold: true
-                        }
-                    }
+                    Avatar { width: 68; height: 68 }
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 4
@@ -74,7 +45,7 @@ Overlay {
                             font.pixelSize: 20; font.bold: true
                         }
                         Text {
-                            text: SysStats.host + (SysStats.uptime ? "  ·  " + root.uptime(SysStats.uptime) : "")
+                            text: SysStats.host + (SysStats.uptime ? "  ·  " + SysStats.uptimeText : "")
                             color: Theme.muted
                             font.pixelSize: 13; font.bold: true
                         }

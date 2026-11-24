@@ -69,6 +69,11 @@ Scope {
     }
 
     IpcHandler {
+        target: "controlCenter"
+        function toggle(): void { Ui.controlCenter = !Ui.controlCenter; }
+    }
+
+    IpcHandler {
         target: "dashboard"
         function toggle(): void { Ui.dashboard = !Ui.dashboard; }
     }

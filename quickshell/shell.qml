@@ -18,6 +18,9 @@ import qs.ipc
 import qs.services
 
 ShellRoot {
+    // reading Idle creates the singleton, so the idle stages run from startup
+    readonly property bool keepAwake: Idle.keepAwake
+
     WallpaperLayer {}
     Bar {}
     NotificationPopups {}
@@ -25,6 +28,7 @@ ShellRoot {
 
     NotificationCenter {}
     Dashboard {}
+    ControlCenter {}
     Calendar {}
     WifiMenu {}
     Launcher {}
@@ -34,6 +38,5 @@ ShellRoot {
     WindowSwitcher {}
 
     Ipc {}
-    Idle {}
     LockScreen {}
 }

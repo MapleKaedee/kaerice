@@ -27,6 +27,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | --- | --- |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
+| `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles |
 | `SUPER+V` | Clipboard history |
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
@@ -38,7 +39,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
 
-Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar. Scroll the volume and brightness cards.
+Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
 The media card (bar center) shows while a player is playing or paused.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
@@ -46,7 +47,7 @@ All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
 The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend.
 Idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
-suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage.
+suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage, and so does Awake in the control center.
 Change the times in `quickshell/services/Idle.qml`.
 
 If the lock ever refuses a correct password:
@@ -61,15 +62,15 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, SysStats, Ui; Idle (stages)
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, SysStats, Idle, Ui
   components/
-    base/             Card, TextCard, IconButton, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, window switcher + overview
+    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar, control center, window switcher + overview
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
 wallpapers/           images for the picker

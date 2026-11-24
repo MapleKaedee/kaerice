@@ -9,6 +9,7 @@ Card {
     id: root
     width: row.implicitWidth + 28 + offset
     height: 38
+    property int maxTextWidth: 260 // title width limit, set by the bar to fit the free space
 
     MouseArea { anchors.fill: parent; onClicked: Ui.dashboard = !Ui.dashboard }
 
@@ -48,7 +49,7 @@ Card {
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(implicitWidth, 260)
+            width: Math.min(implicitWidth, root.maxTextWidth)
             elide: Text.ElideRight
             text: !Media.active ? "No media playing" : Media.artist ? Media.title + " - " + Media.artist : Media.title
             color: Media.playing ? Theme.ink : Theme.muted

@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import QtQuick
 
-// Default output (Pipewire sink): volume 0..1 and mute.
+// Default output (Pipewire sink): volume 0..1 and mute. Default input (source): mic level and mute.
 Singleton {
     id: root
     readonly property var sink: Pipewire.defaultAudioSink
@@ -17,6 +17,11 @@ Singleton {
     function step(delta) { setVolume(volume + delta); }
     function toggleMute() { if (ready) sink.audio.muted = !sink.audio.muted; }
 
-    // binds the sink so its audio properties are live
-    PwObjectTracker { objects: [root.sink] }
+    readonly property var source: Pipewire.defaultAudioSource
+    readonly property bool micMuted: source?.audio?.muted ?? false
+    readonly property int micPercent: Math.round((source?.audio?.volume ?? 0) * 100)
+    function toggleMicMute() { if (source?.audio) source.audio.muted = !source.audio.muted; }
+
+    // binds the nodes so their audio properties are live
+    PwObjectTracker { objects: [root.sink, root.source] }
 }
