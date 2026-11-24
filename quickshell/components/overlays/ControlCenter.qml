@@ -8,13 +8,16 @@ import qs.services
 import qs.components.base
 
 // Control center (top-right, opened from the distro card): profile + lock/power, brightness and volume
-// sliders, network / Bluetooth / speaker / mic tiles, quick toggles (Silent, Awake, app Dark mode), disk and window count.
+// sliders, network / Bluetooth / output / input tiles (the last two open a device list; their icons mute),
+// quick toggles (Silent, Awake, app Dark mode), disk and window count.
 Overlay {
     id: root
     name: "control-center"
     visible: Ui.controlCenter
     onDismissed: Ui.controlCenter = false
+    onVisibleChanged: if (!visible) openDevices = ""
 
+    property string openDevices: "" // device list shown: "" | "output" | "input"
     readonly property int panelWidth: 460
     readonly property int gap: 12
     readonly property var adapter: Bluetooth.defaultAdapter
@@ -39,15 +42,18 @@ Overlay {
         MouseArea { anchors.fill: parent; onClicked: sq.clicked() }
     }
 
-    // icon box + title + subtitle; the icon box turns accent while active
+    // icon box + title + subtitle; the icon box turns accent while active. With iconButton the icon box clicks on its own.
     component Tile: Card {
         id: tile
         property int glyph
         property string title
         property string subtitle
         property bool active
+        property bool iconButton: false
         signal clicked()
+        signal iconClicked()
         width: (root.panelWidth - 32 - root.gap) / 2; height: 66; offset: 3
+        MouseArea { anchors.fill: parent; onClicked: tile.clicked() } // first: below the icon's
         Row {
             anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
             spacing: 12
@@ -62,10 +68,13 @@ Overlay {
                     color: tile.active ? Theme.paper : Theme.ink
                     font.family: Theme.iconFont; font.pixelSize: 17
                 }
+                MouseArea { anchors.fill: parent; enabled: tile.iconButton; onClicked: tile.iconClicked() }
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 Text {
+                    width: tile.width - tile.offset - 76
+                    elide: Text.ElideRight
                     text: tile.title
                     color: Theme.ink
                     font.pixelSize: 14; font.bold: true
@@ -79,7 +88,6 @@ Overlay {
                 }
             }
         }
-        MouseArea { anchors.fill: parent; onClicked: tile.clicked() }
     }
 
     // icon over a short label; accent fill while on
@@ -110,13 +118,15 @@ Overlay {
         MouseArea { anchors.fill: parent; onClicked: tog.clicked() }
     }
 
-    // slider row: glyph, bar, percent
+    // slider row: glyph (clickable), bar, percent
     component LevelRow: Row {
         id: lvl
         property int glyph
         property real value
         property string valueText
+        property alias step: slider.step
         signal moved(real v)
+        signal iconClicked()
         width: root.panelWidth - 32
         spacing: 12
         Text {
@@ -125,8 +135,10 @@ Overlay {
             text: String.fromCodePoint(lvl.glyph)
             color: Theme.ink
             font.family: Theme.iconFont; font.pixelSize: 18
+            MouseArea { anchors.fill: parent; onClicked: lvl.iconClicked() }
         }
         LevelSlider {
+            id: slider
             anchors.verticalCenter: parent.verticalCenter
             width: lvl.width - 24 - 52 - 2 * lvl.spacing
             value: lvl.value
@@ -194,6 +206,7 @@ Overlay {
                 glyph: Audio.muted ? 0xf026 : 0xf028
                 value: Audio.volume
                 valueText: Audio.muted ? "MUTE" : Audio.percent + "%"
+                step: Audio.stepSize
                 onMoved: v => Audio.setVolume(v)
             }
 
@@ -232,6 +245,7 @@ Overlay {
                             width: parent.width - 24 - 84 - 52 - 3 * parent.spacing
                             height: 18
                             value: app.audio?.volume ?? 0
+                            step: Audio.stepSize
                             onMoved: v => Audio.setAppVolume(app.modelData, v)
                         }
                         Text {
@@ -267,17 +281,71 @@ Overlay {
                 }
                 Tile {
                     glyph: Audio.muted ? 0xf026 : 0xf028
-                    title: "Speakers"
+                    title: Audio.shortName(Audio.sink) || "No output"
                     subtitle: Audio.muted ? "Muted" : Audio.percent + "%"
                     active: !Audio.muted
-                    onClicked: Audio.toggleMute()
+                    iconButton: true
+                    onIconClicked: Audio.toggleMute()
+                    onClicked: root.openDevices = root.openDevices === "output" ? "" : "output"
                 }
                 Tile {
                     glyph: Audio.micMuted ? 0xf131 : 0xf130
-                    title: "Microphone"
+                    title: Audio.shortName(Audio.source) || "No input"
                     subtitle: Audio.micMuted ? "Muted" : Audio.micPercent + "%"
                     active: !Audio.micMuted
-                    onClicked: Audio.toggleMicMute()
+                    iconButton: true
+                    onIconClicked: Audio.toggleMicMute()
+                    onClicked: root.openDevices = root.openDevices === "input" ? "" : "input"
+                }
+            }
+
+            // level and device list of the opened tile
+            Card {
+                id: devices
+                readonly property bool output: root.openDevices === "output"
+                visible: root.openDevices !== ""
+                width: parent.width; height: devicesCol.implicitHeight + 24 + offset; offset: 3
+                Column {
+                    id: devicesCol
+                    x: 14; y: 12
+                    width: parent.width - 28
+                    spacing: 12
+                    Item {
+                        width: parent.width; height: 22
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: devices.output ? "Output" : "Input"
+                            color: Theme.ink
+                            font.pixelSize: 15; font.bold: true
+                        }
+                        IconButton {
+                            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                            text: String.fromCodePoint(0xf00d) // xmark
+                            onClicked: root.openDevices = ""
+                        }
+                    }
+                    LevelRow {
+                        width: parent.width
+                        glyph: devices.output ? (Audio.muted ? 0xf026 : 0xf028) : (Audio.micMuted ? 0xf131 : 0xf130)
+                        value: devices.output ? Audio.volume : Audio.micVolume
+                        valueText: (devices.output ? Audio.muted : Audio.micMuted) ? "MUTE" : (devices.output ? Audio.percent : Audio.micPercent) + "%"
+                        step: Audio.stepSize
+                        onIconClicked: devices.output ? Audio.toggleMute() : Audio.toggleMicMute()
+                        onMoved: v => devices.output ? Audio.setVolume(v) : Audio.setMicVolume(v)
+                    }
+                    Flickable { // up to four devices, then it scrolls
+                        width: parent.width; height: Math.min(contentHeight, 4 * 60 - 8)
+                        contentHeight: deviceList.implicitHeight
+                        boundsBehavior: Flickable.StopAtBounds
+                        clip: true
+                        DeviceList {
+                            id: deviceList
+                            nodes: devices.output ? Audio.sinks : Audio.sources
+                            current: devices.output ? Audio.sink : Audio.source
+                            glyph: devices.output ? 0xf028 : 0xf130
+                            onPicked: node => devices.output ? Audio.useSink(node) : Audio.useSource(node)
+                        }
+                    }
                 }
             }
 
