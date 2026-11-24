@@ -24,6 +24,7 @@ link() { # link <path-in-repo> <target>
 
 link hypr "$cfg/hypr"
 link quickshell "$cfg/quickshell/kaerice"
+mkdir -p "$repo/settings" # not in git
 link settings "$cfg/kaerice" # the directory: an atomic write could replace a linked file
 link systemd/dms.service.d/skip-hyprland.conf "$cfg/systemd/user/dms.service.d/skip-hyprland.conf"
 

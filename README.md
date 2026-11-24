@@ -83,7 +83,7 @@ quickshell/
     wallpaper/        background layer, picker (local images, Wallhaven)
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)
-settings/             settings.json: only values that differ from the defaults (services/SettingsSchema.js)
+settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
 systemd/              DMS drop-in

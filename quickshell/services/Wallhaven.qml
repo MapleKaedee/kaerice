@@ -7,8 +7,8 @@ import "WallhavenApi.js" as Api
 
 // Search and download from wallhaven.cc, used by the wallpaper picker. Nothing is sent before its Wallhaven tab is opened.
 // SFW only, unless the user adds an API key there. The key is a secret: it stays in a state file that only this user can
-// read (never settings.json, which is committed) and is sent as a header from here, never as a command argument.
-// The filters are a state file too, so a Sketchy or NSFW choice is not committed either.
+// read (never settings.json, which people share) and is sent as a header from here, never as a command argument.
+// The filters are a state file too, so a Sketchy or NSFW choice is not shared either.
 Singleton {
     id: root
     property alias results: list  // see Api.parse: wid, full, thumb, purity, category, resolution, size
