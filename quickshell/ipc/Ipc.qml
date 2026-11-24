@@ -53,6 +53,11 @@ Scope {
     }
 
     IpcHandler {
+        target: "lock"
+        function lock(): void { Lock.lock(); }
+    }
+
+    IpcHandler {
         target: "clipboard"
         function toggle(): void { Ui.clipboard = !Ui.clipboard; }
     }

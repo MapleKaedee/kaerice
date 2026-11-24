@@ -4,15 +4,17 @@
 // Layout:
 //   config/      design tokens (Theme)
 //   services/    state + actions, no UI (singletons)
-//   components/  UI: base/ primitives, bar/, notifications/, osd/, overlays/, wallpaper/
+//   components/  UI: base/ primitives, bar/, lock/, notifications/, osd/, overlays/, wallpaper/
 //   ipc/         IPC entry points for keybinds
 import Quickshell
 import qs.components.bar
+import qs.components.lock
 import qs.components.notifications
 import qs.components.osd
 import qs.components.overlays
 import qs.components.wallpaper
 import qs.ipc
+import qs.services
 
 ShellRoot {
     WallpaperLayer {}
@@ -29,4 +31,6 @@ ShellRoot {
     WallpaperPicker {}
 
     Ipc {}
+    Idle {}
+    LockScreen {}
 }

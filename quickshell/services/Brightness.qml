@@ -24,6 +24,11 @@ Singleton {
     }
     function step(delta) { set(root.percent + delta); }
 
+    // idle dim: remember the level, drop to 10%; undim restores it
+    property int undimTo: -1
+    function dim() { if (root.percent < 0 || root.undimTo >= 0) return; root.undimTo = root.percent; set(Math.min(root.percent, 10)); }
+    function undim() { if (root.undimTo < 0) return; set(root.undimTo); root.undimTo = -1; }
+
     function write() {
         root.dirty = false;
         writer.command = ["brightnessctl", "-q", "set", root.percent + "%"];

@@ -54,6 +54,8 @@ hl.config({
 	misc = {
 		disable_hyprland_logo = true,
 		disable_splash_rendering = true,
+		-- kaerice lock: if Quickshell crashes while locked, its restart may take the lock back
+		allow_session_lock_restore = true,
 	},
 	dwindle = {
 		preserve_split = true,

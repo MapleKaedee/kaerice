@@ -30,6 +30,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
+| `SUPER+ALT+L` | Lock screen |
 | Volume / mute / brightness keys | Change level and show the OSD |
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
@@ -38,6 +39,18 @@ Click the network card for the Wi-Fi menu, the bell card for notifications, the 
 The media card (bar center) shows while a player is playing or paused.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
+## Lock and idle
+
+The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend.
+Idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
+suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage.
+Change the times in `quickshell/services/Idle.qml`.
+
+If the lock ever refuses a correct password:
+1. Switch to a TTY (`CTRL+ALT+F3`) and log in.
+2. Three wrong passwords lock the account for 10 min. Clear that with `faillock --user $USER --reset`, then go back (`CTRL+ALT+F1` or `F2`) and try again.
+3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` (open windows are lost).
+
 ## Layout
 
 ```
@@ -45,9 +58,10 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Ui; Idle (stages)
   components/
     base/             Card, TextCard, Overlay (full-screen layer with Esc/backdrop close)
+    lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup

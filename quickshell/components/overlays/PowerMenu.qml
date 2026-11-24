@@ -11,7 +11,8 @@ Overlay {
     property int current: 0
 
     readonly property var actions: [
-        // icon = Nerd Font code point: sign-out, moon, refresh, power
+        // icon = Nerd Font code point: lock, sign-out, moon, refresh, power
+        { label: "Lock", icon: 0xf023, fn: () => Lock.lock() },
         { label: "Logout", icon: 0xf08b, cmd: ["sh", "-c", "loginctl terminate-session \"$XDG_SESSION_ID\""] },
         { label: "Suspend", icon: 0xf186, cmd: ["systemctl", "suspend"] },
         { label: "Reboot", icon: 0xf021, cmd: ["systemctl", "reboot"] },
@@ -20,7 +21,8 @@ Overlay {
 
     function run(i) {
         Ui.power = false;
-        Quickshell.execDetached(root.actions[i].cmd);
+        const a = root.actions[i];
+        if (a.fn) a.fn(); else Quickshell.execDetached(a.cmd);
     }
 
     name: "power"
