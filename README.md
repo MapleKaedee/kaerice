@@ -27,7 +27,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | --- | --- |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles |
+| `SUPER+A` | Control center: sliders, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
 | `SUPER+SHIFT+N` | Temp note (saved automatically) |
@@ -66,7 +66,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards

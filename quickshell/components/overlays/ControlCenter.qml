@@ -7,7 +7,7 @@ import qs.services
 import qs.components.base
 
 // Control center (top-right, opened from the distro card): profile + lock/power, brightness and volume
-// sliders, network / Bluetooth / speaker / mic tiles, quick toggles, disk and window count.
+// sliders, network / Bluetooth / speaker / mic tiles, quick toggles (Silent, Awake, app Dark mode), disk and window count.
 Overlay {
     id: root
     name: "control-center"
@@ -88,7 +88,7 @@ Overlay {
         property string label
         property bool active
         signal clicked()
-        width: (root.panelWidth - 32 - 3 * root.gap) / 4; height: 64; offset: 3
+        width: (root.panelWidth - 32 - 4 * root.gap) / 5; height: 64; offset: 3
         fill: active ? Theme.accent : Theme.paper
         Column {
             anchors.centerIn: parent
@@ -234,6 +234,8 @@ Overlay {
                 spacing: root.gap
                 Toggle { glyph: 0xf1f6; label: "Silent"; active: Notifs.dnd; onClicked: Notifs.dnd = !Notifs.dnd }
                 Toggle { glyph: 0xf0f4; label: "Awake"; active: Idle.keepAwake; onClicked: Idle.keepAwake = !Idle.keepAwake }
+                // apps only (GTK color-scheme); the shell keeps its theme
+                Toggle { glyph: 0xf186; label: "Dark"; active: AppTheme.dark; onClicked: AppTheme.setDark(!AppTheme.dark) }
                 Toggle {
                     glyph: 0xf030; label: "Capture"
                     onClicked: root.then(() => Screenshot.take("region"))
