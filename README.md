@@ -16,7 +16,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `quickshell/` | `~/.config/quickshell/kaerice` |
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`,
+Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
 Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
@@ -28,6 +28,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
+| `SUPER+,` | Settings (Users & accounts, About); also the gear in the control center |
 | `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, audio, quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
@@ -68,9 +69,9 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Change the look here.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
-    base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextCard, TextButton, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     editor/           screenshot editor
     lock/             session lock surface
@@ -78,9 +79,11 @@ quickshell/
     notifications/    popups, history panel
     osd/              volume/brightness and Caps/Num Lock popups
     overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, keybinds, calendar, control center, window switcher + overview
+    settings/         settings overlay and its pages
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
   scripts/            shell helpers run by keybinds (screenshot.sh)
+settings/             settings.json: only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
 systemd/              DMS drop-in

@@ -36,7 +36,7 @@ Overlay {
     }
 
     readonly property var keyNames: ({
-        left: "←", right: "→", up: "↑", down: "↓", Return: "Enter", space: "Space", semicolon: ";", slash: "/",
+        left: "←", right: "→", up: "↑", down: "↓", Return: "Enter", space: "Space", semicolon: ";", slash: "/", comma: ",",
         period: ".", bracketleft: "[", bracketright: "]", minus: "-", equal: "=", Page_Up: "PgUp", Page_Down: "PgDn",
         "mouse:272": "LMB", "mouse:273": "RMB", mouse_down: "Wheel ↓", mouse_up: "Wheel ↑",
         XF86AudioRaiseVolume: "Vol +", XF86AudioLowerVolume: "Vol -", XF86AudioMute: "Mute", XF86AudioMicMute: "Mic mute",

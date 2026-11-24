@@ -10,7 +10,7 @@ import QtQuick
 // dnd and arrival times survive a config reload (PersistentProperties), like the notifications themselves.
 Singleton {
     id: root
-    property int timeout: 5000 // ms a popup stays; critical popups stay until clicked
+    readonly property int timeout: Settings.get("notifications.timeout") // ms a popup stays; critical popups stay until clicked
     property alias dnd: persist.dnd
     property var shown: []     // ids of notifications currently shown as popups
     readonly property var times: JSON.parse(persist.times) // id -> "HH:mm" of arrival

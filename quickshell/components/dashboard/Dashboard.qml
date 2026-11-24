@@ -14,7 +14,6 @@ Overlay {
     onVisibleChanged: if (visible) cal.reset()
 
     readonly property int colWidth: 400
-    readonly property string user: Quickshell.env("USER")
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
@@ -40,7 +39,7 @@ Overlay {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 4
                         Text {
-                            text: root.user
+                            text: Account.name
                             color: Theme.ink
                             font.pixelSize: 20; font.bold: true
                         }

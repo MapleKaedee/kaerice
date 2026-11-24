@@ -24,6 +24,7 @@ link() { # link <path-in-repo> <target>
 
 link hypr "$cfg/hypr"
 link quickshell "$cfg/quickshell/kaerice"
+link settings "$cfg/kaerice" # the directory: an atomic write could replace a linked file
 link systemd/dms.service.d/skip-hyprland.conf "$cfg/systemd/user/dms.service.d/skip-hyprland.conf"
 
 systemctl --user daemon-reload

@@ -165,7 +165,7 @@ Overlay {
                     anchors { left: avatar.right; leftMargin: 14; verticalCenter: parent.verticalCenter }
                     spacing: 3
                     Text {
-                        text: avatar.user
+                        text: Account.name
                         color: Theme.ink
                         font.pixelSize: 18; font.bold: true
                     }
@@ -178,6 +178,7 @@ Overlay {
                 Row {
                     anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                     spacing: 10
+                    SquareButton { glyph: 0xf013; onClicked: root.then(() => Ui.settings = true) } // gear
                     SquareButton { glyph: 0xf023; onClicked: root.then(() => Lock.lock()) }        // lock
                     SquareButton { glyph: 0xf011; onClicked: root.then(() => Ui.power = true) }   // power
                 }

@@ -106,6 +106,11 @@ Scope {
     }
 
     IpcHandler {
+        target: "settings"
+        function toggle(): void { Ui.settings = !Ui.settings; }
+    }
+
+    IpcHandler {
         target: "keybinds"
         function toggle(): void { Ui.keybinds = !Ui.keybinds; }
     }

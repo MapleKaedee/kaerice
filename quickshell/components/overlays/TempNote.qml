@@ -20,34 +20,6 @@ Overlay {
         clearArm.stop();
     }
 
-    component HeaderButton: Card {
-        id: hb
-        property int glyph
-        property string label
-        property bool hot: false // accent while armed
-        signal clicked()
-        width: row.implicitWidth + 24 + offset; height: 38; offset: 3
-        fill: hot ? Theme.accent : Theme.paper
-        Row {
-            id: row
-            anchors.centerIn: parent
-            spacing: 8
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: String.fromCodePoint(hb.glyph)
-                color: hb.hot ? Theme.paper : Theme.ink
-                font.family: Theme.iconFont; font.pixelSize: 15
-            }
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: hb.label
-                color: hb.hot ? Theme.paper : Theme.ink
-                font.pixelSize: 13; font.bold: true
-            }
-        }
-        MouseArea { anchors.fill: parent; onClicked: hb.clicked() }
-    }
-
     Timer { id: clearArm; interval: 2000 } // running = Clear was clicked once
 
     Card {
@@ -75,11 +47,11 @@ Overlay {
                     anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                     spacing: 10
                     // Nerd Font: copy f0c5, trash f1f8
-                    HeaderButton {
+                    TextButton {
                         glyph: 0xf0c5; label: "Copy"
                         onClicked: if (edit.text) Quickshell.execDetached(["wl-copy", edit.text])
                     }
-                    HeaderButton {
+                    TextButton {
                         glyph: 0xf1f8; label: clearArm.running ? "Sure?" : "Clear"
                         hot: clearArm.running
                         onClicked: {

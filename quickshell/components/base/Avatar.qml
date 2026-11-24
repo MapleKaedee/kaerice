@@ -2,12 +2,15 @@ import Quickshell
 import Quickshell.Widgets
 import QtQuick
 import qs.config
+import qs.services
 
-// User avatar: ~/.face, then the AccountsService icon, else the initial on accent.
+// User avatar: the AccountsService icon (settings > Users), then ~/.face, else the initial on accent.
 ClippingRectangle {
     id: root
-    readonly property string user: Quickshell.env("USER")
-    readonly property var faces: [Quickshell.env("HOME") + "/.face", "/var/lib/AccountsService/icons/" + user]
+    readonly property string user: Account.user
+    // ?r= makes Image reload the file after a change
+    readonly property var faces: [Account.avatar + "?r=" + Account.revision, Quickshell.env("HOME") + "/.face"]
+    onFacesChanged: faceIndex = 0
     property int faceIndex: 0
 
     radius: Theme.radius

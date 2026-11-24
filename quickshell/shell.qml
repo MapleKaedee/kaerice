@@ -4,7 +4,7 @@
 // Layout:
 //   config/      design tokens (Theme)
 //   services/    state + actions, no UI (singletons)
-//   components/  UI: base/ primitives, bar/, dashboard/, editor/, lock/, notifications/, osd/, overlays/, wallpaper/
+//   components/  UI: base/ primitives, bar/, dashboard/, editor/, lock/, notifications/, osd/, overlays/, settings/, wallpaper/
 //   ipc/         IPC entry points for keybinds
 import Quickshell
 import qs.components.bar
@@ -14,6 +14,7 @@ import qs.components.lock
 import qs.components.notifications
 import qs.components.osd
 import qs.components.overlays
+import qs.components.settings
 import qs.components.wallpaper
 import qs.ipc
 import qs.services
@@ -43,6 +44,7 @@ ShellRoot {
     TempNote {}
     Keybinds {}
     PowerMenu {}
+    SettingsPanel {}
     WallpaperPicker {}
     WindowSwitcher {}
     ScreenshotEditor {}
