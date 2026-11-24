@@ -27,6 +27,16 @@ Scope {
         function clear(): void { Notifs.clearAll(); }
     }
 
+    // media keys: change the level and show the OSD
+    IpcHandler {
+        target: "osd"
+        function volumeUp(): void { Audio.step(0.03); Osd.show("volume"); }
+        function volumeDown(): void { Audio.step(-0.03); Osd.show("volume"); }
+        function toggleMute(): void { Audio.toggleMute(); Osd.show("volume"); }
+        function brightnessUp(): void { Brightness.step(5); Osd.show("brightness"); }
+        function brightnessDown(): void { Brightness.step(-5); Osd.show("brightness"); }
+    }
+
     IpcHandler {
         target: "clipboard"
         function toggle(): void { Ui.clipboard = !Ui.clipboard; }

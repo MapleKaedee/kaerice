@@ -4,11 +4,12 @@
 // Layout:
 //   config/      design tokens (Theme)
 //   services/    state + actions, no UI (singletons)
-//   components/  UI: base/ primitives, bar/, notifications/, overlays/, wallpaper/
+//   components/  UI: base/ primitives, bar/, notifications/, osd/, overlays/, wallpaper/
 //   ipc/         IPC entry points for keybinds
 import Quickshell
 import qs.components.bar
 import qs.components.notifications
+import qs.components.osd
 import qs.components.overlays
 import qs.components.wallpaper
 import qs.ipc
@@ -17,6 +18,7 @@ ShellRoot {
     WallpaperLayer {}
     Bar {}
     NotificationPopups {}
+    LevelOsd {}
 
     NotificationCenter {}
     WifiMenu {}

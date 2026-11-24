@@ -30,6 +30,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
 | `SUPER+X`, `SUPER+SHIFT+E` | Power menu |
+| Volume / mute / brightness keys | Change level and show the OSD |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
 
 Click the network card for the Wi-Fi menu, the bell card for notifications. Scroll the volume and brightness cards.
@@ -42,11 +43,12 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Ui
   components/
     base/             Card, TextCard, Overlay (full-screen layer with Esc/backdrop close)
     bar/              top bar and its cards
     notifications/    popups, history panel
+    osd/              volume/brightness level popup
     overlays/         launcher, power menu, Wi-Fi, clipboard
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds

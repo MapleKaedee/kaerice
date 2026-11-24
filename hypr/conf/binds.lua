@@ -6,9 +6,9 @@ hl.bind("SUPER + T", hl.dsp.exec_cmd("kitty"))
 hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
 
 -- === Audio Controls ===
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 3%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 3%-"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("qs -c kaerice ipc call osd volumeUp"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("qs -c kaerice ipc call osd volumeDown"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("qs -c kaerice ipc call osd toggleMute"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
@@ -18,8 +18,8 @@ hl.bind("CTRL + XF86AudioRaiseVolume", hl.dsp.exec_cmd("playerctl volume 0.03+")
 hl.bind("CTRL + XF86AudioLowerVolume", hl.dsp.exec_cmd("playerctl volume 0.03-"), { locked = true, repeating = true })
 
 -- === Brightness Controls ===
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl --min-value=1 set 5%-"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("qs -c kaerice ipc call osd brightnessUp"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("qs -c kaerice ipc call osd brightnessDown"), { locked = true, repeating = true })
 
 -- === Window Management ===
 hl.bind("SUPER + Q", hl.dsp.window.close())
