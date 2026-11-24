@@ -1,18 +1,16 @@
+pragma Singleton
+
+import Quickshell
 import Quickshell.Io
 import QtQuick
 
 // Network status from systemd-networkd. This machine uses iwd + networkd,
 // which Quickshell.Networking (NetworkManager only) can't read.
 // shortcut: polls networkctl every 5 s; switch to an event source if the delay bothers you.
-TextCard {
+Singleton {
     id: root
-    signal clicked()
-    property string kind: "wifi" // "eth" | "wifi" | "offline"
-    text: "NET"
-    // Nerd Font glyphs: ethernet port, wifi off, wifi
-    icon: String.fromCodePoint(kind === "eth" ? 0xf0200 : kind === "offline" ? 0xf05aa : 0xf1eb)
-    fill: kind === "offline" ? "#1c1c1c" : "#f2f0eb"
-    textColor: kind === "offline" ? "#f2f0eb" : "#1c1c1c"
+    property string kind: "wifi"   // "eth" | "wifi" | "offline"
+    property string label: "NET"   // "ETH", the Wi-Fi SSID, or "OFFLINE"
 
     Process {
         id: proc
@@ -28,7 +26,7 @@ TextCard {
                 const eth = up.find(i => i.Type === "ether");
                 const wifi = up.find(i => i.Type === "wlan");
                 root.kind = eth ? "eth" : wifi ? "wifi" : "offline";
-                root.text = eth ? "ETH" : wifi ? (wifi.SSID ?? "WIFI").slice(0, 14) : "OFFLINE";
+                root.label = eth ? "ETH" : wifi ? (wifi.SSID ?? "WIFI").slice(0, 14) : "OFFLINE";
             }
         }
     }
@@ -39,10 +37,5 @@ TextCard {
         repeat: true
         triggeredOnStart: true
         onTriggered: proc.running = true
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: root.clicked()
     }
 }

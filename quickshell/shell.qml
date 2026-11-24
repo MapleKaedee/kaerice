@@ -1,63 +1,29 @@
 //@ pragma UseQApplication
 // UseQApplication: required for tray right-click menus (platform menus); needs a qs restart
+
+// Layout:
+//   config/      design tokens (Theme)
+//   services/    state + actions, no UI (singletons)
+//   components/  UI: base/ primitives, bar/, notifications/, overlays/, wallpaper/
+//   ipc/         IPC entry points for keybinds
 import Quickshell
-import Quickshell.Hyprland
-import QtQuick
+import qs.components.bar
+import qs.components.notifications
+import qs.components.overlays
+import qs.components.wallpaper
+import qs.ipc
 
 ShellRoot {
-    SystemClock { id: clock; precision: SystemClock.Minutes }
+    WallpaperLayer {}
+    Bar {}
+    NotificationPopups {}
 
-    PanelWindow {
-        id: bar
-        anchors { top: true; left: true; right: true }
-        implicitHeight: 52
-        color: "transparent"
-
-        Row {
-            anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
-            spacing: 8
-            Repeater {
-                model: Hyprland.workspaces
-                Card {
-                    required property HyprlandWorkspace modelData
-                    width: 40; height: 38
-                    fill: modelData.focused ? "#e8335a" : "#f2f0eb"
-                    Text { anchors.centerIn: parent; text: modelData.id; font.bold: true }
-                    MouseArea { anchors.fill: parent; onClicked: modelData.activate() }
-                }
-            }
-        }
-
-        Row {
-            anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
-            spacing: 8
-
-            Tray { barWindow: bar }
-            Network { onClicked: wifiMenu.open = !wifiMenu.open }
-            Volume {}
-            Brightness {}
-            Battery {}
-
-            // notification history: count + bell (bell-slash while do-not-disturb)
-            TextCard {
-                icon: String.fromCodePoint(notifs.dnd ? 0xf1f6 : 0xf0f3)
-                text: "" + notifs.count
-                MouseArea { anchors.fill: parent; onClicked: notifs.panelOpen = !notifs.panelOpen }
-            }
-
-            TextCard {
-                text: Qt.formatDateTime(clock.date, "HH:mm")
-                icon: String.fromCodePoint(0xf017) // Nerd Font clock
-                fill: "#e8335a"
-                textColor: "#f2f0eb"
-            }
-        }
-    }
-
-    Notifications { id: notifs }
-    Clipboard {}
+    NotificationCenter {}
+    WifiMenu {}
     Launcher {}
+    ClipboardMenu {}
     PowerMenu {}
-    WifiMenu { id: wifiMenu }
-    Wallpaper {}
+    WallpaperPicker {}
+
+    Ipc {}
 }

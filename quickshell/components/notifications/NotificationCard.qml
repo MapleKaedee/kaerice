@@ -1,5 +1,7 @@
 import Quickshell.Services.Notifications
 import QtQuick
+import qs.config
+import qs.components.base
 
 // One notification as a card. Click = `activated`; the x (when closable) only dismisses.
 Card {
@@ -10,9 +12,9 @@ Card {
     signal activated()
 
     readonly property bool critical: notification.urgency === NotificationUrgency.Critical
-    readonly property color fg: critical ? "#f2f0eb" : "#1c1c1c"
+    readonly property color fg: critical ? Theme.paper : Theme.ink
     height: content.implicitHeight + 24 + offset
-    fill: critical ? "#e8335a" : "#f2f0eb"
+    fill: critical ? Theme.accent : Theme.paper
 
     MouseArea { anchors.fill: parent; onClicked: card.activated() }
 
@@ -25,7 +27,7 @@ Card {
         Text {
             width: parent.width - (card.closable ? 22 : 0)
             text: card.notification.appName + (card.time ? "  ·  " + card.time : "")
-            color: card.critical ? "#f2f0eb" : "#e8335a"
+            color: card.critical ? Theme.paper : Theme.accent
             font.bold: true; font.pixelSize: 11
             elide: Text.ElideRight
         }
@@ -53,7 +55,7 @@ Card {
         anchors { top: parent.top; right: parent.right; margins: 10 }
         text: String.fromCodePoint(0xf00d) // x
         color: card.fg
-        font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 14
+        font.family: Theme.iconFont; font.pixelSize: 14
         MouseArea {
             anchors { fill: parent; margins: -6 }
             onClicked: card.notification.dismiss()

@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import QtQuick
+import qs.components.base
 
 // Tray icons in one card. Left click = activate, right click = app menu.
 // Quickshell also acts as the StatusNotifierWatcher, so no extra daemon is needed.

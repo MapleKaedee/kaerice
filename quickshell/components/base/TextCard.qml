@@ -1,11 +1,12 @@
 import QtQuick
+import qs.config
 
 // Card with an optional Nerd Font icon and one bold label; width follows the content.
 Card {
     id: root
     property alias text: label.text
     property string icon: ""
-    property color textColor: "#1c1c1c"
+    property color textColor: Theme.ink
     width: row.implicitWidth + 28 + offset
     height: 38
 
@@ -19,7 +20,7 @@ Card {
             visible: root.icon !== ""
             text: root.icon
             color: root.textColor
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Theme.iconFont
             font.pixelSize: 17
         }
         Text {
