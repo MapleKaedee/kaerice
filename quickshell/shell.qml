@@ -21,6 +21,7 @@ ShellRoot {
     LevelOsd {}
 
     NotificationCenter {}
+    Calendar {}
     WifiMenu {}
     Launcher {}
     ClipboardMenu {}

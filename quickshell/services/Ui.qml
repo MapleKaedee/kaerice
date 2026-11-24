@@ -9,6 +9,7 @@ Singleton {
     property bool power: false
     property bool wifi: false
     property bool notifications: false
+    property bool calendar: false
     property bool clipboard: false
     property bool wallpaperPicker: false
 }

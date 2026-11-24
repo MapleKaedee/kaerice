@@ -34,7 +34,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
 
-Click the network card for the Wi-Fi menu, the bell card for notifications. Scroll the volume and brightness cards.
+Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar. Scroll the volume and brightness cards.
 The media card (bar center) shows while a player is playing or paused.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
@@ -51,7 +51,7 @@ quickshell/
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness level popup
-    overlays/         launcher, power menu, Wi-Fi, clipboard
+    overlays/         launcher, power menu, Wi-Fi, clipboard, calendar
     wallpaper/        background layer, picker
   ipc/Ipc.qml         every IPC target used by keybinds
 wallpapers/           images for the picker
