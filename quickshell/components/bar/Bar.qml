@@ -9,6 +9,11 @@ PanelWindow {
     implicitHeight: 52
     color: "transparent"
 
+    // first child: drawn behind every card
+    Visualizer {
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 14; rightMargin: 14 }
+    }
+
     Row {
         id: leftRow
         anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }

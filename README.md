@@ -16,7 +16,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `quickshell/` | `~/.config/quickshell/kaerice` |
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cliphist`,
+Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
 Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
@@ -40,7 +40,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window to clipboard |
 
 Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
-The media card (bar center) shows while a player is playing or paused.
+The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
 ## Lock and idle
@@ -62,7 +62,8 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, SysStats, Idle, Ui
+  config/cava.conf    cava settings for the bar visualizer
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Cava, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextCard, IconButton, LevelSlider, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
