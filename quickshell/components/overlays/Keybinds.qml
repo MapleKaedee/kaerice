@@ -22,7 +22,7 @@ Overlay {
                                        "Monitor", "Screenshot", "Media", "Audio", "Display"]
     readonly property var matches: {
         const q = search.text.trim().toLowerCase();
-        return !q ? rows : rows.filter(r => (r.group + " " + r.action + " " + r.combos.flat().join(" ")).toLowerCase().includes(q));
+        return !q ? rows : rows.filter(r => (r.group + " " + r.action + " " + r.combos.map(c => c.join(" ")).join(" ")).toLowerCase().includes(q));
     }
     // matches with a { header } entry before each group
     readonly property var shown: {
