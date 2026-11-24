@@ -3,54 +3,54 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Active MPRIS track: prev / play-pause / next + "Title - Artist". Hidden when nothing plays.
+// Active MPRIS track: prev / play-pause / next + "Title - Artist"; "No media playing" otherwise.
+// Click the card (outside the buttons) to open the dashboard.
 Card {
     id: root
-    visible: Media.active
     width: row.implicitWidth + 28 + offset
     height: 38
 
-    component Button: Text {
-        id: btn
-        signal clicked()
-        anchors.verticalCenter: parent.verticalCenter
-        color: !enabled ? Theme.muted : area.containsMouse ? Theme.accent : Theme.ink
-        font.family: Theme.iconFont
-        font.pixelSize: 15
-        MouseArea {
-            id: area
-            anchors { fill: parent; margins: -4 }
-            hoverEnabled: true // disabled with the Text (Item.enabled propagates)
-            onClicked: btn.clicked()
-        }
-    }
+    MouseArea { anchors.fill: parent; onClicked: Ui.dashboard = !Ui.dashboard }
 
     Row {
         id: row
         anchors.centerIn: parent
         spacing: 12
 
+        Text { // Nerd Font music, shown instead of the controls when nothing plays
+            anchors.verticalCenter: parent.verticalCenter
+            visible: !Media.active
+            text: String.fromCodePoint(0xf001)
+            color: Theme.muted
+            font.family: Theme.iconFont; font.pixelSize: 15
+        }
         // Nerd Font: backward-step f048, play f04b, pause f04c, forward-step f051
-        Button {
+        IconButton {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: Media.active
             text: String.fromCodePoint(0xf048)
-            enabled: Media.active && Media.player.canGoPrevious
+            enabled: Media.player?.canGoPrevious ?? false
             onClicked: Media.previous()
         }
-        Button {
+        IconButton {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: Media.active
             text: String.fromCodePoint(Media.playing ? 0xf04c : 0xf04b)
-            enabled: Media.active && Media.player.canTogglePlaying
+            enabled: Media.player?.canTogglePlaying ?? false
             onClicked: Media.togglePlaying()
         }
-        Button {
+        IconButton {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: Media.active
             text: String.fromCodePoint(0xf051)
-            enabled: Media.active && Media.player.canGoNext
+            enabled: Media.player?.canGoNext ?? false
             onClicked: Media.next()
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(implicitWidth, 260)
             elide: Text.ElideRight
-            text: Media.artist ? Media.title + " - " + Media.artist : Media.title
+            text: !Media.active ? "No media playing" : Media.artist ? Media.title + " - " + Media.artist : Media.title
             color: Media.playing ? Theme.ink : Theme.muted
             font.pixelSize: 14; font.bold: true
         }

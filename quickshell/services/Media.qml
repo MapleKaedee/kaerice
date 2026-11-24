@@ -9,9 +9,9 @@ Singleton {
     readonly property var player: players.find(p => p.isPlaying)
         ?? players.find(p => p.playbackState !== MprisPlaybackState.Stopped) ?? null
     readonly property bool active: player !== null
-    readonly property bool playing: active && player.isPlaying
-    readonly property string title: active ? (player.trackTitle || player.identity) : ""
-    readonly property string artist: active ? player.trackArtist : ""
+    readonly property bool playing: player?.isPlaying ?? false
+    readonly property string title: player ? (player.trackTitle || player.identity) : ""
+    readonly property string artist: player?.trackArtist ?? ""
 
     function togglePlaying() { if (active && player.canTogglePlaying) player.togglePlaying(); }
     function next() { if (active && player.canGoNext) player.next(); }

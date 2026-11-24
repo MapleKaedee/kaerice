@@ -68,6 +68,11 @@ Scope {
     }
 
     IpcHandler {
+        target: "dashboard"
+        function toggle(): void { Ui.dashboard = !Ui.dashboard; }
+    }
+
+    IpcHandler {
         target: "calendar"
         function toggle(): void { Ui.calendar = !Ui.calendar; }
     }

@@ -26,6 +26,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | Key | Action |
 | --- | --- |
 | `SUPER+Space` | Launcher |
+| `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
 | `SUPER+V` | Clipboard history |
 | `SUPER+N` | Notification history |
 | `SUPER+Y` | Wallpaper picker |
@@ -59,9 +60,10 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Change the look here.
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, Ui; Idle (stages)
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Osd, Media, Lock, Switcher, SysStats, Ui; Idle (stages)
   components/
-    base/             Card, TextCard, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextCard, IconButton, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    dashboard/        dashboard panel and its cards
     lock/             session lock surface
     bar/              top bar and its cards
     notifications/    popups, history panel
