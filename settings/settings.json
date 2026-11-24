@@ -1,4 +1,7 @@
 {
+    "theme.shadow": 5,
+    "bar.size": 34,
+    "bar.cards": "workspaces title | media | privacy tray notifications control clock",
     "sound.volumeStep": 5,
     "sound.visualizer": false,
     "idle.dim": 0,

@@ -30,8 +30,8 @@ Overlay {
     }
 
     Card {
-        x: parent.width - width - 14
-        y: 60
+        x: BarLayout.panelX("network", width, parent.width)
+        y: BarLayout.panelY(height, parent.height)
         width: 380
         height: col.implicitHeight + 24 + offset
         offset: Theme.depth(6)

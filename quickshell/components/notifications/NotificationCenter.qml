@@ -3,15 +3,15 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Notification history panel (top-right): do-not-disturb, clear all, newest first.
+// Notification history panel (at the bar): do-not-disturb, clear all, newest first.
 Overlay {
     name: "notifications"
     visible: Ui.notifications
     onDismissed: Ui.notifications = false
 
     Card {
-        x: parent.width - width - 14
-        y: 60
+        x: BarLayout.panelX("notifications", width, parent.width)
+        y: BarLayout.panelY(height, parent.height)
         width: 400
         height: col.implicitHeight + 24 + offset
         offset: Theme.depth(6)

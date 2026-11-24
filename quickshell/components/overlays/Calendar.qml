@@ -3,7 +3,7 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Month calendar under the clock (top-right). Arrows / scroll / Left-Right change month,
+// Month calendar at the bar, on the side of the clock. Arrows / scroll / Left-Right change month,
 // click the month title to jump back to today.
 Overlay {
     id: root
@@ -13,8 +13,8 @@ Overlay {
     onVisibleChanged: if (visible) cal.reset()
 
     Card {
-        x: parent.width - width - 14
-        y: 60
+        x: BarLayout.panelX("clock", width, parent.width)
+        y: BarLayout.panelY(height, parent.height)
         width: cal.implicitWidth + 24 + offset
         height: cal.implicitHeight + 24 + offset
         offset: Theme.depth(6)

@@ -1,4 +1,5 @@
 .pragma library
+.import "BarLayout.js" as BarLayout
 
 // Every setting: its default, and a check returning true for usable values. Pure, so tests/tst_settings.qml can
 // check it. settings.json is one flat object that holds only values differing from the default.
@@ -18,6 +19,10 @@ const schema = {
     "theme.radius": { def: 8, ok: int(0, 16) },                  // px
     "theme.border": { def: 3, ok: int(1, 5) },                   // px
     "theme.shadow": { def: 4, ok: int(0, 8) },                   // px
+    "bar.position": { def: "top", ok: oneOf(["top", "bottom"]) },
+    "bar.size": { def: 38, ok: int(28, 48) },                    // px, height of a card
+    "bar.monitor": { def: "all", ok: v => typeof v === "string" && /^[\w.-]{1,32}$/.test(v) }, // "all" or a name, e.g. DP-1
+    "bar.cards": { def: BarLayout.defaults, ok: BarLayout.valid },
     "sound.volumeStep": { def: 3, ok: int(1, 20) },              // percent per key press or scroll
     "sound.visualizer": { def: true, ok: bool },                 // cava behind the bar while music plays
     "idle.dim": { def: 150, ok: idle },

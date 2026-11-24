@@ -2,6 +2,8 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import QtQuick
+import qs.config
+import qs.services
 import qs.components.base
 
 // Tray icons in one card. Left click = activate, right click = app menu.
@@ -11,13 +13,13 @@ Card {
     required property var barWindow
 
     visible: icons.count > 0
-    width: row.implicitWidth + 20 + offset
-    height: 38
+    width: row.implicitWidth + Theme.bar(20) + offset
+    height: Theme.bar(38); offset: Theme.bar(Theme.shadow)
 
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: 8
+        spacing: Theme.bar(8)
 
         Repeater {
             id: icons
@@ -27,8 +29,8 @@ Card {
                 id: slot
                 required property SystemTrayItem modelData
                 visible: modelData.status !== Status.Passive
-                width: visible ? 20 : 0
-                height: 20
+                width: visible ? height : 0
+                height: Theme.bar(20)
 
                 IconImage {
                     anchors.fill: parent
@@ -40,7 +42,7 @@ Card {
                     onClicked: mouse => {
                         if (mouse.button === Qt.RightButton || slot.modelData.onlyMenu) {
                             if (!slot.modelData.hasMenu) return;
-                            const p = slot.mapToItem(null, 0, slot.height + 8);
+                            const p = slot.mapToItem(null, 0, BarLayout.atTop ? slot.height + 8 : -8);
                             slot.modelData.display(root.barWindow, p.x, p.y);
                         } else {
                             slot.modelData.activate();

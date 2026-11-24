@@ -37,4 +37,7 @@ Singleton {
     function corner(px) { return Math.round(px * radius / 8); }
     function stroke(px) { return Math.max(1, Math.round(px * border / 3)); }
     function depth(px) { return Math.round(px * shadow / 4); }
+    // the same for the bar's cards: written for a height of 38
+    readonly property int barSize: Settings.get("bar.size")
+    function bar(px) { return Math.round(px * barSize / 38); }
 }

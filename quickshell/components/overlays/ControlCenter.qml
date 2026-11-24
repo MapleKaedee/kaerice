@@ -7,7 +7,7 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Control center (top-right, opened from the distro card): profile + lock/power, brightness and volume
+// Control center (at the bar, opened from the distro card): profile + lock/power, brightness and volume
 // sliders, network / Bluetooth / output / input tiles (the last two open a device list; their icons mute),
 // quick toggles (Silent, Awake, app Dark mode), disk and window count.
 Overlay {
@@ -155,8 +155,8 @@ Overlay {
     }
 
     Card {
-        x: parent.width - width - 14
-        y: 60
+        x: BarLayout.panelX("control", width, parent.width)
+        y: BarLayout.panelY(height, parent.height)
         width: root.panelWidth - 6 + offset // 6: the default shadow; the content keeps its width
         height: col.implicitHeight + 32 + offset
         offset: Theme.depth(6)

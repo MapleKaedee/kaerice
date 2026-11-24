@@ -28,7 +28,7 @@ Restart the shell after big changes: `qs kill -c kaerice && qs -c kaerice`
 | `SUPER+/` | Keybind cheat sheet (searchable) |
 | `SUPER+Space` | Launcher |
 | `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+,` | Settings (Theme, Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
+| `SUPER+,` | Settings (Theme, Bar, Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
 | `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, output and input (click the tile to pick a device, its icon to mute), quick toggles (Silent, Awake, Dark for apps) |
 | `SUPER+V` | Clipboard history |
 | `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
@@ -69,9 +69,9 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
-    base/             Card, TextCard, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
+    base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     editor/           screenshot editor
     lock/             session lock surface
@@ -89,6 +89,6 @@ tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qm
 systemd/              DMS drop-in
 ```
 
-Adding a feature: state and commands go in a `services/` singleton, UI in `components/`, colors from `Theme`,
+Adding a feature: state and commands go in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,
 open/close flags in `services/Ui.qml`, and the keybind entry point in `ipc/Ipc.qml`.
 Imports use the shell root: `import qs.services`, `import qs.components.base`.
