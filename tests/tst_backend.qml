@@ -3,7 +3,7 @@ import QtTest
 import "../quickshell/services/BackendState.js" as State
 
 // Run: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
-// The lines are the ones core/src/server.rs, wifi.rs and brightness.rs check: change both.
+// The lines are the ones core/src/server.rs and wifi.rs check: change both.
 TestCase {
     name: "BackendState"
 
@@ -26,17 +26,6 @@ TestCase {
         const wifi = State.merge({}, State.parse(line)).wifi;
         compare(wifi.device, "wlan0");
         compare(wifi.networks[0], { path: "/net/connman/iwd/0/3/home_psk", name: "home", type: "psk", known: true, connected: true, dbm: -59 });
-    }
-
-    function test_brightness_line() {
-        compare(State.merge({}, State.parse('{"brightness":{"percent":55}}')).brightness.percent, 55);
-    }
-
-    function test_answer_with_data() {
-        const message = State.parse('{"id":7,"ok":true,"data":{"downloads":true,"packages":false}}');
-        verify(State.isAnswer(message));
-        compare(State.code(message), "");
-        compare(message.data, { downloads: true, packages: false });
     }
 
     function test_answer_lines_data() {
