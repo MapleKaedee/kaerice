@@ -14,7 +14,7 @@ Singleton {
     property int lastId: 0
     property var pending: ({})   // id of a call -> its done
 
-    // done(code) runs once, with "" when the call succeeded
+    // done(code, data) runs once; code is "" when the call succeeded
     function call(name, args, done) {
         if (!socket.connected) { done("Disconnected"); return; }
         root.pending[++root.lastId] = done;
@@ -22,10 +22,10 @@ Singleton {
         socket.flush();
     }
 
-    function answer(id, code) {
+    function answer(id, code, data) {
         const done = root.pending[id];
         delete root.pending[id];
-        if (done) done(code);
+        if (done) done(code, data);
     }
 
     Socket {
@@ -36,7 +36,7 @@ Singleton {
             onRead: line => {
                 const message = State.parse(line);
                 if (!message) console.warn("kaericed sent a line that is not an object");
-                else if (State.isAnswer(message)) root.answer(message.id, State.code(message));
+                else if (State.isAnswer(message)) root.answer(message.id, State.code(message), message.data);
                 else root.topics = State.merge(root.topics, message);
             }
         }

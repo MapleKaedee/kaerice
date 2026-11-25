@@ -17,12 +17,12 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
+Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
-`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status and the Wi-Fi menu: without it the card shows
-`N/A`, the menu `Unavailable`, and the rest works. Run `./install.sh` again after a `git pull`: QML changes are live at once, the
-daemon only after that.
+`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness and system usage:
+without it those show `N/A`, `--` or `Unavailable`, the brightness keys do nothing, and the rest works. Run `./install.sh`
+again after a `git pull`: QML changes are live at once, the daemon only after that.
 
 Working on the daemon in `core/`: see [env.md](env.md).
 

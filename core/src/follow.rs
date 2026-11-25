@@ -10,7 +10,7 @@ use zbus::export::futures_core::Stream;
 use zbus::message::Type::Signal;
 use zbus::proxy::MethodFlags;
 use zbus::wire::DynamicDeserialize;
-use zbus::{Connection, DynamicType, MatchRule, MessageStream, Proxy};
+use zbus::{Connection, DBusError, DynamicType, MatchRule, MessageStream, Proxy};
 
 /// One change sends several signals.
 const JOIN: Duration = Duration::from_millis(200);
@@ -90,6 +90,20 @@ async fn next(streams: &mut [MessageStream]) -> bool {
 pub fn gone(error: &zbus::Error) -> bool {
     use zbus::fdo::Error::{NameHasNoOwner, ServiceUnknown};
     matches!(error, zbus::Error::FDO(e) if matches!(**e, NameHasNoOwner(_) | ServiceUnknown(_)))
+}
+
+/// The last part of the error's D-Bus name.
+pub fn code(error: zbus::Error) -> String {
+    use zbus::fdo::Error::NoReply;
+    let name = match &error {
+        e if gone(e) => "Unavailable",
+        // the service left the bus before it answered
+        zbus::Error::FDO(e) if matches!(**e, NoReply(_)) => "Unavailable",
+        zbus::Error::FDO(e) => &e.name().to_string(),
+        zbus::Error::MethodError(name, ..) => name.as_str(),
+        _ => "Failed",
+    };
+    name.rsplit('.').next().unwrap_or(name).to_owned()
 }
 
 // NoAutoStart: a service that the user stopped stays stopped

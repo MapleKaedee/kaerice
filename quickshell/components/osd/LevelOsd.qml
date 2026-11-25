@@ -11,6 +11,7 @@ PanelWindow {
     id: root
     readonly property bool isVolume: Osd.kind === "volume"
     readonly property bool muted: isVolume && Audio.muted
+    readonly property bool unknown: !isVolume && Brightness.percent < 0
     readonly property int percent: Math.max(0, Math.min(100, isVolume ? Audio.percent : Brightness.percent))
 
     visible: Osd.shown && (isVolume || Osd.kind === "brightness")
@@ -71,7 +72,7 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 52 // fixed so the bar doesn't jump as digits change
                 horizontalAlignment: Text.AlignRight
-                text: root.muted ? "MUTE" : root.percent + "%"
+                text: root.unknown ? "N/A" : root.muted ? "MUTE" : root.percent + "%"
                 color: Theme.text
                 font.pixelSize: 15; font.bold: true
             }

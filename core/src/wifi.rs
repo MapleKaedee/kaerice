@@ -8,11 +8,9 @@ use tokio::sync::{Mutex, watch};
 use tokio::time;
 use zbus::message::Type::Signal;
 use zbus::proxy::MethodFlags;
-use zbus::{
-    Connection, DBusError, MatchRule, ObjectPath, OwnedObjectPath, OwnedVariant, Proxy, Variant,
-};
+use zbus::{Connection, MatchRule, ObjectPath, OwnedObjectPath, OwnedVariant, Proxy, Variant};
 
-use crate::follow::{call, follow, gone};
+use crate::follow::{call, code, follow};
 use crate::server::{Answer, Topics, publish};
 
 const NAME: &str = "net.connman.iwd";
@@ -256,20 +254,6 @@ impl Agent {
         }
         Ok(self.passphrase.clone())
     }
-}
-
-/// The last part of the error's D-Bus name.
-fn code(error: zbus::Error) -> String {
-    use zbus::fdo::Error::NoReply;
-    let name = match &error {
-        e if gone(e) => "Unavailable",
-        // iwd left the bus before it answered
-        zbus::Error::FDO(e) if matches!(**e, NoReply(_)) => "Unavailable",
-        zbus::Error::FDO(e) => &e.name().to_string(),
-        zbus::Error::MethodError(name, ..) => name.as_str(),
-        _ => "Failed",
-    };
-    name.rsplit('.').next().unwrap_or(name).to_owned()
 }
 
 #[cfg(test)]

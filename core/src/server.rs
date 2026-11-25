@@ -29,7 +29,7 @@ pub struct Call {
 }
 
 /// The error is a code: the text for it is made in QML.
-pub type Answer = Result<(), String>;
+pub type Answer<T = ()> = Result<T, String>;
 
 pub fn publish<T: Serialize>(tx: &watch::Sender<Topics>, topic: &'static str, payload: &T) {
     let line =
@@ -54,7 +54,7 @@ pub async fn serve<H, F>(
 ) -> io::Result<()>
 where
     H: Fn(Call) -> F + Clone + Send + 'static,
-    F: Future<Output = Answer> + Send + 'static,
+    F: Future<Output = Answer<Value>> + Send + 'static,
 {
     loop {
         let (stream, _) = listener.accept().await?;
@@ -70,7 +70,7 @@ async fn client<H, F>(
 ) -> io::Result<()>
 where
     H: Fn(Call) -> F,
-    F: Future<Output = Answer> + Send + 'static,
+    F: Future<Output = Answer<Value>> + Send + 'static,
 {
     let mut sent = Topics::new();
     let mut input = Vec::with_capacity(LINE);
@@ -84,6 +84,8 @@ where
         }
         sent = topics;
         tokio::select! {
+            // in this order: the state that a call changed goes out before its answer
+            biased;
             changed = rx.changed() => if changed.is_err() { return Ok(()) },
             Some(line) = answers.recv() => stream.write_all(format!("{line}\n").as_bytes()).await?,
             read = stream.read_buf(&mut input) => if read? == 0 { return Ok(()) },
@@ -105,9 +107,10 @@ where
     }
 }
 
-fn reply(id: u64, answer: Answer) -> String {
+fn reply(id: u64, answer: Answer<Value>) -> String {
     match answer {
-        Ok(()) => format!(r#"{{"id":{id},"ok":true}}"#),
+        Ok(Value::Null) => format!(r#"{{"id":{id},"ok":true}}"#),
+        Ok(data) => format!(r#"{{"id":{id},"ok":true,"data":{data}}}"#),
         Err(code) => format!(r#"{{"id":{id},"error":{}}}"#, Value::from(code)),
     }
 }
@@ -143,14 +146,15 @@ mod tests {
         }
     }
 
-    /// "ok" succeeds, "slow" too but later, any other name is the error.
-    async fn handler(call: Call) -> Answer {
+    /// "ok" succeeds, "slow" too but later, "data" gives its args back, any other name is the error.
+    async fn handler(call: Call) -> Answer<Value> {
         match call.name.as_str() {
-            "ok" => Ok(()),
+            "ok" => Ok(Value::Null),
             "slow" => {
                 sleep(Duration::from_millis(200)).await;
-                Ok(())
+                Ok(Value::Null)
             }
+            "data" => Ok(call.args),
             "echo" => Err(call.args["text"].as_str().unwrap_or("none").to_owned()),
             other => Err(other.to_owned()),
         }
@@ -295,6 +299,43 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn answers_with_data() {
+        let sock = Sock::new("data");
+        let _tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(
+            &mut a,
+            b"{\"id\":7,\"call\":\"data\",\"args\":{\"downloads\":true,\"packages\":false}}\n",
+        )
+        .await;
+        assert_eq!(
+            next(&mut a).await,
+            r#"{"id":7,"ok":true,"data":{"downloads":true,"packages":false}}"#
+        );
+    }
+
+    #[tokio::test]
+    async fn state_before_its_answer() {
+        let sock = Sock::new("order");
+        let (tx, rx) = watch::channel(Topics::new());
+        tokio::spawn(serve(bind(&sock.0).unwrap(), rx, move |call: Call| {
+            let tx = tx.clone();
+            async move {
+                publish(&tx, "network", &call.args);
+                Ok(Value::Null)
+            }
+        }));
+        let mut a = connect(&sock).await;
+        // many times: an unordered select! picks one of the two at random
+        for i in 0..50 {
+            let line = format!("{{\"id\":7,\"call\":\"ok\",\"args\":{i}}}\n");
+            send(&mut a, line.as_bytes()).await;
+            assert_eq!(next(&mut a).await, format!(r#"{{"network":{i}}}"#));
+            assert_eq!(next(&mut a).await, OK);
+        }
+    }
+
+    #[tokio::test]
     async fn an_error_is_escaped() {
         let sock = Sock::new("escaped");
         let _tx = start(&sock);
@@ -391,7 +432,7 @@ mod tests {
                 done.send("started").unwrap();
                 sleep(Duration::from_millis(100)).await;
                 done.send("finished").unwrap();
-                Ok(())
+                Ok(Value::Null)
             }
         }));
         let mut a = connect(&sock).await;

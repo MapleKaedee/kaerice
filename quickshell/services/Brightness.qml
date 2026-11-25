@@ -1,66 +1,49 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Io
 import QtQuick
+import "BrightnessState.js" as State
 
-// Screen backlight via brightnessctl (its default device). percent is -1 until the first read.
-// set() updates percent at once; writes run one brightnessctl at a time, and presses that arrive
-// during a write coalesce into one follow-up write of the latest value, so fast key repeats stay in order.
-// shortcut: sysfs backlight gives no reliable change events, so it polls every 2 s.
+// Screen backlight, through kaericed. percent is -1 while it is unknown.
+// set() updates percent at once; one write runs at a time, and presses that arrive during it coalesce into one
+// follow-up write of the latest value, so fast key repeats stay in order.
 Singleton {
     id: root
-    property int percent: -1
-    property int gen: 0          // bumps on every set(); a read started before it is stale
-    property bool dirty: false   // a newer value is waiting for the current write to finish
+    readonly property var payload: Backend.topics.brightness
+    readonly property bool unavailable: Backend.down
+    readonly property int percent: wanted >= 0 ? wanted : State.level(payload)
+    property int wanted: -1      // being written; topics that arrive meanwhile are older
+    property bool writing: false
 
-    // never below 1% so the screen can't go black
-    function set(p) {
-        if (root.percent < 0) return;
-        root.percent = Math.max(1, Math.min(100, Math.round(p)));
-        root.gen++;
-        if (writer.running) root.dirty = true;
-        else root.write();
-    }
+    function set(p) { if (root.percent >= 0) apply(p); }
     function step(delta) { set(root.percent + delta); }
 
-    // idle dim: remember the level, drop to 10%; undim restores it
-    property int undimTo: -1
-    function dim() { if (root.percent < 0 || root.undimTo >= 0) return; root.undimTo = root.percent; set(Math.min(root.percent, 10)); }
-    function undim() { if (root.undimTo < 0) return; set(root.undimTo); root.undimTo = -1; }
-
+    function apply(p) {
+        root.wanted = State.clamp(p);
+        if (!root.writing) write();
+    }
     function write() {
-        root.dirty = false;
-        writer.command = ["brightnessctl", "-q", "set", root.percent + "%"];
-        writer.running = true;
+        const p = root.wanted;
+        root.writing = true;
+        Backend.call("brightness.set", { percent: p }, code => {
+            root.writing = false;
+            if (code === "" && root.wanted !== p) { write(); return; }
+            if (code === "" && !root.dimmed) root.undimTo = -1;
+            root.wanted = -1;
+        });
     }
 
-    Process {
-        id: writer
-        // callLater: restart only after this run has fully stopped
-        onExited: if (root.dirty) Qt.callLater(root.write)
+    // idle dim: remember the level, drop to 10%; undim restores it. undimTo stays until a write succeeds, so that the
+    // next topic restores the level when the daemon was gone.
+    property int undimTo: -1
+    property bool dimmed: false
+    function dim() {
+        if (root.percent < 0 || root.dimmed) return;
+        if (root.undimTo < 0) root.undimTo = root.percent;
+        root.dimmed = true;
+        apply(Math.min(root.percent, 10));
     }
-
-    Process {
-        id: read
-        property int gen: 0
-        command: ["brightnessctl", "-m"]
-        stdout: StdioCollector {
-            id: out
-            // -m prints one line: device,class,current,percent%,max
-            onStreamFinished: {
-                if (read.gen !== root.gen || writer.running || root.dirty) return; // a set() happened meanwhile
-                const p = parseInt(out.text.split(",")[3]);
-                if (!isNaN(p)) root.percent = p;
-            }
-        }
-    }
-
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: { read.gen = root.gen; read.running = true; }
-    }
+    function undim() { root.dimmed = false; restore(); }
+    function restore() { if (!root.dimmed && root.undimTo >= 0 && State.level(root.payload) >= 0) apply(root.undimTo); }
+    onPayloadChanged: if (!root.writing) restore() // a write of its own sends a topic too
 }

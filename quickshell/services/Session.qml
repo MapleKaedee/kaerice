@@ -1,35 +1,24 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Io
 import QtQuick
+import "SessionState.js" as State
 
 // Reasons to think twice before logout / reboot / shutdown: a package manager running (or the pacman lock),
-// or downloads in progress. The power menu calls refresh() when it opens.
+// downloads in progress, or no way to find out. The power menu calls refresh() when it opens.
 Singleton {
     id: root
-    property bool packages: false
-    property bool downloads: false
-    readonly property var warnings: [
-        packages ? "A package manager is running: stopping now can break the update." : "",
-        downloads ? "Downloads are in progress." : ""
-    ].filter(w => w)
+    property var warnings: []
 
     function refresh() {
-        root.packages = false;
-        root.downloads = false;
-        pkg.running = true;
-        dl.running = true;
+        root.warnings = [];
+        late.restart();
+        Backend.call("session.check", {}, (code, data) => {
+            late.stop();
+            root.warnings = State.warnings(code, data);
+        });
     }
 
-    Process {
-        id: pkg
-        command: ["sh", "-c", "pidof -q pacman paru yay || [ -e /var/lib/pacman/db.lck ]"]
-        onExited: code => root.packages = code === 0
-    }
-    Process {
-        id: dl
-        command: ["sh", "-c", "pidof -q curl wget aria2c yt-dlp || ls \"$HOME\"/Downloads/*.part \"$HOME\"/Downloads/*.crdownload >/dev/null 2>&1"]
-        onExited: code => root.downloads = code === 0
-    }
+    // a daemon that hangs must not look like "nothing is running"
+    Timer { id: late; interval: 1000; onTriggered: root.warnings = State.warnings("Timeout") }
 }

@@ -97,7 +97,7 @@ Overlay {
                     StatBar { width: parent.width; label: "CPU"; glyph: 0xf2db; value: SysStats.cpu }
                     StatBar {
                         width: parent.width; label: "RAM"; glyph: 0xefc5; value: SysStats.mem
-                        detail: SysStats.memUsedGb.toFixed(1) + " / " + SysStats.memTotalGb.toFixed(0) + " GB"
+                        detail: SysStats.mem < 0 ? "--" : SysStats.memUsedGb.toFixed(1) + " / " + SysStats.memTotalGb.toFixed(0) + " GB"
                     }
                     StatBar { width: parent.width; label: "Disk"; glyph: 0xf0a0; value: SysStats.disk }
                 }
