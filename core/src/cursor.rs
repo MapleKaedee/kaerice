@@ -39,11 +39,17 @@ const NAMED: [(&str, &str, &str); 4] = [
 /// The type of an image in a cursor file.
 const IMAGE: u32 = 0xfffd_0002;
 /// The longest side of an image, in pixels.
-const SIDE: u32 = 1024;
+pub const SIDE: u32 = 1024;
 /// The most bytes a cursor file may have, before and after.
-const BYTES: u64 = 64 << 20;
+pub const BYTES: u64 = 64 << 20;
+/// The most images of a cursor file.
+const IMAGES: usize = 4096;
+/// The most bytes that are read and written for one copy.
+pub const THEME: u64 = 256 << 20;
 /// The most bytes of an index.theme.
-const INDEX: u64 = 1 << 20;
+pub const INDEX: u64 = 1 << 20;
+/// The most themes whose cursors a theme may use.
+const THEMES: usize = 32;
 
 #[derive(Serialize)]
 struct State {
@@ -65,21 +71,24 @@ pub async fn set(args: Value) -> Answer<Value> {
     task::spawn_blocking(work).await.map_err(|_| "Failed")?
 }
 
-struct Dirs {
-    home: PathBuf,
-    system: PathBuf,
+pub struct Dirs {
+    pub home: PathBuf,
+    pub system: PathBuf,
+    /// Bytes, for each copy.
+    pub limit: u64,
 }
 
 impl Dirs {
-    fn new() -> Answer<Dirs> {
+    pub fn new() -> Answer<Dirs> {
         Ok(Dirs {
             home: env::var_os("HOME").ok_or("Failed")?.into(),
             system: "/usr/share/icons".into(),
+            limit: THEME,
         })
     }
 
     /// In the order in which libXcursor searches them. Old versions skip the first, Flatpak shows only that one.
-    fn icons(&self) -> [PathBuf; 3] {
+    pub fn icons(&self) -> [PathBuf; 3] {
         [
             self.home.join(".local/share/icons"),
             self.home.join(".icons"),
@@ -133,7 +142,7 @@ impl Dirs {
             i += 1;
             for dir in self.icons().map(|dir| dir.join(&name)) {
                 for next in inherits(&dir) {
-                    if valid(&next) && !names.contains(&next) {
+                    if valid(&next) && names.len() < THEMES && !names.contains(&next) {
                         names.push(next);
                     }
                 }
@@ -201,34 +210,36 @@ impl Dirs {
     fn build(&self, theme: &str, size: u32, dir: &Path) -> io::Result<()> {
         let cursors = dir.join("cursors");
         fs::create_dir_all(&cursors)?;
-        let mut made = false;
+        let (mut left, mut made) = (self.limit, false);
         for folder in self.folders(theme) {
-            let sibling = |name: &OsString| {
-                let link = fs::read_link(folder.join(name)).ok()?;
-                (link.file_name() == Some(link.as_os_str())).then_some(link)
-            };
-            let (links, files): (Vec<_>, Vec<_>) = list(&folder)
-                .into_iter()
-                .partition(|n| sibling(n).is_some());
+            let (links, files) = siblings(&folder);
             let mut given = HashSet::new();
-            for name in files.into_iter().chain(links) {
+            let mut add = |name: OsString, given: &mut HashSet<OsString>| -> io::Result<()> {
                 let to = cursors.join(&name);
                 if exists(&to) {
-                    continue;
+                    return Ok(());
                 }
-                match sibling(&name) {
-                    // most names are links to a few files; to one of another theme they would show its cursor
-                    Some(link) if given.contains(link.as_os_str()) => symlink(link, to)?,
-                    _ => {
-                        let file = load(&folder.join(&name), BYTES);
-                        let Some(file) = file.and_then(|file| convert(&file, size)) else {
-                            continue;
-                        };
-                        fs::write(to, file)?;
-                        made = true;
-                    }
+                let Some(file) = load(&folder.join(&name), BYTES) else {
+                    return Ok(());
+                };
+                let copy = convert(&file, size);
+                let used = file.len() + copy.as_ref().map_or(0, Vec::len);
+                left = left
+                    .checked_sub(used as u64)
+                    .ok_or_else(|| io::Error::other("the theme is too big"))?;
+                if let Some(copy) = copy {
+                    fs::write(to, copy)?;
+                    made = true;
+                    given.insert(name);
                 }
-                given.insert(name);
+                Ok(())
+            };
+            for name in files {
+                add(name, &mut given)?;
+            }
+            // to a name that a nearer theme has: as a link it would show that cursor
+            for (name, _) in link(&cursors, links, &mut given)? {
+                add(name, &mut given)?;
             }
         }
         if !made {
@@ -261,17 +272,51 @@ impl Dirs {
     }
 }
 
-fn exists(path: &Path) -> bool {
+pub fn exists(path: &Path) -> bool {
     path.symlink_metadata().is_ok()
 }
 
-fn list(dir: &Path) -> Vec<OsString> {
+pub fn list(dir: &Path) -> Vec<OsString> {
     let entries = fs::read_dir(dir).into_iter().flatten().flatten();
     entries.map(|entry| entry.file_name()).collect()
 }
 
+/// The names in a folder: links to another name in it, with that name, and the others.
+pub fn siblings(dir: &Path) -> (Vec<(OsString, OsString)>, Vec<OsString>) {
+    let (mut links, mut others) = (Vec::new(), Vec::new());
+    for name in list(dir) {
+        match fs::read_link(dir.join(&name)) {
+            Ok(to) if to.file_name() == Some(to.as_os_str()) => links.push((name, to.into())),
+            _ => others.push(name),
+        }
+    }
+    (links, others)
+}
+
+/// Most names are links to a few files, or to such a link. Makes those that lead to a given name and gives the others back.
+pub fn link(
+    dir: &Path,
+    mut links: Vec<(OsString, OsString)>,
+    given: &mut HashSet<OsString>,
+) -> io::Result<Vec<(OsString, OsString)>> {
+    loop {
+        let (ready, rest): (Vec<_>, Vec<_>) =
+            links.into_iter().partition(|(_, to)| given.contains(to));
+        if ready.is_empty() {
+            return Ok(rest);
+        }
+        links = rest;
+        for (name, target) in ready {
+            if !exists(&dir.join(&name)) {
+                symlink(target, dir.join(&name))?;
+                given.insert(name);
+            }
+        }
+    }
+}
+
 /// Themes are folder names, and come from the socket and from index.theme files.
-fn valid(theme: &str) -> bool {
+pub fn valid(theme: &str) -> bool {
     !theme.is_empty()
         && theme.len() <= 200
         && !theme.starts_with('.')
@@ -287,7 +332,7 @@ fn copy(link: &Path) -> Option<String> {
     name.starts_with(PREFIX).then(|| name.to_owned())
 }
 
-fn inherits(theme: &Path) -> Vec<String> {
+pub fn inherits(theme: &Path) -> Vec<String> {
     let text = load(&theme.join("index.theme"), INDEX).unwrap_or_default();
     let text = String::from_utf8_lossy(&text);
     let mut lines = text.lines().filter_map(|line| line.split_once('='));
@@ -297,7 +342,7 @@ fn inherits(theme: &Path) -> Vec<String> {
     names.filter(|n| !n.is_empty()).map(str::to_owned).collect()
 }
 
-fn load(path: &Path, limit: u64) -> Option<Vec<u8>> {
+pub fn load(path: &Path, limit: u64) -> Option<Vec<u8>> {
     if !path.is_file() {
         return None;
     }
@@ -321,20 +366,31 @@ fn point(dir: &Path, target: &Path) -> io::Result<()> {
 }
 
 /// One image of a cursor file. Several of one size are an animation.
-struct Frame<'a> {
-    size: u32,
-    width: u32,
-    height: u32,
-    xhot: u32,
-    yhot: u32,
+pub struct Image {
+    pub size: u32,
+    pub width: u32,
+    pub height: u32,
+    pub xhot: u32,
+    pub yhot: u32,
     /// Milliseconds.
-    delay: u32,
+    pub delay: u32,
     /// Premultiplied ARGB, little endian.
-    pixels: &'a [u8],
+    pub pixels: Vec<u8>,
+}
+
+/// The same, as it is in a file.
+pub struct Frame<'a> {
+    pub size: u32,
+    pub width: u32,
+    pub height: u32,
+    pub xhot: u32,
+    pub yhot: u32,
+    pub delay: u32,
+    pub pixels: &'a [u8],
 }
 
 /// Cursor files come from anywhere and a panic ends the daemon: nothing here may index or overflow.
-fn frames(file: &[u8]) -> Option<Vec<Frame<'_>>> {
+pub fn frames(file: &[u8]) -> Option<Vec<Frame<'_>>> {
     let word = |at: usize| {
         Some(u32::from_le_bytes(
             file.get(at..)?.get(..4)?.try_into().ok()?,
@@ -345,6 +401,7 @@ fn frames(file: &[u8]) -> Option<Vec<Frame<'_>>> {
     }
     let toc = word(4)? as usize;
     let mut frames = Vec::new();
+    let mut total = 0;
     for i in 0..word(12)? as usize {
         let entry = toc + 12 * i;
         if word(entry)? != IMAGE {
@@ -356,6 +413,11 @@ fn frames(file: &[u8]) -> Option<Vec<Frame<'_>>> {
         if size == 0 || !(1..=SIDE).contains(&width) || !(1..=SIDE).contains(&height) {
             return None;
         }
+        // many entries may lead to one image
+        total += bytes(width, height);
+        if total as u64 > BYTES || frames.len() == IMAGES {
+            return None;
+        }
         frames.push(Frame {
             size,
             width,
@@ -363,9 +425,7 @@ fn frames(file: &[u8]) -> Option<Vec<Frame<'_>>> {
             xhot: field(6)?,
             yhot: field(7)?,
             delay: field(8)?,
-            pixels: file
-                .get(at + 36..)?
-                .get(..4 * width as usize * height as usize)?,
+            pixels: file.get(at + 36..)?.get(..bytes(width, height))?,
         });
     }
     (!frames.is_empty()).then_some(frames)
@@ -386,29 +446,67 @@ fn convert(file: &[u8], size: u32) -> Option<Vec<u8>> {
         .filter(|f| f.size == source)
         .map(|f| Some((f, side(f.width)?, side(f.height)?)))
         .collect::<Option<_>>()?;
-    let bytes = |w: u32, h: u32| 4 * w as usize * h as usize;
+    // before the work
     let total: usize = images.iter().map(|(_, w, h)| bytes(*w, *h)).sum();
     if total as u64 > BYTES {
         return None;
     }
+    let images: Vec<_> = images
+        .into_iter()
+        .map(|(frame, width, height)| {
+            let hot = |n: u32, side: u32| scaled(n).min(u64::from(side) - 1) as u32;
+            let from = (frame.width as usize, frame.height as usize);
+            Image {
+                size,
+                width,
+                height,
+                xhot: hot(frame.xhot, width),
+                yhot: hot(frame.yhot, height),
+                delay: frame.delay,
+                pixels: resize(frame.pixels, from, (width as usize, height as usize)),
+            }
+        })
+        .collect();
+    encode(&images)
+}
 
+pub fn bytes(width: u32, height: u32) -> usize {
+    4 * width as usize * height as usize
+}
+
+/// A cursor file. None if it would be empty or too big, or an image has not the pixels of its sides.
+pub fn encode(images: &[Image]) -> Option<Vec<u8>> {
+    let fits = |i: &Image| {
+        i.size > 0
+            && (1..=SIDE).contains(&i.width)
+            && (1..=SIDE).contains(&i.height)
+            && i.pixels.len() == bytes(i.width, i.height)
+    };
+    let total: usize = images.iter().map(|i| 48 + i.pixels.len()).sum();
+    if images.is_empty()
+        || images.len() > IMAGES
+        || total as u64 > BYTES
+        || !images.iter().all(fits)
+    {
+        return None;
+    }
     let mut out = b"Xcur".to_vec();
     let put = |out: &mut Vec<u8>, words: &[u32]| {
         out.extend(words.iter().flat_map(|w| w.to_le_bytes()));
     };
     put(&mut out, &[16, 0x1_0000, images.len() as u32]);
     let mut at = 16 + 12 * images.len();
-    for (_, w, h) in &images {
-        put(&mut out, &[IMAGE, size, at as u32]);
-        at += 36 + bytes(*w, *h);
+    for i in images {
+        put(&mut out, &[IMAGE, i.size, at as u32]);
+        at += 36 + i.pixels.len();
     }
-    for (frame, w, h) in images {
-        let hot = |n: u32, side: u32| scaled(n).min(u64::from(side) - 1) as u32;
-        let (xhot, yhot) = (hot(frame.xhot, w), hot(frame.yhot, h));
-        let words = [36, IMAGE, size, 1, w, h, xhot, yhot, frame.delay];
-        put(&mut out, &words);
-        let from = (frame.width as usize, frame.height as usize);
-        out.extend(resize(frame.pixels, from, (w as usize, h as usize)));
+    for i in images {
+        let (xhot, yhot) = (i.xhot.min(i.width - 1), i.yhot.min(i.height - 1));
+        put(
+            &mut out,
+            &[36, IMAGE, i.size, 1, i.width, i.height, xhot, yhot, i.delay],
+        );
+        out.extend(&i.pixels);
     }
     Some(out)
 }
@@ -585,14 +683,159 @@ mod tests {
     }
 
     #[test]
-    fn a_small_file_does_not_become_a_huge_one() {
-        let one = file(&[(32, 32, 8, 0, RED)]);
+    fn encode_is_read_back_by_frames() {
+        let pixels: Vec<u8> = (0..4 * 3 * 2).collect();
+        let image = |size, delay| Image {
+            size,
+            width: 3,
+            height: 2,
+            xhot: 2,
+            yhot: 1,
+            delay,
+            pixels: pixels.clone(),
+        };
+        let file = encode(&[image(24, 40), image(48, 50)]).unwrap();
+        let frames = frames(&file).unwrap();
+        let facts = |f: &Frame| (f.size, f.width, f.height, f.xhot, f.yhot, f.delay);
+        let facts: Vec<_> = frames.iter().map(facts).collect();
+        assert_eq!(facts, [(24, 3, 2, 2, 1, 40), (48, 3, 2, 2, 1, 50)]);
+        assert!(frames.iter().all(|f| f.pixels == pixels));
+        // not square: width and height must not change places
+        let grown = convert(&file, 96).unwrap();
+        let grown = self::frames(&grown).unwrap();
+        assert_eq!((grown[0].width, grown[0].height), (6, 4));
+        let rows: Vec<_> = grown[0].pixels.chunks(24).collect();
+        assert_eq!(rows[0][..4], pixels[..4]);
+        assert_eq!(rows[3][20..], pixels[20..]);
+        assert_eq!(rows[0][20..], pixels[8..12]);
+    }
+
+    #[test]
+    fn encode_refuses_nothing_and_wrong_sizes() {
+        assert!(encode(&[]).is_none());
+        for (size, width, height, bytes) in [
+            (24, 2, 2, 15),
+            (24, 2, 2, 17),
+            (24, 0, 2, 0),
+            (0, 2, 2, 16),
+            (24, 1025, 1, 4100),
+        ] {
+            let image = Image {
+                size,
+                width,
+                height,
+                xhot: 0,
+                yhot: 0,
+                delay: 0,
+                pixels: vec![0; bytes],
+            };
+            assert!(
+                encode(&[image]).is_none(),
+                "{size} {width} {height} {bytes}"
+            );
+        }
+    }
+
+    /// One image that many entries of the file lead to.
+    fn shared(side: u32, entries: u32) -> Vec<u8> {
+        let one = file(&[(side, side, 0, 0, RED)]);
         let mut many = b"Xcur".to_vec();
-        put(&mut many, &[16, 0x1_0000, 3000]);
-        for _ in 0..3000 {
-            put(&mut many, &[0xfffd_0002, 32, 16 + 12 * 3000]);
+        put(&mut many, &[16, 0x1_0000, entries]);
+        for _ in 0..entries {
+            put(&mut many, &[0xfffd_0002, side, 16 + 12 * entries]);
         }
         many.extend(&one[28..]);
+        many
+    }
+
+    #[test]
+    fn one_big_image_is_not_used_many_times() {
+        assert!(frames(&shared(1024, 16)).is_some());
+        assert!(frames(&shared(1024, 17)).is_none());
+    }
+
+    #[test]
+    fn too_many_images_are_refused() {
+        assert!(frames(&shared(1, 4096)).is_some());
+        assert!(frames(&shared(1, 4097)).is_none());
+    }
+
+    #[test]
+    fn a_theme_has_a_limit() {
+        let home = Home::new("theme-limit");
+        home.theme("system/A").theme("system/B");
+        for i in 0..4 {
+            home.write(
+                &format!("system/B/cursors/{i}"),
+                file(&[(32, 32, 0, 0, RED)]),
+            );
+        }
+        home.set("A", 32).unwrap();
+        let mut dirs = home.dirs();
+        // each cursor is about 4 kB, read and written
+        dirs.limit = 30_000;
+        let set = |theme: &str| dirs.set(&json!({ "theme": theme, "size": 32 }));
+        assert_eq!(set("B"), Err("Failed".into()));
+        assert_eq!(home.names(OWN), ["default", "kaerice-cursor-A-32"]);
+        assert!(set("A").is_ok());
+    }
+
+    #[test]
+    fn the_inherited_themes_have_a_limit() {
+        let home = Home::new("inherit-limit");
+        let names: Vec<_> = (0..1000).map(|i| format!("T{i}")).collect();
+        home.theme("system/A").write(
+            "system/A/index.theme",
+            format!("Inherits={}\n", names.join(",")),
+        );
+        for (theme, shape) in [("T5", "wait"), ("T500", "help")] {
+            let blue = file(&[(32, 32, 8, 0, BLUE)]);
+            home.write(&format!("system/{theme}/cursors/{shape}"), blue);
+        }
+        home.set("A", 32).unwrap();
+        assert_eq!(
+            home.names(&format!("{OWN}/kaerice-cursor-A-32/cursors")),
+            ["left_ptr", "wait"]
+        );
+    }
+
+    #[test]
+    fn links_to_links_stay_links() {
+        let home = Home::new("chains");
+        home.theme("system/A");
+        // in both orders, one of them is not the order in which the folder is read
+        for i in 0..6 {
+            let next = |i: usize| {
+                if i == 5 {
+                    "left_ptr".into()
+                } else {
+                    format!("up{}", i + 1)
+                }
+            };
+            home.link(&next(i), &format!("system/A/cursors/up{i}"));
+        }
+        for i in (0..6).rev() {
+            let next = |i: usize| {
+                if i == 5 {
+                    "left_ptr".into()
+                } else {
+                    format!("down{}", i + 1)
+                }
+            };
+            home.link(&next(i), &format!("system/A/cursors/down{i}"));
+        }
+        home.set("A", 48).unwrap();
+        let cursors = home.0.join(OWN).join("kaerice-cursor-A-48/cursors");
+        let files = list(&cursors)
+            .into_iter()
+            .filter(|n| !cursors.join(n).is_symlink());
+        assert_eq!(files.collect::<Vec<_>>(), ["left_ptr"]);
+        assert_eq!(list(&cursors).len(), 13);
+    }
+
+    #[test]
+    fn a_small_file_does_not_become_a_huge_one() {
+        let many = shared(32, 3000);
         assert_eq!(frames(&many).unwrap().len(), 3000);
         assert!(convert(&many, 96).is_none());
     }
@@ -611,6 +854,7 @@ mod tests {
             Dirs {
                 home: self.0.join("home"),
                 system: self.0.join("system"),
+                limit: THEME,
             }
         }
         fn set(&self, theme: &str, size: u32) -> Answer<String> {
@@ -770,6 +1014,9 @@ mod tests {
             .link("missing", "system/A/cursors/wait")
             .link("bad", "system/A/cursors/hand1")
             .link("arrow", "system/A/cursors/crosshair")
+            .write("system/A/cursors/cross", file(&[(32, 32, 8, 0, RED)]))
+            .link("crosshair", "system/B/cursors/cross")
+            .link("cross", "system/B/cursors/tcross")
             .link("left_ptr", "system/B/cursors/hand2")
             .link("crosshair", "system/B/cursors/arrow");
         for shape in ["left_ptr", "wait", "hand1", "crosshair"] {
@@ -783,7 +1030,7 @@ mod tests {
             frames(&file).is_some_and(|frames| plain(&frames[0], color))
         };
         assert!(color("left_ptr", RED));
-        for shape in ["wait", "hand1", "crosshair", "arrow", "hand2"] {
+        for shape in ["wait", "hand1", "crosshair", "arrow", "hand2", "tcross"] {
             assert!(color(shape, BLUE), "{shape}");
         }
     }

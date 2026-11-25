@@ -18,7 +18,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
 Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
-`wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
+`wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
 
 `nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness, system usage and
 the cursor: without it those show `N/A`, `--` or `Unavailable`, the brightness keys do nothing, and the rest works. Run `./install.sh`
@@ -75,6 +75,11 @@ the copy the theme `default`, for Wayland, X11, XWayland and Flatpak apps. The f
 `~/.local/share/icons` moves to `default.pre-kaerice`, and the cursor theme named in the GTK `settings.ini` files, `~/.gtkrc-2.0` or `~/.Xresources`
 becomes `default`. To undo it, delete both `default` links and put `default.pre-kaerice` back.
 
+Install next to it, or `quickshell/scripts/install-cursor.sh FILE`, adds a downloaded theme to `~/.local/share/icons`: Linux themes are
+copied, Windows cursors (`.cur` and `.ani`, with or without an `install.inf`) converted. It takes a folder, a `.zip`, `.7z`, `.rar`, `.cab`,
+`.tar.*`, `.deskthemepack`, or an `.exe` that holds an archive. Nothing in it is run, and a theme that is already there is never replaced. To
+remove a theme, delete its folder. Hyprcursor and CursorFX themes, `.cape`, loose images and installers that only unpack by running cannot be used.
+
 - Apps that are open and load the cursor themselves change when they are opened again. With `xorg-xsetroot`, X11 windows without a cursor
   of their own change at once, without it at the next login.
 - Not reached: games with a cursor of their own, apps run as root, the login screen, and Niri (its config names a theme).
@@ -102,7 +107,7 @@ quickshell/
     settings/         settings overlay and its pages
     wallpaper/        background layer, picker (local images, Wallhaven)
   ipc/Ipc.qml         every IPC target used by keybinds
-  scripts/            shell helpers run by keybinds (screenshot.sh)
+  scripts/            shell helpers (screenshot.sh, install-cursor.sh)
 settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests

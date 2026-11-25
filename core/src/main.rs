@@ -1,12 +1,14 @@
 mod brightness;
 mod cursor;
 mod follow;
+mod install;
 mod network;
 mod server;
 mod session;
 mod sleep;
 mod stats;
 mod wifi;
+mod windows;
 
 use std::env;
 use std::error::Error;
@@ -24,6 +26,10 @@ use wifi::Wifi;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> ExitCode {
+    let mut args = env::args_os().skip(1);
+    if args.next().is_some_and(|arg| arg == "install-cursor") {
+        return install::run(args);
+    }
     let error = match run().await {
         Err(e) => e,
         Ok(()) => "stopped".into(),

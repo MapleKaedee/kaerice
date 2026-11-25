@@ -137,6 +137,13 @@ Column {
         hint: !Cursor.state ? "Unavailable"
             : Cursor.failed ? "The cursor could not be changed"
             : "For all apps. An app that is already open may need to be opened again."
+        TextButton {
+            visible: Cursor.state !== null
+            enabled: !Cursor.installing
+            glyph: 0xf067 // plus
+            label: "Install"
+            onClicked: Cursor.install()
+        }
     }
     DeviceList {
         visible: Cursor.state !== null
