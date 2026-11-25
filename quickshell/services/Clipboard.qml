@@ -28,10 +28,10 @@ Singleton {
 
     function wipe() { wiper.running = true; }
 
-    // records every clipboard change
+    // records every clipboard change; pdeathsig: a killed shell must not leave it behind
     Process {
         running: true
-        command: ["wl-paste", "--watch", "cliphist", "store"]
+        command: ["setpriv", "--pdeathsig", "TERM", "wl-paste", "--watch", "cliphist", "store"]
     }
 
     Process {
