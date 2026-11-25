@@ -14,3 +14,5 @@ TODO.md
 /.env.local
 /.envrc.local
 /core/target/
+# agent skills: local, like CLAUDE.md
+/.claude/
