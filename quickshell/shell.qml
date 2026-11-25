@@ -24,6 +24,8 @@ ShellRoot {
     readonly property int batteryPercent: Battery.percent
     // and LockKeys: it needs the lock state from before the first key press
     readonly property bool lockKeyOn: LockKeys.on
+    // and the apps: the scan adds them one by one, so a launcher that starts it fills up row by row
+    readonly property var apps: DesktopEntries.applications
 
     WallpaperLayer {}
     Bar {}
@@ -31,20 +33,22 @@ ShellRoot {
     LevelOsd {}
     LockKeysOsd {}
 
-    NotificationCenter {}
-    Dashboard {}
-    ControlCenter {}
+    // only while open: these cost the most memory, or keep working on changes while they are closed
+    LazyLoader { active: Ui.notifications; NotificationCenter {} }
+    LazyLoader { active: Ui.dashboard; Dashboard {} }
+    LazyLoader { active: Ui.controlCenter; ControlCenter {} }
+    LazyLoader { active: Ui.launcher; Launcher {} }
+    LazyLoader { active: Ui.emoji; EmojiPicker {} }
+    LazyLoader { active: Switcher.open; WindowSwitcher {} }
+
     Calendar {}
     WifiMenu {}
-    Launcher {}
     ClipboardMenu {}
-    EmojiPicker {}
     TempNote {}
     Keybinds {}
     PowerMenu {}
     SettingsPanel {}
     WallpaperPicker {}
-    WindowSwitcher {}
     ScreenshotEditor {}
 
     Ipc {}

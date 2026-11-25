@@ -18,7 +18,8 @@ end)
 hl.on("hyprland.start", function()
 	-- run binary directly: the systemd unit needs WAYLAND_DISPLAY imported first (races with the session env block above)
 	hl.exec_cmd("/usr/lib/hyprpolkitagent/hyprpolkitagent")
-	hl.exec_cmd("qs -c kaerice")
+	-- one jemalloc arena: the default (4 per core) keeps memory the shell has already freed
+	hl.exec_cmd("env MALLOC_CONF=narenas:1 qs -c kaerice")
 end)
 
 hl.config({

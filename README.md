@@ -26,7 +26,7 @@ again after a `git pull`: QML changes are live at once, the daemon only after th
 
 Working on the daemon in `core/`: see [env.md](env.md).
 
-Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; qs -c kaerice` (`qs kill` shortly after a hot reload crashes Quickshell 0.3.2)
+Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; env MALLOC_CONF=narenas:1 qs -c kaerice` (`qs kill` shortly after a hot reload crashes Quickshell 0.3.2)
 
 ## Keys
 
