@@ -1,0 +1,26 @@
+[package]
+name = "kaericed"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = [
+  "io-util",
+  "macros",
+  "net",
+  "rt",
+  "sync",
+  "time",
+] }
+zbus = { version = "6.5.0", default-features = false, features = [
+  "proxy",
+  "tokio",
+] }
+
+[dev-dependencies]
+zbus = { version = "6.5.0", default-features = false, features = ["service"] }

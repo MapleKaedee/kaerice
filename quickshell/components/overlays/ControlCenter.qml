@@ -265,10 +265,10 @@ Overlay {
                 spacing: root.gap
                 Tile {
                     // ethernet port / wifi off / wifi
-                    glyph: Network.kind === "eth" ? 0xf0200 : Network.kind === "offline" ? 0xf05aa : 0xf1eb
+                    glyph: Network.kind === "eth" ? 0xf0200 : Network.online ? 0xf1eb : 0xf05aa
                     title: Network.kind === "eth" ? "Ethernet" : "Wi-Fi"
-                    subtitle: Network.kind === "eth" ? "Connected" : Network.kind === "offline" ? "Offline" : Network.label
-                    active: Network.kind !== "offline"
+                    subtitle: Network.kind === "eth" ? "Connected" : Network.kind === "offline" ? "Offline" : Network.kind === "unavailable" ? "Unavailable" : Network.label
+                    active: Network.online
                     onClicked: root.then(() => Ui.wifi = true)
                 }
                 Tile {

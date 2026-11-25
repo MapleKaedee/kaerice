@@ -4,3 +4,13 @@ CLAUDE.md
 TODO.md
 # your own settings; the leading slash keeps quickshell/components/settings/ tracked
 /settings/
+# design documents and plans: local, like TODO.md
+/docs/
+# Nix and local environment
+/.direnv/
+/result
+/result-*
+/.pre-commit-config.yaml
+/.env.local
+/.envrc.local
+/core/target/

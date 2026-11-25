@@ -15,9 +15,15 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `hypr/` | `~/.config/hypr` |
 | `quickshell/` | `~/.config/quickshell/kaerice` |
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
+| `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
 Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
+
+`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status: without it that card shows `N/A` and the rest
+works. Run `./install.sh` again after a `git pull`: QML changes are live at once, the daemon only after that.
+
+Working on the daemon in `core/`: see [env.md](env.md).
 
 Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; qs -c kaerice` (`qs kill` shortly after a hot reload crashes Quickshell 0.3.2)
 
@@ -69,7 +75,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
@@ -86,7 +92,8 @@ quickshell/
 settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
-systemd/              DMS drop-in
+core/                 kaericed, the daemon (Rust): sends state to the shell over a Unix socket, one JSON line per change
+systemd/              DMS drop-in, kaericed unit
 ```
 
 Adding a feature: state and commands go in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,
