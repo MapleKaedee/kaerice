@@ -20,8 +20,9 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `brightnessctl`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
 
-`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status: without it that card shows `N/A` and the rest
-works. Run `./install.sh` again after a `git pull`: QML changes are live at once, the daemon only after that.
+`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status and the Wi-Fi menu: without it the card shows
+`N/A`, the menu `Unavailable`, and the rest works. Run `./install.sh` again after a `git pull`: QML changes are live at once, the
+daemon only after that.
 
 Working on the daemon in `core/`: see [env.md](env.md).
 
@@ -92,7 +93,7 @@ quickshell/
 settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
-core/                 kaericed, the daemon (Rust): sends state to the shell over a Unix socket, one JSON line per change
+core/                 kaericed, the daemon (Rust): sends state to the shell and takes its calls over a Unix socket, one JSON line each
 systemd/              DMS drop-in, kaericed unit
 ```
 

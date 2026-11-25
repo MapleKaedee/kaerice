@@ -3,13 +3,33 @@ use std::io;
 use std::os::unix::net::UnixStream as Probe;
 use std::path::Path;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{UnixListener, UnixStream};
-use tokio::sync::watch;
+use tokio::sync::{mpsc, watch};
+
+/// The longest line a client may send.
+const LINE: usize = 4096;
 
 /// The last state of every topic, as the line that is sent (without the newline).
 pub type Topics = BTreeMap<&'static str, String>;
+
+#[derive(Deserialize)]
+struct Request {
+    id: u64,
+    call: String,
+    #[serde(default)]
+    args: Value,
+}
+
+pub struct Call {
+    pub name: String,
+    pub args: Value,
+}
+
+/// The error is a code: the text for it is made in QML.
+pub type Answer = Result<(), String>;
 
 pub fn publish<T: Serialize>(tx: &watch::Sender<Topics>, topic: &'static str, payload: &T) {
     let line =
@@ -27,17 +47,34 @@ pub fn bind(path: &Path) -> io::Result<UnixListener> {
     }
 }
 
-pub async fn serve(listener: UnixListener, rx: watch::Receiver<Topics>) -> io::Result<()> {
+pub async fn serve<H, F>(
+    listener: UnixListener,
+    rx: watch::Receiver<Topics>,
+    handler: H,
+) -> io::Result<()>
+where
+    H: Fn(Call) -> F + Clone + Send + 'static,
+    F: Future<Output = Answer> + Send + 'static,
+{
     loop {
         let (stream, _) = listener.accept().await?;
-        tokio::spawn(client(stream, rx.clone()));
+        tokio::spawn(client(stream, rx.clone(), handler.clone()));
     }
 }
 
 /// Ends when the client leaves.
-async fn client(mut stream: UnixStream, mut rx: watch::Receiver<Topics>) -> io::Result<()> {
+async fn client<H, F>(
+    mut stream: UnixStream,
+    mut rx: watch::Receiver<Topics>,
+    handler: H,
+) -> io::Result<()>
+where
+    H: Fn(Call) -> F,
+    F: Future<Output = Answer> + Send + 'static,
+{
     let mut sent = Topics::new();
-    let mut input = [0; 256];
+    let mut input = Vec::with_capacity(LINE);
+    let (done, mut answers) = mpsc::unbounded_channel();
     loop {
         let topics = rx.borrow_and_update().clone();
         for (topic, line) in &topics {
@@ -48,8 +85,30 @@ async fn client(mut stream: UnixStream, mut rx: watch::Receiver<Topics>) -> io::
         sent = topics;
         tokio::select! {
             changed = rx.changed() => if changed.is_err() { return Ok(()) },
-            read = stream.read(&mut input) => if read? == 0 { return Ok(()) },
+            Some(line) = answers.recv() => stream.write_all(format!("{line}\n").as_bytes()).await?,
+            read = stream.read_buf(&mut input) => if read? == 0 { return Ok(()) },
         }
+        while let Some(end) = input.iter().position(|b| *b == b'\n') {
+            let line: Vec<u8> = input.drain(..=end).collect();
+            let Ok(Request { id, call, args }) = serde_json::from_slice(&line) else {
+                // never the line itself: it can hold a password
+                eprintln!("kaericed: a client sent a line that is not a call");
+                continue;
+            };
+            let (done, answer) = (done.clone(), handler(Call { name: call, args }));
+            // a task of its own: a call goes on after its client left
+            tokio::spawn(async move { done.send(reply(id, answer.await)) });
+        }
+        if input.len() > LINE {
+            return Ok(());
+        }
+    }
+}
+
+fn reply(id: u64, answer: Answer) -> String {
+    match answer {
+        Ok(()) => format!(r#"{{"id":{id},"ok":true}}"#),
+        Err(code) => format!(r#"{{"id":{id},"error":{}}}"#, Value::from(code)),
     }
 }
 
@@ -60,7 +119,7 @@ mod tests {
     use std::path::PathBuf;
     use std::time::Duration;
     use tokio::io::{AsyncBufReadExt, BufReader, Lines};
-    use tokio::time::timeout;
+    use tokio::time::{sleep, timeout};
 
     fn state(kind: Kind, ssid: Option<&str>) -> Status {
         Status {
@@ -84,10 +143,27 @@ mod tests {
         }
     }
 
+    /// "ok" succeeds, "slow" too but later, any other name is the error.
+    async fn handler(call: Call) -> Answer {
+        match call.name.as_str() {
+            "ok" => Ok(()),
+            "slow" => {
+                sleep(Duration::from_millis(200)).await;
+                Ok(())
+            }
+            "echo" => Err(call.args["text"].as_str().unwrap_or("none").to_owned()),
+            other => Err(other.to_owned()),
+        }
+    }
+
     fn start(sock: &Sock) -> watch::Sender<Topics> {
         let (tx, rx) = watch::channel(Topics::new());
-        tokio::spawn(serve(bind(&sock.0).unwrap(), rx));
+        tokio::spawn(serve(bind(&sock.0).unwrap(), rx, handler));
         tx
+    }
+
+    async fn send(lines: &mut Lines<BufReader<UnixStream>>, text: &[u8]) {
+        lines.get_mut().get_mut().write_all(text).await.unwrap();
     }
 
     async fn connect(sock: &Sock) -> Lines<BufReader<UnixStream>> {
@@ -193,5 +269,136 @@ mod tests {
         publish(&tx, "network", &state(Kind::Eth, None));
         assert_eq!(bind(&sock.0).unwrap_err().kind(), io::ErrorKind::AddrInUse);
         assert_eq!(next(&mut connect(&sock).await).await, ETH);
+    }
+
+    const OK: &str = r#"{"id":7,"ok":true}"#;
+    const FAILED: &str = r#"{"id":7,"error":"Failed"}"#;
+
+    #[tokio::test]
+    async fn answers_the_caller_only() {
+        let sock = Sock::new("caller");
+        let tx = start(&sock);
+        let (mut a, mut b) = (connect(&sock).await, connect(&sock).await);
+        send(&mut a, b"{\"id\":7,\"call\":\"ok\",\"args\":{}}\n").await;
+        assert_eq!(next(&mut a).await, OK);
+        publish(&tx, "network", &state(Kind::Eth, None));
+        assert_eq!(next(&mut b).await, ETH);
+    }
+
+    #[tokio::test]
+    async fn answers_errors() {
+        let sock = Sock::new("errors");
+        let _tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(&mut a, b"{\"id\":7,\"call\":\"Failed\"}\n").await;
+        assert_eq!(next(&mut a).await, FAILED);
+    }
+
+    #[tokio::test]
+    async fn an_error_is_escaped() {
+        let sock = Sock::new("escaped");
+        let _tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(
+            &mut a,
+            b"{\"id\":1,\"call\":\"echo\",\"args\":{\"text\":\"a\\\"b\\n\"}}\n",
+        )
+        .await;
+        assert_eq!(next(&mut a).await, r#"{"id":1,"error":"a\"b\n"}"#);
+    }
+
+    #[tokio::test]
+    async fn bad_lines_are_skipped() {
+        let sock = Sock::new("bad");
+        let _tx = start(&sock);
+        let mut a = connect(&sock).await;
+        for line in [
+            &b"\n"[..],
+            b"{\n",
+            b"5\n",
+            b"[]\n",
+            b"\xff\xfe\n",
+            b"{\"call\":\"ok\"}\n",
+            b"{\"id\":\"x\",\"call\":\"ok\"}\n",
+            b"{\"id\":-1,\"call\":\"ok\"}\n",
+            b"{\"id\":7,\"call\":\"ok\"}\n",
+        ] {
+            send(&mut a, line).await;
+        }
+        assert_eq!(next(&mut a).await, OK);
+    }
+
+    #[tokio::test]
+    async fn call_split_over_two_writes() {
+        let sock = Sock::new("split");
+        let tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(&mut a, b"{\"id\":7,\"ca").await;
+        publish(&tx, "network", &state(Kind::Eth, None));
+        assert_eq!(next(&mut a).await, ETH);
+        send(&mut a, b"ll\":\"ok\"}\n").await;
+        assert_eq!(next(&mut a).await, OK);
+    }
+
+    #[tokio::test]
+    async fn two_calls_in_one_write() {
+        let sock = Sock::new("two");
+        let _tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(
+            &mut a,
+            b"{\"id\":1,\"call\":\"slow\"}\n{\"id\":7,\"call\":\"ok\"}\n",
+        )
+        .await;
+        assert_eq!(next(&mut a).await, OK);
+        assert_eq!(next(&mut a).await, r#"{"id":1,"ok":true}"#);
+    }
+
+    #[tokio::test]
+    async fn long_line_ends_the_client() {
+        let sock = Sock::new("long");
+        let _tx = start(&sock);
+        let (mut a, mut b) = (connect(&sock).await, connect(&sock).await);
+        // the daemon may hang up while this is still being written
+        let _ = a.get_mut().get_mut().write_all(&[b'x'; 20_000]).await;
+        // a hang-up with unread input is a reset, not an end
+        let end = timeout(Duration::from_secs(2), a.next_line()).await;
+        assert!(matches!(end, Ok(Ok(None) | Err(_))), "{end:?}");
+        send(&mut b, b"{\"id\":7,\"call\":\"ok\"}\n").await;
+        assert_eq!(next(&mut b).await, OK);
+    }
+
+    #[tokio::test]
+    async fn slow_call_does_not_block_topics() {
+        let sock = Sock::new("slow");
+        let tx = start(&sock);
+        let mut a = connect(&sock).await;
+        send(&mut a, b"{\"id\":7,\"call\":\"slow\"}\n").await;
+        sleep(Duration::from_millis(20)).await;
+        publish(&tx, "network", &state(Kind::Eth, None));
+        assert_eq!(next(&mut a).await, ETH);
+        assert_eq!(next(&mut a).await, OK);
+    }
+
+    #[tokio::test]
+    async fn call_finishes_after_the_client_left() {
+        let sock = Sock::new("left");
+        let (_tx, rx) = watch::channel(Topics::new());
+        let (done, mut finished) = tokio::sync::mpsc::unbounded_channel();
+        tokio::spawn(serve(bind(&sock.0).unwrap(), rx, move |_| {
+            let done = done.clone();
+            async move {
+                done.send("started").unwrap();
+                sleep(Duration::from_millis(100)).await;
+                done.send("finished").unwrap();
+                Ok(())
+            }
+        }));
+        let mut a = connect(&sock).await;
+        send(&mut a, b"{\"id\":7,\"call\":\"ok\"}\n").await;
+        let limit = Duration::from_secs(2);
+        assert_eq!(timeout(limit, finished.recv()).await, Ok(Some("started")));
+        drop(a);
+        assert_eq!(timeout(limit, finished.recv()).await, Ok(Some("finished")));
     }
 }

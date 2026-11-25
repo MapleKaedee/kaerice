@@ -1,5 +1,7 @@
+mod follow;
 mod network;
 mod server;
+mod wifi;
 
 use std::env;
 use std::error::Error;
@@ -9,7 +11,8 @@ use std::time::Duration;
 
 use tokio::sync::watch;
 
-use server::Topics;
+use server::{Call, Topics};
+use wifi::Wifi;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> ExitCode {
@@ -26,9 +29,21 @@ async fn run() -> Result<(), Box<dyn Error>> {
     let listener = server::bind(&directory()?.join("kaericed.sock"))?;
     let bus = zbus::Connection::system().await?;
     let (tx, rx) = watch::channel(Topics::new());
+    let wifi = Wifi::new(bus.clone(), Duration::from_secs(60));
+    let calls = move |call: Call| {
+        let wifi = wifi.clone();
+        async move {
+            match call.name.split_once('.') {
+                Some(("wifi", what)) => wifi.call(what, &call.args).await,
+                _ => Err("UnknownCall".into()),
+            }
+        }
+    };
+    let limit = Duration::from_secs(5);
     tokio::select! {
-        r = server::serve(listener, rx) => r?,
-        r = network::watch(&bus, &tx, Duration::from_secs(5)) => r?,
+        r = server::serve(listener, rx, calls) => r?,
+        r = network::watch(&bus, &tx, limit) => r?,
+        r = wifi::watch(&bus, &tx, limit) => r?,
     }
     Ok(())
 }

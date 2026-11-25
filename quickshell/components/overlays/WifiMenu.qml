@@ -1,3 +1,4 @@
+import Quickshell
 import QtQuick
 import qs.config
 import qs.services
@@ -22,10 +23,9 @@ Overlay {
     visible: Ui.wifi
     onDismissed: Ui.wifi = false
     onVisibleChanged: {
+        root.expanded = "";
         if (!visible) return;
         Wifi.status = "";
-        root.expanded = "";
-        Wifi.refresh();
         Wifi.scan();
     }
 
@@ -89,9 +89,7 @@ Overlay {
             Text {
                 width: parent.width
                 visible: text !== ""
-                text: Wifi.status || (!Wifi.device ? "No Wi-Fi device found"
-                                    : !Wifi.powered ? "Wi-Fi is off"
-                                    : Wifi.scanning ? "Scanning…" : "")
+                text: Wifi.note
                 color: Theme.text
                 opacity: 0.75
                 font.pixelSize: 13
@@ -105,13 +103,17 @@ Overlay {
                 visible: count > 0
                 clip: true
                 spacing: 6
-                model: Wifi.networks
+                // paths only: a row keeps its password field when the networks change
+                model: ScriptModel { values: Wifi.networks.map(n => n.path) }
+                currentIndex: -1   // a current row takes the focus from that field when rows move
 
                 delegate: Column {
                     id: row
-                    required property var modelData
-                    readonly property bool isOpen: root.expanded === modelData.path
-                    readonly property color fg: modelData.connected ? Theme.accentText : Theme.text
+                    required property string modelData
+                    readonly property var net: Wifi.networks.find(n => n.path === modelData)
+                        ?? ({ path: modelData, name: "", type: "open", connected: false, dbm: -100 })
+                    readonly property bool isOpen: root.expanded === modelData
+                    readonly property color fg: net.connected ? Theme.accentText : Theme.text
                     width: list.width
                     spacing: 6
 
@@ -119,15 +121,15 @@ Overlay {
                         width: parent.width
                         height: 42
                         radius: Theme.corner(6)
-                        color: row.modelData.connected ? Theme.accent : hover.containsMouse ? Theme.hover : "transparent"
-                        border.width: row.modelData.connected || row.isOpen ? Theme.border : 0
+                        color: row.net.connected ? Theme.accent : hover.containsMouse ? Theme.hover : "transparent"
+                        border.width: row.net.connected || row.isOpen ? Theme.border : 0
                         border.color: Theme.line
 
                         MouseArea {
                             id: hover
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: root.pick(row.modelData)
+                            onClicked: root.pick(row.net)
                         }
 
                         Row {
@@ -138,12 +140,12 @@ Overlay {
                             Row {
                                 anchors.verticalCenter: parent.verticalCenter
                                 Text {
-                                    text: "▂▄▆█".slice(0, root.bars(row.modelData.dbm))
+                                    text: "▂▄▆█".slice(0, root.bars(row.net.dbm))
                                     color: row.fg
                                     font.family: Theme.iconFont; font.pixelSize: 14
                                 }
                                 Text {
-                                    text: "▂▄▆█".slice(root.bars(row.modelData.dbm))
+                                    text: "▂▄▆█".slice(root.bars(row.net.dbm))
                                     color: row.fg
                                     opacity: 0.25
                                     font.family: Theme.iconFont; font.pixelSize: 14
@@ -152,14 +154,14 @@ Overlay {
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 230
-                                text: row.modelData.name
+                                text: row.net.name
                                 elide: Text.ElideRight
                                 color: row.fg
                                 font.pixelSize: 14; font.bold: true
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                visible: row.modelData.type !== "open"
+                                visible: row.net.type !== "open"
                                 text: String.fromCodePoint(0xf023) // lock
                                 color: row.fg
                                 font.family: Theme.iconFont; font.pixelSize: 13
@@ -168,7 +170,7 @@ Overlay {
 
                         // disconnect button on the connected network
                         Text {
-                            visible: row.modelData.connected
+                            visible: row.net.connected
                             anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
                             text: String.fromCodePoint(0xf00d) // x
                             color: row.fg
@@ -194,10 +196,18 @@ Overlay {
                             echoMode: TextInput.Password
                             color: Theme.text
                             font.pixelSize: 14
-                            onVisibleChanged: if (visible) { text = ""; forceActiveFocus(); }
-                            Keys.onReturnPressed: if (text) { root.expanded = ""; Wifi.connect(row.modelData, text); }
-                            Keys.onEnterPressed: if (text) { root.expanded = ""; Wifi.connect(row.modelData, text); }
+                            onVisibleChanged: { text = ""; if (visible) forceActiveFocus(); }
+                            Keys.onReturnPressed: join()
+                            Keys.onEnterPressed: join()
                             Keys.onEscapePressed: { root.expanded = ""; root.focusItem.forceActiveFocus(); }
+
+                            function join() {
+                                if (!text) return;
+                                const secret = text;   // closing the field empties it
+                                root.expanded = "";
+                                root.focusItem.forceActiveFocus();
+                                Wifi.connect(row.net, secret);
+                            }
 
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter

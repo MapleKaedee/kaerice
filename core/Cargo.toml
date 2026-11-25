@@ -19,8 +19,6 @@ tokio = { version = "1.54.1", features = [
 ] }
 zbus = { version = "6.5.0", default-features = false, features = [
   "proxy",
+  "service",
   "tokio",
 ] }
-
-[dev-dependencies]
-zbus = { version = "6.5.0", default-features = false, features = ["service"] }

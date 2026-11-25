@@ -1,16 +1,12 @@
-use std::future::poll_fn;
-use std::pin::Pin;
 use std::time::Duration;
 
 use serde::Serialize;
 use serde_json::Value;
-use tokio::sync::{Notify, watch};
-use tokio::time;
-use zbus::export::futures_core::Stream;
+use tokio::sync::watch;
 use zbus::message::Type::Signal;
-use zbus::proxy::MethodFlags;
-use zbus::{Connection, MatchRule, MessageStream, Proxy};
+use zbus::{Connection, MatchRule};
 
+use crate::follow::{call, follow};
 use crate::server::{Topics, publish};
 
 const NAME: &str = "org.freedesktop.network1";
@@ -19,8 +15,6 @@ const OFFLINE: Status = Status {
     kind: Kind::Offline,
     ssid: None,
 };
-/// One change sends several signals.
-const JOIN: Duration = Duration::from_millis(200);
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -66,95 +60,35 @@ pub async fn watch(
     tx: &watch::Sender<Topics>,
     timeout: Duration,
 ) -> zbus::Result<()> {
-    let mut changes = MessageStream::for_match_rule(
-        MatchRule::builder()
-            .msg_type(Signal)
-            .sender(NAME)
-            .interface("org.freedesktop.DBus.Properties")
-            .member("PropertiesChanged")
-            .path_namespace(PATH)
-            .build()?,
+    let changes = MatchRule::builder()
+        .msg_type(Signal)
+        .sender(NAME)
+        .interface("org.freedesktop.DBus.Properties")
+        .member("PropertiesChanged")
+        .path_namespace(PATH)
+        .build()?;
+    follow(
         conn,
-        None,
+        NAME,
+        vec![changes],
+        timeout,
+        || describe(conn),
+        |status| publish(tx, "network", &status.unwrap_or(OFFLINE)),
     )
-    .await?;
-    let mut owners = MessageStream::for_match_rule(
-        MatchRule::builder()
-            .msg_type(Signal)
-            .sender("org.freedesktop.DBus")
-            .interface("org.freedesktop.DBus")
-            .member("NameOwnerChanged")
-            .arg(0, NAME)
-            .build()?,
-        conn,
-        None,
-    )
-    .await?;
-
-    let dirty = Notify::new();
-    // apart from the reads: a stream that nobody polls stalls the connection, the reply to Describe included
-    let pump = async {
-        loop {
-            let ended = tokio::select! {
-                m = next(&mut changes) => m.is_none(),
-                m = next(&mut owners) => m.is_none(),
-            };
-            if ended {
-                return;
-            }
-            dirty.notify_one();
-        }
-    };
-    let reads = async {
-        let mut failed = false;
-        loop {
-            let answer = read(conn, timeout).await;
-            let retry = answer.as_ref().is_err_and(|e| !gone(e));
-            if let Err(e) = &answer
-                && !failed
-            {
-                eprintln!("kaericed: networkd: {e}");
-            }
-            failed = answer.is_err();
-            publish(tx, "network", &answer.unwrap_or(OFFLINE));
-            if retry {
-                let _ = time::timeout(timeout, dirty.notified()).await;
-            } else {
-                dirty.notified().await;
-            }
-            time::sleep(JOIN).await;
-        }
-    };
-    tokio::select! {
-        () = pump => {}
-        () = reads => {}
-    }
-    Err(zbus::Error::Failure("the bus connection was lost".into()))
+    .await
 }
 
-async fn next(stream: &mut MessageStream) -> Option<zbus::Result<zbus::Message>> {
-    poll_fn(|cx| Pin::new(&mut *stream).poll_next(cx)).await
-}
-
-async fn read(conn: &Connection, timeout: Duration) -> zbus::Result<Status> {
-    let answer = time::timeout(timeout, describe(conn)).await;
-    let json = answer.map_err(|_| zbus::Error::Failure("no answer".into()))??;
+async fn describe(conn: &Connection) -> zbus::Result<Status> {
+    let json: String = call(
+        conn,
+        NAME,
+        PATH,
+        "org.freedesktop.network1.Manager",
+        "Describe",
+        &(),
+    )
+    .await?;
     Ok(status(&json))
-}
-
-/// Not on the bus. Its return is a signal, so there is nothing to retry.
-fn gone(error: &zbus::Error) -> bool {
-    use zbus::fdo::Error::{NameHasNoOwner, ServiceUnknown};
-    matches!(error, zbus::Error::FDO(e) if matches!(**e, NameHasNoOwner(_) | ServiceUnknown(_)))
-}
-
-// NoAutoStart: a networkd that the user stopped stays stopped
-async fn describe(conn: &Connection) -> zbus::Result<String> {
-    Proxy::new(conn, NAME, PATH, "org.freedesktop.network1.Manager")
-        .await?
-        .call_with_flags("Describe", MethodFlags::NO_AUTO_START, &())
-        .await?
-        .ok_or(zbus::Error::InvalidReply)
 }
 
 #[cfg(test)]
@@ -244,6 +178,7 @@ mod tests {
     // a networkd of our own on the private bus of `run-tests`
     mod on_a_bus {
         use super::*;
+        use crate::follow::gone;
         use std::collections::HashMap;
         use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering::SeqCst};
         use std::sync::{Arc, Mutex};
@@ -418,13 +353,14 @@ mod tests {
         async fn only_a_missing_networkd_is_gone() {
             let _one = BUS.lock().await;
             let conn = Connection::session().await.unwrap();
-            let missing = read(&conn, LONG).await.unwrap_err();
+            let missing = describe(&conn).await.unwrap_err();
             assert!(gone(&missing), "{missing:?}");
-            let fake = Fake::says(WIFI_JSON);
-            fake.hangs.store(true, SeqCst);
-            let _networkd = own(&fake).await;
-            let hung = read(&conn, Duration::from_millis(100)).await.unwrap_err();
-            assert!(!gone(&hung), "{hung:?}");
+            let networkd = Connection::session().await.unwrap();
+            let server = networkd.object_server();
+            server.at("/elsewhere", Fake::default()).await.unwrap();
+            networkd.request_name(NAME).await.unwrap();
+            let broken = describe(&conn).await.unwrap_err();
+            assert!(!gone(&broken), "{broken:?}");
         }
 
         #[tokio::test]
