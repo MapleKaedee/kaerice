@@ -1,4 +1,5 @@
 mod brightness;
+mod cursor;
 mod follow;
 mod network;
 mod server;
@@ -53,6 +54,8 @@ async fn run() -> Result<(), Box<dyn Error>> {
                 }
                 Some(("sleep", what)) => sleep.call(what).map(Value::from),
                 Some(("stats", "read")) => stats::read(),
+                Some(("cursor", "read")) => cursor::read(),
+                Some(("cursor", "set")) => cursor::set(call.args).await,
                 Some(("session", "check")) => session::check(),
                 _ => Err("UnknownCall".into()),
             }

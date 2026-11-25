@@ -2,13 +2,14 @@ import QtQuick
 import qs.config
 import qs.services
 
-// Audio devices to choose from: one row each, the one in use filled.
+// Audio devices (or whatever label() names) to choose from: one row each, the one in use filled.
 // Tab focuses a row (accent border); Enter, Space or a click picks it.
 Column {
     id: root
     property var nodes: []
     property var current
     property int glyph
+    property var label: node => Audio.deviceName(node)
     signal picked(var node)
     width: parent?.width ?? 0
     spacing: 8
@@ -47,7 +48,7 @@ Column {
                 Text {
                     width: parent.width
                     elide: Text.ElideRight
-                    text: Audio.deviceName(row.modelData)
+                    text: root.label(row.modelData)
                     color: row.active ? Theme.accentText : Theme.text
                     font.pixelSize: 13; font.bold: true
                 }

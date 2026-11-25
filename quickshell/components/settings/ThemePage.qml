@@ -4,7 +4,7 @@ import qs.services
 import qs.components.base
 import qs.components.wallpaper
 
-// Wallpaper, light or dark (shell and apps separately), accent color, card shape.
+// Wallpaper, light or dark (shell and apps separately), accent color, card shape, cursor.
 Column {
     id: root
     spacing: 14
@@ -12,7 +12,10 @@ Column {
     readonly property string accent: String(Theme.accent) // "#rrggbb"
     function setAccent(hex) { Settings.set("theme.accent", hex); }
 
-    Component.onCompleted: Wallpaper.scan() // picks up new files
+    Component.onCompleted: {
+        Wallpaper.scan(); // picks up new files
+        Cursor.refresh();
+    }
 
     SettingRow { label: "Wallpaper"; hint: "SUPER+Y opens them all, and Wallhaven" }
     ListView { // Tab focuses it, Left/Right or a click pick
@@ -126,6 +129,31 @@ Column {
             value: Theme.shadow
             format: v => v ? v + " px" : "Off"
             onPicked: v => Settings.set("theme.shadow", v)
+        }
+    }
+
+    SettingRow {
+        label: "Cursor"
+        hint: !Cursor.state ? "Unavailable"
+            : Cursor.failed ? "The cursor could not be changed"
+            : "For all apps. An app that is already open may need to be opened again."
+    }
+    DeviceList {
+        visible: Cursor.state !== null
+        nodes: Cursor.themes
+        current: Cursor.theme
+        glyph: 0xf245 // mouse-pointer
+        label: name => name
+        onPicked: name => Cursor.set(name, Cursor.size)
+    }
+    SettingRow {
+        visible: Cursor.theme !== ""
+        label: "Cursor size"
+        Stepper {
+            values: [16, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96]
+            value: Cursor.size
+            format: v => v + " px"
+            onPicked: v => Cursor.set(Cursor.theme, v)
         }
     }
 }

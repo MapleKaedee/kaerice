@@ -5,6 +5,8 @@ StartLimitIntervalSec=60
 StartLimitBurst=5
 
 [Service]
+# glibc's default keeps the 7 MB that copying a cursor theme takes
+Environment=MALLOC_TRIM_THRESHOLD_=131072
 ExecStart=%S/kaerice/core/bin/kaericed
 RuntimeDirectory=kaerice
 RuntimeDirectoryMode=0700

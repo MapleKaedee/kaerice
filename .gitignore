@@ -16,3 +16,5 @@ TODO.md
 /core/target/
 # agent skills: local, like CLAUDE.md
 /.claude/
+# downloaded cursor packs
+/cursors/

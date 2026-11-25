@@ -18,10 +18,10 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
 Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
-`wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd.
+`wl-clipboard`, `grim`, `slurp`, `jq`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
 
-`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness and system usage:
-without it those show `N/A`, `--` or `Unavailable`, the brightness keys do nothing, and the rest works. Run `./install.sh`
+`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness, system usage and
+the cursor: without it those show `N/A`, `--` or `Unavailable`, the brightness keys do nothing, and the rest works. Run `./install.sh`
 again after a `git pull`: QML changes are live at once, the daemon only after that.
 
 Working on the daemon in `core/`: see [env.md](env.md).
@@ -67,6 +67,19 @@ If the lock ever refuses a correct password:
 2. Three wrong passwords lock the account for 10 min. Clear that with `faillock --user $USER --reset`, then go back (`CTRL+ALT+F1` or `F2`) and try again.
 3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` (open windows are lost).
 
+## Cursor
+
+Settings, Theme picks a cursor theme from `~/.local/share/icons`, `~/.icons` and `/usr/share/icons`, and a size from 16 to 96 px.
+`kaericed` copies the theme in that size to `~/.local/share/icons/kaerice-cursor-<theme>-<size>` (the theme itself stays as it is) and makes
+the copy the theme `default`, for Wayland, X11, XWayland and Flatpak apps. The first time, a `default` that is already in `~/.icons` or
+`~/.local/share/icons` moves to `default.pre-kaerice`, and the cursor theme named in the GTK `settings.ini` files, `~/.gtkrc-2.0` or `~/.Xresources`
+becomes `default`. To undo it, delete both `default` links and put `default.pre-kaerice` back.
+
+- Apps that are open and load the cursor themselves change when they are opened again. With `xorg-xsetroot`, X11 windows without a cursor
+  of their own change at once, without it at the next login.
+- Not reached: games with a cursor of their own, apps run as root, the login screen, and Niri (its config names a theme).
+- On a screen scaled above 1 the cursor is smaller than the number.
+
 ## Layout
 
 ```
@@ -76,7 +89,7 @@ quickshell/
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
