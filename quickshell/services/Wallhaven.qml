@@ -129,10 +129,11 @@ Singleton {
             required property string wid
             required property string url
             required property string file
-            // a .part file first, so half an image never shows up as a wallpaper
-            command: ["sh", "-c", `
-                mkdir -p "\${2%/*}" && curl -fsSL --proto =https --max-time 300 --max-filesize 100M -o "$2.part" -- "$1" && mv -- "$2.part" "$2" && exit 0
-                rm -f -- "$2.part"; exit 1`, "sh", url, file]
+            // setsid: a reload kills only the process started here, the rest must still finish. A .part file of its own ($$):
+            // half an image never shows up as a wallpaper, and after a reload the same one can be on its way twice.
+            command: ["setsid", "-fw", "sh", "-c", `
+                mkdir -p "\${2%/*}" && curl -fsSL --proto =https --max-time 300 --max-filesize 100M -o "$2.$$.part" -- "$1" && mv -- "$2.$$.part" "$2" && exit 0
+                rm -f -- "$2.$$.part"; exit 1`, "sh", url, file]
             onExited: code => {
                 const left = Object.assign({}, root.busy);
                 delete left[wid];

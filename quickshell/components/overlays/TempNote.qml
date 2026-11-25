@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import qs.config
 import qs.services
@@ -49,7 +48,7 @@ Overlay {
                     // Nerd Font: copy f0c5, trash f1f8
                     TextButton {
                         glyph: 0xf0c5; label: "Copy"
-                        onClicked: if (edit.text) Quickshell.execDetached(["wl-copy", edit.text])
+                        onClicked: if (edit.text) Note.copy()
                     }
                     TextButton {
                         glyph: 0xf1f8; label: clearArm.running ? "Sure?" : "Clear"
