@@ -42,7 +42,10 @@ Singleton {
         }
         onConnectionStateChanged: {
             if (connected) { root.tries = 0; root.down = false; }
-            else Object.keys(root.pending).forEach(id => root.answer(id, "Disconnected"));
+            else {
+                Object.keys(root.pending).forEach(id => root.answer(id, "Disconnected"));
+                root.topics = State.merge(root.topics, { sleep: null }); // Lock takes over at once, not when down
+            }
         }
     }
 

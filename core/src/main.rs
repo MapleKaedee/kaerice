@@ -3,6 +3,7 @@ mod follow;
 mod network;
 mod server;
 mod session;
+mod sleep;
 mod stats;
 mod wifi;
 
@@ -17,6 +18,7 @@ use tokio::sync::watch;
 
 use brightness::Brightness;
 use server::{Call, Topics};
+use sleep::Sleep;
 use wifi::Wifi;
 
 #[tokio::main(flavor = "current_thread")]
@@ -39,14 +41,17 @@ async fn run() -> Result<(), Box<dyn Error>> {
     let class = Path::new("/sys/class/backlight");
     let backlight = Brightness::new(bus.clone(), tx.clone(), class, limit);
     let brightness = backlight.clone();
+    let suspend = Sleep::new(bus.clone());
+    let sleep = suspend.clone();
     let calls = move |call: Call| {
-        let (wifi, brightness) = (wifi.clone(), brightness.clone());
+        let (wifi, brightness, sleep) = (wifi.clone(), brightness.clone(), sleep.clone());
         async move {
             match call.name.split_once('.') {
                 Some(("wifi", what)) => wifi.call(what, &call.args).await.map(Value::from),
                 Some(("brightness", what)) => {
                     brightness.call(what, &call.args).await.map(Value::from)
                 }
+                Some(("sleep", what)) => sleep.call(what).map(Value::from),
                 Some(("stats", "read")) => stats::read(),
                 Some(("session", "check")) => session::check(),
                 _ => Err("UnknownCall".into()),
@@ -57,6 +62,7 @@ async fn run() -> Result<(), Box<dyn Error>> {
         r = server::serve(listener, rx, calls) => r?,
         r = network::watch(&bus, &tx, limit) => r?,
         r = wifi::watch(&bus, &tx, limit) => r?,
+        r = suspend.watch(&tx, limit) => r?,
         () = backlight.watch() => {}
     }
     Ok(())

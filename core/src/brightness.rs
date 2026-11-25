@@ -275,11 +275,10 @@ mod tests {
     // a logind of our own on the private bus of `run-tests`
     mod on_a_bus {
         use super::*;
+        use crate::follow::LOGIND as BUS;
         use serde_json::json;
         use tokio::time::timeout;
 
-        // one bus name, so one test at a time
-        static BUS: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
         const LONG: Duration = Duration::from_secs(5);
         const SHORT: Duration = Duration::from_millis(200);
         const LINE: &str = r#"{"brightness":{"percent":55}}"#;

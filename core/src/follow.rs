@@ -12,6 +12,10 @@ use zbus::proxy::MethodFlags;
 use zbus::wire::DynamicDeserialize;
 use zbus::{Connection, DBusError, DynamicType, MatchRule, MessageStream, Proxy};
 
+/// One bus name on the private bus of `run-tests`, so one test at a time.
+#[cfg(test)]
+pub static LOGIND: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 /// One change sends several signals.
 const JOIN: Duration = Duration::from_millis(200);
 

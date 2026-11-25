@@ -57,7 +57,7 @@ All shell actions are also IPC calls: `qs -c kaerice ipc show`.
 
 ## Lock and idle
 
-The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend.
+The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend, with or without `kaericed`.
 Default idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
 suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage, and so does Awake in the control center.
 Change the times in settings, Power.
