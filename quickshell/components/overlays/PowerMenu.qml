@@ -51,7 +51,7 @@ Overlay {
     visible: Ui.power
     focusItem: keys
     onDismissed: Ui.power = false
-    onVisibleChanged: { release(); if (visible) { root.current = 0; Session.refresh(); } }
+    onVisibleChanged: { release(); if (visible) root.current = 0; }
     onCurrentChanged: release()
     onWarnedChanged: release() // a warning that shows up mid-hold must be read first
 

@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 
 use crate::server::Answer;
 
-const MANAGERS: [&str; 3] = ["pacman", "paru", "yay"];
+const MANAGERS: [&str; 4] = ["pacman", "paru", "yay", "shelly"];
 const DOWNLOADERS: [&str; 4] = ["curl", "wget", "aria2c", "yt-dlp"];
 
 /// The "session.check" call: what a logout or power off would interrupt.
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn package_managers() {
-        for name in ["pacman", "paru", "yay"] {
+        for name in ["pacman", "paru", "yay", "shelly"] {
             let root = Root::new(name).process("200", name);
             assert_eq!(root.check(), found(true, false), "{name}");
         }
@@ -138,7 +138,10 @@ mod tests {
     fn other_names_do_not_match() {
         let root = Root::new("other")
             .process("200", "pacman-key")
-            .process("201", "curlew");
+            .process("201", "curlew")
+            // the window and the tray icon of Shelly, which stay open
+            .process("202", "shelly-ui")
+            .process("203", "shelly-notifica");
         assert_eq!(root.check(), found(false, false));
     }
 
