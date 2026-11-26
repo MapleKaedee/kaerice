@@ -2,20 +2,25 @@ use std::path::Path;
 use std::{env, fs, io};
 
 use serde_json::{Value, json};
+use tokio::task;
 
 use crate::server::Answer;
 
 const MANAGERS: [&str; 4] = ["pacman", "paru", "yay", "shelly"];
 const DOWNLOADERS: [&str; 4] = ["curl", "wget", "aria2c", "yt-dlp"];
 
-/// The "session.check" call: what a logout or power off would interrupt.
-pub fn check() -> Answer<Value> {
+/// The "session.check" call: what a logout or power off would interrupt. Not on the main thread: it reads a folder
+/// of the user's.
+pub async fn check() -> Answer<Value> {
     let home = env::var_os("HOME").ok_or("Failed")?;
-    look(
-        Path::new("/proc"),
-        Path::new("/var/lib/pacman/db.lck"),
-        &Path::new(&home).join("Downloads"),
-    )
+    let work = move || {
+        look(
+            Path::new("/proc"),
+            Path::new("/var/lib/pacman/db.lck"),
+            &Path::new(&home).join("Downloads"),
+        )
+    };
+    task::spawn_blocking(work).await.map_err(|_| "Failed")?
 }
 
 /// Fails when it cannot look: that must not pass for "nothing".

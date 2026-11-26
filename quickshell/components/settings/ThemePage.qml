@@ -151,7 +151,8 @@ Column {
         current: Cursor.theme
         glyph: 0xf245 // mouse-pointer
         label: name => name
-        onPicked: name => Cursor.set(name, Cursor.size)
+        // a theme without a copy reports the size apps get, which cursor.set may refuse (it takes 16..96)
+        onPicked: name => Cursor.set(name, Math.min(Math.max(Cursor.size, 16), 96))
     }
     SettingRow {
         visible: Cursor.theme !== ""

@@ -60,15 +60,15 @@ async fn run() -> Result<(), Box<dyn Error>> {
                 }
                 Some(("sleep", what)) => sleep.call(what).map(Value::from),
                 Some(("stats", "read")) => stats::read(),
-                Some(("cursor", "read")) => cursor::read(),
+                Some(("cursor", "read")) => cursor::read().await,
                 Some(("cursor", "set")) => cursor::set(call.args).await,
-                Some(("session", "check")) => session::check(),
+                Some(("session", "check")) => session::check().await,
                 _ => Err("UnknownCall".into()),
             }
         }
     };
     tokio::select! {
-        r = server::serve(listener, rx, calls) => r?,
+        () = server::serve(listener, rx, calls) => {}
         r = network::watch(&bus, &tx, limit) => r?,
         r = wifi::watch(&bus, &tx, limit) => r?,
         r = suspend.watch(&tx, limit) => r?,

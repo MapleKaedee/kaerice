@@ -59,10 +59,10 @@ struct State {
     size: u32,
 }
 
-/// The "cursor.read" call.
-pub fn read() -> Answer<Value> {
-    let state = Dirs::new()?.state();
-    Ok(serde_json::to_value(state).expect("the state is plain data"))
+/// The "cursor.read" call. Not on the main thread: it lists folders and may read a whole cursor file.
+pub async fn read() -> Answer<Value> {
+    let work = || Ok(serde_json::to_value(Dirs::new()?.state()).expect("the state is plain data"));
+    task::spawn_blocking(work).await.map_err(|_| "Failed")?
 }
 
 /// The "cursor.set" call: gives the name of the copy. Not on the main thread, a big theme takes a while.

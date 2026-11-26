@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::io;
 use std::os::unix::net::UnixStream as Probe;
 use std::path::Path;
+use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -11,6 +12,8 @@ use tokio::sync::{mpsc, watch};
 
 /// The longest line a client may send.
 const LINE: usize = 4096;
+/// The most calls of one client that run at once: its next lines wait unread.
+const CALLS: usize = 16;
 
 /// The last state of every topic, as the line that is sent (without the newline).
 pub type Topics = BTreeMap<&'static str, String>;
@@ -47,18 +50,23 @@ pub fn bind(path: &Path) -> io::Result<UnixListener> {
     }
 }
 
-pub async fn serve<H, F>(
-    listener: UnixListener,
-    rx: watch::Receiver<Topics>,
-    handler: H,
-) -> io::Result<()>
+/// Never ends: a failed accept (out of fds after a flood of clients) must not take the daemon down.
+pub async fn serve<H, F>(listener: UnixListener, rx: watch::Receiver<Topics>, handler: H)
 where
     H: Fn(Call) -> F + Clone + Send + 'static,
     F: Future<Output = Answer<Value>> + Send + 'static,
 {
     loop {
-        let (stream, _) = listener.accept().await?;
-        tokio::spawn(client(stream, rx.clone(), handler.clone()));
+        match listener.accept().await {
+            Ok((stream, _)) => {
+                tokio::spawn(client(stream, rx.clone(), handler.clone()));
+            }
+            Err(e) => {
+                eprintln!("kaericed: could not accept a client: {e}");
+                // the waiting client keeps the listener ready: without a pause this spins
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
+        }
     }
 }
 
@@ -74,6 +82,8 @@ where
 {
     let mut sent = Topics::new();
     let mut input = Vec::with_capacity(LINE);
+    let mut running = 0;
+    let mut warned = false;
     let (done, mut answers) = mpsc::unbounded_channel();
     loop {
         let topics = rx.borrow_and_update().clone();
@@ -87,21 +97,31 @@ where
             // in this order: the state that a call changed goes out before its answer
             biased;
             changed = rx.changed() => if changed.is_err() { return Ok(()) },
-            Some(line) = answers.recv() => stream.write_all(format!("{line}\n").as_bytes()).await?,
-            read = stream.read_buf(&mut input) => if read? == 0 { return Ok(()) },
+            Some(line) = answers.recv() => {
+                running -= 1;
+                stream.write_all(format!("{line}\n").as_bytes()).await?;
+            }
+            // a client that never reads its answers would pile them up here
+            read = stream.read_buf(&mut input), if running < CALLS => if read? == 0 { return Ok(()) },
         }
-        while let Some(end) = input.iter().position(|b| *b == b'\n') {
+        while running < CALLS
+            && let Some(end) = input.iter().position(|b| *b == b'\n')
+        {
             let line: Vec<u8> = input.drain(..=end).collect();
             let Ok(Request { id, call, args }) = serde_json::from_slice(&line) else {
-                // never the line itself: it can hold a password
-                eprintln!("kaericed: a client sent a line that is not a call");
+                // never the line itself: it can hold a password; once per client, or a loop floods the journal
+                if !warned {
+                    eprintln!("kaericed: a client sent a line that is not a call");
+                    warned = true;
+                }
                 continue;
             };
             let (done, answer) = (done.clone(), handler(Call { name: call, args }));
             // a task of its own: a call goes on after its client left
             tokio::spawn(async move { done.send(reply(id, answer.await)) });
+            running += 1;
         }
-        if input.len() > LINE {
+        if input.len() > LINE && !input.contains(&b'\n') {
             return Ok(());
         }
     }
@@ -122,6 +142,7 @@ mod tests {
     use std::path::PathBuf;
     use std::time::Duration;
     use tokio::io::{AsyncBufReadExt, BufReader, Lines};
+    use tokio::sync::Semaphore;
     use tokio::time::{sleep, timeout};
 
     fn state(kind: Kind, ssid: Option<&str>) -> Status {
@@ -441,5 +462,36 @@ mod tests {
         assert_eq!(timeout(limit, finished.recv()).await, Ok(Some("started")));
         drop(a);
         assert_eq!(timeout(limit, finished.recv()).await, Ok(Some("finished")));
+    }
+
+    #[tokio::test]
+    async fn a_client_runs_only_a_few_calls_at_once() {
+        use std::sync::Arc;
+        use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
+        let sock = Sock::new("many");
+        let (_tx, rx) = watch::channel(Topics::new());
+        let (started, gate) = (Arc::new(AtomicUsize::new(0)), Arc::new(Semaphore::new(0)));
+        let (count, wait) = (started.clone(), gate.clone());
+        tokio::spawn(serve(bind(&sock.0).unwrap(), rx, move |_| {
+            count.fetch_add(1, SeqCst);
+            let wait = wait.clone();
+            async move {
+                let _ = wait.acquire().await;
+                Ok(Value::Null)
+            }
+        }));
+        let mut a = connect(&sock).await;
+        let calls: String = (0..100)
+            .map(|i| format!("{{\"id\":{i},\"call\":\"ok\"}}\n"))
+            .collect();
+        send(&mut a, calls.as_bytes()).await;
+        sleep(Duration::from_millis(100)).await;
+        assert_eq!(started.load(SeqCst), CALLS);
+        // each call gives its permit back when it ends
+        gate.add_permits(1);
+        for _ in 0..100 {
+            next(&mut a).await;
+        }
+        assert_eq!(started.load(SeqCst), 100);
     }
 }
