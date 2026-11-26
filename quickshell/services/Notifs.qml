@@ -53,13 +53,19 @@ Singleton {
             n.tracked = true;
             // here, not in the popup's onDestruction: that writes shown while the popup model reads it (binding loop)
             n.closed.connect(() => root.hide(n.id));
+            const critical = n.urgency === NotificationUrgency.Critical;
+            // a reload hands every kept notification in again: its time is saved, and only a critical one was still on screen
+            if (n.lastGeneration) {
+                if (critical) root.shown = root.shown.concat([n.id]);
+                return;
+            }
             // keep times only for notifications still in the history
             const kept = {};
             for (const t of server.trackedNotifications.values)
                 if (root.times[t.id]) kept[t.id] = root.times[t.id];
             kept[n.id] = Qt.formatDateTime(new Date(), "HH:mm");
             persist.times = JSON.stringify(kept);
-            if (!root.dnd || n.urgency === NotificationUrgency.Critical)
+            if (!root.dnd || critical)
                 root.shown = root.shown.concat([n.id]);
         }
     }
