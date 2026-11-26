@@ -52,7 +52,7 @@ struct Theme {
     inherits: Vec<String>,
 }
 
-/// Bytes that one download may read, decode and write: a small PNG can hold a big picture.
+/// Bytes that one download may read and decode, and its dropped themes write: a small PNG can hold a big picture.
 const WORK: u64 = 1 << 30;
 
 /// The error is the reason for the user.
@@ -76,6 +76,8 @@ fn install(dirs: &Dirs, root: &Path, label: &str, mut work: u64) -> Result<Repor
             Ok(Some(Err(taken))) => report.notes.push(format!("{taken} is already installed.")),
             Err(e) => report.notes.push(e.to_string()),
         }
+        // what a dropped one wrote, or they would write without end
+        work = work.saturating_sub(left - rest);
         let _ = fs::remove_dir_all(&stage);
     }
     report.notes.dedup();
@@ -163,7 +165,7 @@ fn linux(
     for name in &folder.files {
         let file = open(&folder.path.join(name), BYTES, work);
         if let Some(file) = file.filter(|file| frames(file).is_some()) {
-            spend(left, work, &file)?;
+            *left = spend(*left, &file)?;
             fs::create_dir_all(&cursors)?;
             fs::write(cursors.join(name), file)?;
             given.insert(name.clone());
@@ -220,7 +222,7 @@ fn windows(
                 _ => continue,
             }
         };
-        spend(left, work, &found)?;
+        *left = spend(*left, &found)?;
         fs::create_dir_all(&cursors)?;
         fs::write(cursors.join(file), found)?;
         for name in *links {
@@ -248,14 +250,9 @@ fn open(path: &Path, limit: u64, work: &mut u64) -> Option<Vec<u8>> {
     file
 }
 
-/// A file that is written, paid from `left` and from `work`, which a dropped theme does not give back.
-fn spend(left: &mut u64, work: &mut u64, file: &[u8]) -> io::Result<()> {
-    let n = file.len() as u64;
-    let (Some(rest), Some(more)) = (left.checked_sub(n), work.checked_sub(n)) else {
-        return Err(io::Error::other("The theme is too big."));
-    };
-    (*left, *work) = (rest, more);
-    Ok(())
+fn spend(left: u64, file: &[u8]) -> io::Result<u64> {
+    let left = left.checked_sub(file.len() as u64);
+    left.ok_or_else(|| io::Error::other("The theme is too big."))
 }
 
 /// "" for the root, whose name is made up.
@@ -618,8 +615,8 @@ mod tests {
         let file = plain(32, 1);
         b.write("in/A/Normal.cur", &file)
             .write("in/B/Normal.cur", &file);
-        // the file, its picture, the pixels, the XCursor written
-        let one = (2 * file.len() + bytes(32, 32) + 64 + bytes(32, 32)) as u64;
+        // the file, its picture, the pixels
+        let one = (2 * file.len() + bytes(32, 32)) as u64;
         b.install_within(one + one / 2).unwrap();
         assert_eq!(b.names(OWN).len(), 1);
     }
@@ -631,12 +628,12 @@ mod tests {
         let file = xcursor(24);
         b.write("in/A/cursors/left_ptr", &file);
         assert!(b.install_within(file.len() as u64 - 1).is_err());
+        assert!(b.install_within(file.len() as u64).is_ok());
         let b = Home::new("read-again");
         b.write("in/A/cursors/left_ptr", &file)
             .write("in/B/cursors/left_ptr", &file);
         let n = file.len() as u64;
-        // read and written, then read
-        b.install_within(2 * n + n / 2).unwrap();
+        b.install_within(n + n / 2).unwrap();
         assert_eq!(b.names(OWN).len(), 1);
         // one that is too big was read up to the limit
         let mut work = 15;
@@ -679,13 +676,18 @@ mod tests {
     }
 
     #[test]
-    fn writing_takes_from_the_budget() {
+    fn a_dropped_theme_pays_for_what_it_wrote() {
         // or the themes that are dropped would write without end
-        let b = Home::new("write");
-        let n = xcursor(24).len() as u64;
-        b.write("in/A/cursors/left_ptr", xcursor(24));
-        assert!(b.install_within(2 * n - 1).is_err());
-        assert!(b.install_within(2 * n).is_ok());
+        let b = Home::new("dropped");
+        let arrow = plain(32, 1);
+        b.write("in/Normal.cur", &arrow)
+            .write("system/My Download/index.theme", "")
+            .write("in/B/cursors/left_ptr", xcursor(24));
+        // what both read and decode, then the XCursor of the first
+        let read = 2 * arrow.len() - 22 + bytes(32, 32) + xcursor(24).len();
+        let need = (read + 64 + bytes(32, 32)) as u64;
+        assert!(b.install_within(need - 1).is_err());
+        assert_eq!(b.install_within(need).unwrap().installed, ["B"]);
     }
 
     #[test]

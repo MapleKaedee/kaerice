@@ -280,16 +280,21 @@ fn text(data: &[u8]) -> String {
 }
 
 /// The images of a .cur or .ani file, whatever it is called. Each picture is paid from `work` before it is read: its
-/// bytes in the file, then its pixels. At most BYTES for one file.
+/// bytes in the file, then its pixels. At most BYTES for the pictures of one file, and BYTES for the steps.
 pub fn read(file: &[u8], work: &mut u64) -> Option<Vec<Image>> {
+    match file.get(..4)? {
+        b"RIFF" => ani(file, work),
+        _ => paid(work, |left| cur(file, left)),
+    }
+}
+
+/// `f` spends at most BYTES of `work`.
+fn paid<T>(work: &mut u64, f: impl FnOnce(&mut u64) -> T) -> T {
     let start = (*work).min(BYTES);
     let mut left = start;
-    let images = match file.get(..4)? {
-        b"RIFF" => ani(file, &mut left),
-        _ => cur(file, &mut left),
-    };
+    let out = f(&mut left);
     *work -= start - left;
-    images
+    out
 }
 
 fn take(left: &mut u64, n: usize) -> Option<()> {
@@ -307,7 +312,7 @@ fn word(data: &[u8], at: usize) -> Option<u32> {
     Some(u32::from_le_bytes(bytes))
 }
 
-fn ani(file: &[u8], left: &mut u64) -> Option<Vec<Image>> {
+fn ani(file: &[u8], work: &mut u64) -> Option<Vec<Image>> {
     if file.get(8..12)? != b"ACON" {
         return None;
     }
@@ -335,25 +340,31 @@ fn ani(file: &[u8], left: &mut u64) -> Option<Vec<Image>> {
     if steps.len() > STEPS {
         return None;
     }
-    let icons: Vec<_> = icons.into_iter().map(|icon| cur(icon, left)).collect();
-    let mut images = Vec::new();
-    for (i, step) in steps.into_iter().enumerate() {
-        let jiffies = rates.as_ref().and_then(|r| r.get(i).copied());
-        // 60 in a second; the shell and Hyprland would not move on from 0
-        let delay = match u64::from(jiffies.unwrap_or(rate)) * 1000 / 60 {
-            0 => 100,
-            ms => ms.min(60_000) as u32,
-        };
-        for image in icons.get(step)?.as_ref()? {
-            take(left, image.pixels.len())?;
-            images.push(Image {
-                delay,
-                pixels: image.pixels.clone(),
-                ..*image
-            });
+    let icons: Vec<_> = paid(work, |left| {
+        icons.into_iter().map(|icon| cur(icon, left)).collect()
+    });
+    let frames = steps.iter().map(|&step| icons.get(step)?.as_ref());
+    let frames: Vec<_> = frames.collect::<Option<_>>()?;
+    paid(work, |left| {
+        let mut images = Vec::new();
+        for (i, frame) in frames.into_iter().enumerate() {
+            let jiffies = rates.as_ref().and_then(|r| r.get(i).copied());
+            // 60 in a second; the shell and Hyprland would not move on from 0
+            let delay = match u64::from(jiffies.unwrap_or(rate)) * 1000 / 60 {
+                0 => 100,
+                ms => ms.min(60_000) as u32,
+            };
+            for image in frame {
+                take(left, image.pixels.len())?;
+                images.push(Image {
+                    delay,
+                    pixels: image.pixels.clone(),
+                    ..*image
+                });
+            }
         }
-    }
-    (!images.is_empty()).then_some(images)
+        (!images.is_empty()).then_some(images)
+    })
 }
 
 /// Those that are whole: the length in the header of the file is often wrong.
@@ -720,6 +731,15 @@ pub mod tests {
         let images = super::read(&ani(10, &[seq], &[icon]), &mut work).unwrap();
         assert_eq!(images.len(), 10);
         assert_eq!(work, once - 10 * bytes(32, 32) as u64);
+    }
+
+    #[test]
+    fn the_steps_have_a_limit_of_their_own() {
+        // 40 MB of pictures, and as much again for the steps
+        let data = vec![0; 256 * 256];
+        let png = png_of(256, 256, png::ColorType::Grayscale, None, &data);
+        let frame = cur(&[(0, 0, 0, 0, png)]);
+        assert_eq!(read(&ani(160, &[], &vec![frame; 160])).unwrap().len(), 160);
     }
 
     fn png(color: png::ColorType, palette: Option<&[u8]>, data: &[u8]) -> Vec<u8> {
