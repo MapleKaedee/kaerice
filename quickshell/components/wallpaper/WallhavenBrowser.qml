@@ -10,6 +10,7 @@ Item {
     id: root
     property int cols: 4
     property bool keyOpen: false
+    Component.onCompleted: searchField.input.text = Wallhaven.query // the picker is lazy: a new, empty field at every open
 
     function enter() {
         searchField.input.forceActiveFocus();

@@ -6,7 +6,7 @@ import Quickshell.Services.Notifications
 import QtQuick
 
 // Notification daemon (owns org.freedesktop.Notifications) and history.
-// Notifications stay in `list` until dismissed; `shown` holds the ids currently shown as popups.
+// Notifications stay in `list` until dismissed or `limit` newer ones came; `shown` holds the ids currently shown as popups.
 // Do not disturb: no popups except critical ones, but everything still lands in the history.
 // dnd is saved (state file "silent"); arrival times survive a config reload, like the notifications themselves.
 Singleton {
@@ -17,7 +17,8 @@ Singleton {
     property var shown: []     // ids of notifications currently shown as popups
     readonly property var times: JSON.parse(persist.times) // id -> "HH:mm" of arrival
     readonly property var list: server.trackedNotifications // oldest first
-    readonly property int count: server.trackedNotifications.values.length
+    property int count: 0 // set below: a binding on values.length copies the whole list at every change
+    readonly property int limit: 50 // in the history; one with an image holds ~270 KB
 
     function hide(id) { root.shown = root.shown.filter(x => x !== id); }
 
@@ -53,6 +54,10 @@ Singleton {
             n.tracked = true;
             // here, not in the popup's onDestruction: that writes shown while the popup model reads it (binding loop)
             n.closed.connect(() => root.hide(n.id));
+            // expire, not dismiss: to the app, dismissed means the user closed it
+            const old = server.trackedNotifications.values.filter(x => x !== n); // n is not in the model yet
+            for (let i = 0; i < old.length + 1 - root.limit; i++)
+                old[i].expire();
             const critical = n.urgency === NotificationUrgency.Critical;
             // a reload hands every kept notification in again: it keeps its time, and only a critical one pops up again.
             // One without a time came while the old shell was closing: it is new.
@@ -69,5 +74,10 @@ Singleton {
             if (!root.dnd || critical)
                 root.shown = root.shown.concat([n.id]);
         }
+    }
+
+    Connections {
+        target: server.trackedNotifications
+        function onValuesChanged() { root.count = server.trackedNotifications.rowCount(); }
     }
 }

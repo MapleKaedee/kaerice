@@ -40,6 +40,7 @@ ShellRoot {
     LazyLoader { active: Ui.launcher; Launcher {} }
     LazyLoader { active: Ui.emoji; EmojiPicker {} }
     LazyLoader { active: Switcher.open; WindowSwitcher {} }
+    LazyLoader { active: Ui.wallpaperPicker; WallpaperPicker {} }
 
     Calendar {}
     WifiMenu {}
@@ -48,7 +49,6 @@ ShellRoot {
     Keybinds {}
     PowerMenu {}
     SettingsPanel {}
-    WallpaperPicker {}
     ScreenshotEditor {}
 
     Ipc {}
