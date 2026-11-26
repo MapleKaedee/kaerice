@@ -54,8 +54,9 @@ Singleton {
             // here, not in the popup's onDestruction: that writes shown while the popup model reads it (binding loop)
             n.closed.connect(() => root.hide(n.id));
             const critical = n.urgency === NotificationUrgency.Critical;
-            // a reload hands every kept notification in again: its time is saved, and only a critical one was still on screen
-            if (n.lastGeneration) {
+            // a reload hands every kept notification in again: it keeps its time, and only a critical one pops up again.
+            // One without a time came while the old shell was closing: it is new.
+            if (n.lastGeneration && root.times[n.id]) {
                 if (critical) root.shown = root.shown.concat([n.id]);
                 return;
             }
