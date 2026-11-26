@@ -64,6 +64,8 @@ fn install(dirs: &Dirs, root: &Path, label: &str, mut work: u64) -> Result<Repor
     let mut report = Report::default();
     // for all themes together: one download can hold thousands
     let mut left = dirs.limit;
+    // the work ran out while one was read: a shape that is missing for it would go unnoticed
+    let mut short = false;
     for folder in &folders {
         // one that is not installed gives its share back: its stage is removed
         let mut rest = left;
@@ -76,12 +78,12 @@ fn install(dirs: &Dirs, root: &Path, label: &str, mut work: u64) -> Result<Repor
             Ok(Some(Err(taken))) => report.notes.push(format!("{taken} is already installed.")),
             Err(e) => report.notes.push(e.to_string()),
         }
+        short |= work == 0;
         // what a dropped one wrote, or they would write without end
         work = work.saturating_sub(left - rest);
         let _ = fs::remove_dir_all(&stage);
     }
-    // a shape that is missing for it would go unnoticed
-    if work == 0 {
+    if short {
         report
             .notes
             .push("Some cursors were left out: the download is too big.".into());
@@ -699,6 +701,20 @@ mod tests {
                 "{more}"
             );
         }
+    }
+
+    #[test]
+    fn paying_for_a_dropped_theme_leaves_nothing_out() {
+        let b = Home::new("no-note");
+        let arrow = plain(32, 1);
+        b.write("in/Normal.cur", &arrow)
+            .write("system/My Download/index.theme", "");
+        // all it reads and decodes, but not all it wrote
+        let work = 2 * arrow.len() - 22 + bytes(32, 32) + 64 + bytes(32, 32) - 1;
+        assert_eq!(
+            b.install_within(work as u64).err().unwrap(),
+            "My Download is already installed."
+        );
     }
 
     #[test]
