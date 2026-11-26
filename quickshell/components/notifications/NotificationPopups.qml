@@ -21,7 +21,8 @@ PanelWindow {
         spacing: 10
 
         Repeater {
-            model: Notifs.list
+            // ScriptModel: cards that stay shown keep their timers when another one comes or goes
+            model: ScriptModel { values: Notifs.list.values.filter(n => Notifs.shown.indexOf(n.id) >= 0) }
 
             NotificationCard {
                 id: popup
@@ -29,7 +30,6 @@ PanelWindow {
                 readonly property int nid: modelData.id
                 notification: modelData
                 width: popups.width
-                visible: Notifs.shown.indexOf(nid) >= 0
                 onActivated: Notifs.activate(modelData)
 
                 Timer {
@@ -37,7 +37,6 @@ PanelWindow {
                     interval: Notifs.timeout
                     onTriggered: Notifs.hide(popup.nid)
                 }
-                Component.onDestruction: Notifs.hide(popup.nid)
             }
         }
     }

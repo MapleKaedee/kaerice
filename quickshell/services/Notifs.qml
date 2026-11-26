@@ -51,6 +51,8 @@ Singleton {
         bodySupported: true
         onNotification: n => {
             n.tracked = true;
+            // here, not in the popup's onDestruction: that writes shown while the popup model reads it (binding loop)
+            n.closed.connect(() => root.hide(n.id));
             // keep times only for notifications still in the history
             const kept = {};
             for (const t of server.trackedNotifications.values)
