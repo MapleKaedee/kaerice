@@ -297,9 +297,11 @@ fn paid<T>(work: &mut u64, f: impl FnOnce(&mut u64) -> T) -> T {
     out
 }
 
+/// One that runs short loses the rest, so that a download out of work ends at 0.
 fn take(left: &mut u64, n: usize) -> Option<()> {
-    *left = left.checked_sub(n as u64)?;
-    Some(())
+    let rest = left.checked_sub(n as u64);
+    *left = rest.unwrap_or(0);
+    rest.map(|_| ())
 }
 
 fn half(data: &[u8], at: usize) -> Option<u32> {
@@ -739,7 +741,19 @@ pub mod tests {
         let data = vec![0; 256 * 256];
         let png = png_of(256, 256, png::ColorType::Grayscale, None, &data);
         let frame = cur(&[(0, 0, 0, 0, png)]);
-        assert_eq!(read(&ani(160, &[], &vec![frame; 160])).unwrap().len(), 160);
+        assert_eq!(
+            read(&ani(160, &[], &vec![frame.clone(); 160]))
+                .unwrap()
+                .len(),
+            160
+        );
+        // but no more: 75 MB of steps
+        let mut once = u64::MAX;
+        super::read(&frame, &mut once).unwrap();
+        let seq = chunk(b"seq ", &words(&[0; 300]));
+        let mut work = u64::MAX;
+        assert!(super::read(&ani(300, &[seq], &[frame]), &mut work).is_none());
+        assert_eq!(work, once - BYTES);
     }
 
     fn png(color: png::ColorType, palette: Option<&[u8]>, data: &[u8]) -> Vec<u8> {

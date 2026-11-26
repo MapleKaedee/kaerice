@@ -80,6 +80,12 @@ fn install(dirs: &Dirs, root: &Path, label: &str, mut work: u64) -> Result<Repor
         work = work.saturating_sub(left - rest);
         let _ = fs::remove_dir_all(&stage);
     }
+    // a shape that is missing for it would go unnoticed
+    if work == 0 {
+        report
+            .notes
+            .push("Some cursors were left out: the download is too big.".into());
+    }
     report.notes.dedup();
     if !report.installed.is_empty() {
         return Ok(report);
@@ -673,6 +679,26 @@ mod tests {
         let report = install(&dirs, &b.0.join("in"), "x", WORK).unwrap();
         assert_eq!(report.installed, ["B"]);
         assert_eq!(report.notes, ["x is already installed."]);
+    }
+
+    #[test]
+    fn running_out_is_told() {
+        let arrow = plain(32, 1);
+        let busy = plain(32, 2);
+        // the arrow fits, then reading Busy.cur or decoding it does not
+        for more in [100, busy.len() + 100] {
+            let b = Home::new("short");
+            b.write("in/x/Normal.cur", &arrow)
+                .write("in/x/Busy.cur", &busy);
+            let work = 2 * arrow.len() - 22 + bytes(32, 32) + more;
+            let report = b.install_within(work as u64).unwrap();
+            assert_eq!(report.installed, ["x"]);
+            assert_eq!(
+                report.notes,
+                ["Some cursors were left out: the download is too big."],
+                "{more}"
+            );
+        }
     }
 
     #[test]
