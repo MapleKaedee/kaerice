@@ -52,7 +52,7 @@ struct Theme {
     inherits: Vec<String>,
 }
 
-/// Bytes of pixels that may be decoded for one download: a small PNG can hold a big picture.
+/// Bytes that one download may read, decode and write: a small PNG can hold a big picture.
 const WORK: u64 = 1 << 30;
 
 /// The error is the reason for the user.
@@ -65,9 +65,14 @@ fn install(dirs: &Dirs, root: &Path, label: &str, mut work: u64) -> Result<Repor
     // for all themes together: one download can hold thousands
     let mut left = dirs.limit;
     for folder in &folders {
-        match add(dirs, root, label, folder, &stage, &mut work, &mut left) {
+        // one that is not installed gives its share back: its stage is removed
+        let mut rest = left;
+        match add(dirs, root, label, folder, &stage, &mut work, &mut rest) {
             Ok(None) => {}
-            Ok(Some(Ok(name))) => report.installed.push(name),
+            Ok(Some(Ok(name))) => {
+                left = rest;
+                report.installed.push(name);
+            }
             Ok(Some(Err(taken))) => report.notes.push(format!("{taken} is already installed.")),
             Err(e) => report.notes.push(e.to_string()),
         }
@@ -158,7 +163,7 @@ fn linux(
     for name in &folder.files {
         let file = open(&folder.path.join(name), BYTES, work);
         if let Some(file) = file.filter(|file| frames(file).is_some()) {
-            *left = spend(*left, &file)?;
+            spend(left, work, &file)?;
             fs::create_dir_all(&cursors)?;
             fs::write(cursors.join(name), file)?;
             given.insert(name.clone());
@@ -215,7 +220,7 @@ fn windows(
                 _ => continue,
             }
         };
-        *left = spend(*left, &found)?;
+        spend(left, work, &found)?;
         fs::create_dir_all(&cursors)?;
         fs::write(cursors.join(file), found)?;
         for name in *links {
@@ -243,9 +248,14 @@ fn open(path: &Path, limit: u64, work: &mut u64) -> Option<Vec<u8>> {
     file
 }
 
-fn spend(left: u64, file: &[u8]) -> io::Result<u64> {
-    let left = left.checked_sub(file.len() as u64);
-    left.ok_or_else(|| io::Error::other("The theme is too big."))
+/// A file that is written, paid from `left` and from `work`, which a dropped theme does not give back.
+fn spend(left: &mut u64, work: &mut u64, file: &[u8]) -> io::Result<()> {
+    let n = file.len() as u64;
+    let (Some(rest), Some(more)) = (left.checked_sub(n), work.checked_sub(n)) else {
+        return Err(io::Error::other("The theme is too big."));
+    };
+    (*left, *work) = (rest, more);
+    Ok(())
 }
 
 /// "" for the root, whose name is made up.
@@ -608,8 +618,8 @@ mod tests {
         let file = plain(32, 1);
         b.write("in/A/Normal.cur", &file)
             .write("in/B/Normal.cur", &file);
-        // the file, its picture, the pixels
-        let one = (2 * file.len() + bytes(32, 32)) as u64;
+        // the file, its picture, the pixels, the XCursor written
+        let one = (2 * file.len() + bytes(32, 32) + 64 + bytes(32, 32)) as u64;
         b.install_within(one + one / 2).unwrap();
         assert_eq!(b.names(OWN).len(), 1);
     }
@@ -621,12 +631,12 @@ mod tests {
         let file = xcursor(24);
         b.write("in/A/cursors/left_ptr", &file);
         assert!(b.install_within(file.len() as u64 - 1).is_err());
-        assert!(b.install_within(file.len() as u64).is_ok());
         let b = Home::new("read-again");
         b.write("in/A/cursors/left_ptr", &file)
             .write("in/B/cursors/left_ptr", &file);
         let n = file.len() as u64;
-        b.install_within(n + n / 2).unwrap();
+        // read and written, then read
+        b.install_within(2 * n + n / 2).unwrap();
         assert_eq!(b.names(OWN).len(), 1);
         // one that is too big was read up to the limit
         let mut work = 15;
@@ -648,6 +658,34 @@ mod tests {
         let report = install(&dirs, &b.0.join("in"), "x", WORK).unwrap();
         assert_eq!(b.names(OWN).len(), 1);
         assert_eq!(report.notes, ["The theme is too big."]);
+    }
+
+    #[test]
+    fn a_theme_that_is_not_installed_gives_its_share_back() {
+        let b = Home::new("give-back");
+        // the download itself is a theme, so it comes first
+        b.write("in/Normal.cur", plain(32, 1))
+            .write("system/x/index.theme", "")
+            .write("in/B/cursors/left_ptr", xcursor(24));
+        let dirs = Dirs {
+            home: b.0.join("home"),
+            system: b.0.join("system"),
+            // Normal.cur as an XCursor
+            limit: (64 + bytes(32, 32)) as u64,
+        };
+        let report = install(&dirs, &b.0.join("in"), "x", WORK).unwrap();
+        assert_eq!(report.installed, ["B"]);
+        assert_eq!(report.notes, ["x is already installed."]);
+    }
+
+    #[test]
+    fn writing_takes_from_the_budget() {
+        // or the themes that are dropped would write without end
+        let b = Home::new("write");
+        let n = xcursor(24).len() as u64;
+        b.write("in/A/cursors/left_ptr", xcursor(24));
+        assert!(b.install_within(2 * n - 1).is_err());
+        assert!(b.install_within(2 * n).is_ok());
     }
 
     #[test]

@@ -337,7 +337,6 @@ fn ani(file: &[u8], left: &mut u64) -> Option<Vec<Image>> {
     }
     let icons: Vec<_> = icons.into_iter().map(|icon| cur(icon, left)).collect();
     let mut images = Vec::new();
-    let mut total = 0;
     for (i, step) in steps.into_iter().enumerate() {
         let jiffies = rates.as_ref().and_then(|r| r.get(i).copied());
         // 60 in a second; the shell and Hyprland would not move on from 0
@@ -346,10 +345,7 @@ fn ani(file: &[u8], left: &mut u64) -> Option<Vec<Image>> {
             ms => ms.min(60_000) as u32,
         };
         for image in icons.get(step)?.as_ref()? {
-            total += image.pixels.len();
-            if total as u64 > BYTES {
-                return None;
-            }
+            take(left, image.pixels.len())?;
             images.push(Image {
                 delay,
                 pixels: image.pixels.clone(),
@@ -711,6 +707,19 @@ pub mod tests {
         let mut work = u64::MAX;
         assert!(super::read(&ani(257, &[], &vec![frame; 257]), &mut work).is_none());
         assert!((BYTES - 1_000_000..=BYTES).contains(&(u64::MAX - work)));
+    }
+
+    #[test]
+    fn every_step_of_an_animation_is_paid() {
+        let icon = plain(32, 1);
+        let mut once = u64::MAX;
+        super::read(&icon, &mut once).unwrap();
+        // one small picture shown many times
+        let seq = chunk(b"seq ", &words(&[0; 10]));
+        let mut work = u64::MAX;
+        let images = super::read(&ani(10, &[seq], &[icon]), &mut work).unwrap();
+        assert_eq!(images.len(), 10);
+        assert_eq!(work, once - 10 * bytes(32, 32) as u64);
     }
 
     fn png(color: png::ColorType, palette: Option<&[u8]>, data: &[u8]) -> Vec<u8> {
