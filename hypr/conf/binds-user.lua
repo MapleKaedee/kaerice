@@ -25,6 +25,10 @@ hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("qs -c kaerice ipc call lock lock"), 
 -- Alt+Tab switcher: global shortcuts (ordered, no process per press); releasing Alt switches
 hl.bind("ALT + Tab", hl.dsp.global("quickshell:switcherNext"), { description = "Shell: switch window" })
 hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:switcherPrev"), { description = "Shell: switch window back" })
+-- here, not in the switcher: after a quick Alt+Tab, Alt is up before its window has keyboard focus.
+-- transparent: else ALT + Tab shadows it and it never fires after a Tab
+hl.bind("Alt_L", hl.dsp.global("quickshell:switcherCommit"), { release = true, non_consuming = true, transparent = true, ignore_mods = true, description = "Shell: switch window on Alt release" })
+hl.bind("Alt_R", hl.dsp.global("quickshell:switcherCommit"), { release = true, non_consuming = true, transparent = true, ignore_mods = true, description = "Shell: switch window on Alt release" })
 hl.bind("SUPER + Tab", hl.dsp.exec_cmd("qs -c kaerice ipc call switcher overview"), { description = "Shell: overview" })
 hl.bind("SUPER + comma", hl.dsp.exec_cmd("qs -c kaerice ipc call settings toggle"), { description = "Shell: settings" })
 hl.bind("SUPER + slash", hl.dsp.exec_cmd("qs -c kaerice ipc call keybinds toggle"), { description = "Shell: keybind cheat sheet" })

@@ -16,6 +16,10 @@ Scope {
         name: "switcherPrev"
         onPressed: Switcher.step(-1)
     }
+    GlobalShortcut {
+        name: "switcherCommit" // a release bind on Alt: arrives as released; overview ignores it
+        onReleased: if (Switcher.mode === "switcher") Switcher.commit()
+    }
 
     IpcHandler {
         target: "switcher"

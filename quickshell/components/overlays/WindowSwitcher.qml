@@ -44,8 +44,6 @@ Overlay {
         Keys.onRightPressed: Switcher.step(1)
         Keys.onUpPressed: if (root.overview) Switcher.step(-root.grid.cols)
         Keys.onDownPressed: if (root.overview) Switcher.step(root.grid.cols)
-        // Tab presses go to Hyprland (bound), so only the Alt release reaches us; overview ignores it
-        Keys.onReleased: event => { if (event.key === Qt.Key_Alt && !root.overview) Switcher.commit(); }
     }
 
     Text {

@@ -12,7 +12,7 @@ Card {
     id: root
     required property var barWindow
 
-    visible: icons.count > 0
+    visible: SystemTray.items.values.some(i => i.status !== Status.Passive)
     width: row.implicitWidth + Theme.bar(20) + offset
     height: Theme.bar(38); offset: Theme.bar(Theme.shadow)
 

@@ -12,6 +12,8 @@ Row {
 
         Card {
             required property HyprlandWorkspace modelData
+            // the scratchpad; not by id: named workspaces are negative too
+            visible: !modelData.name.startsWith("special:")
             width: Theme.bar(40); height: Theme.bar(38); offset: Theme.bar(Theme.shadow)
             fill: modelData.focused ? Theme.accent : Theme.face
             Text { anchors.centerIn: parent; text: modelData.id; color: modelData.focused ? Theme.accentText : Theme.text; font.pixelSize: Theme.bar(12); font.bold: true }

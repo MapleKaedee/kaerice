@@ -41,7 +41,7 @@ Overlay {
         "mouse:272": "LMB", "mouse:273": "RMB", mouse_down: "Wheel ↓", mouse_up: "Wheel ↑",
         XF86AudioRaiseVolume: "Vol +", XF86AudioLowerVolume: "Vol -", XF86AudioMute: "Mute", XF86AudioMicMute: "Mic mute",
         XF86AudioPlay: "Play", XF86AudioPause: "Pause", XF86AudioPrev: "Prev", XF86AudioNext: "Next",
-        Caps_Lock: "Caps Lock", Num_Lock: "Num Lock", XF86MonBrightnessUp: "Bright +", XF86MonBrightnessDown: "Bright -"
+        Caps_Lock: "Caps Lock", Num_Lock: "Num Lock", Alt_L: "Left Alt", Alt_R: "Right Alt", XF86MonBrightnessUp: "Bright +", XF86MonBrightnessDown: "Bright -"
     })
 
     function parse(json) {
@@ -53,7 +53,9 @@ Overlay {
             const desc = b.description || b.dispatcher.replace(/^HL\.Dispatcher\((.*)\)$/, "$1");
             const i = desc.indexOf(": ");
             const group = i > 0 ? desc.slice(0, i) : "Other", action = i > 0 ? desc.slice(i + 2) : desc;
-            const combo = mods.filter(m => b.modmask & m[0]).map(m => m[1]).concat([keyNames[b.key] ?? b.key]);
+            // Hyprland adds the key's own mod to a modifier key bind (Alt_L: ALT)
+            const combo = mods.filter(m => b.modmask & m[0] && !b.key.toUpperCase().startsWith(m[1]))
+                .map(m => m[1]).concat([keyNames[b.key] ?? b.key]);
             const id = group + "\n" + action;
             if (!byAction[id]) { byAction[id] = { group: group, action: action, combos: [] }; out.push(byAction[id]); }
             byAction[id].combos.push(combo);
