@@ -4,17 +4,15 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// Temp note text. Saved to a state file 0.5 s after the last change (and on close),
-// so it survives reloads, restarts and logins until cleared.
+// Temp note text in a state file: survives reloads, restarts and logins until cleared.
+// Saved at every change, not after a pause: a Singleton's onDestruction runs neither on a reload nor on exit.
 Singleton {
     id: root
     property string text: saved.text()
 
-    onTextChanged: timer.restart()
-    function flush() { timer.stop(); saved.setText(root.text); }
+    onTextChanged: saved.setText(root.text)
     function copy() { copier.text = root.text; copier.running = true; }
 
-    Timer { id: timer; interval: 500; onTriggered: root.flush() }
     FileView { id: saved; path: Quickshell.statePath("note"); blockLoading: true; printErrors: false }
     Process { // through stdin: everyone can read the arguments of a process
         id: copier

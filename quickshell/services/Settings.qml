@@ -5,9 +5,8 @@ import Quickshell.Io
 import QtQuick
 import "SettingsSchema.js" as Schema
 
-// User settings, one file: ~/.config/kaerice/settings.json (linked to settings/ in the repo by install.sh).
-// Read with get("key") in bindings, change with set(). Edits to the file apply live. Defaults and checks are in
-// SettingsSchema.js. Parsed here instead of with JsonAdapter, which shows defaults on the first frame and cannot reset.
+// One file, linked to settings/ in the repo by install.sh. Parsed here, not with JsonAdapter:
+// that shows defaults on the first frame and cannot reset.
 Singleton {
     id: root
     readonly property string path: (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/kaerice/settings.json"
@@ -23,22 +22,22 @@ Singleton {
     function set(key, value) {
         if (!Schema.schema[key]?.ok(value)) { console.warn("rejected setting", key, JSON.stringify(value)); return; }
         root.values = Object.assign({}, root.values, { [key]: value });
-        save.restart();
+        save();
     }
 
     function reset() {
         backup();
         root.values = Schema.defaults();
         root.unknown = {};
-        flush();
+        save();
     }
 
     function backup() { bak.setText(file.text()); }
-    function flush() { save.stop(); file.setText(Schema.dump(root.values, root.unknown)); }
+    // at every change, not after a pause: a Singleton's onDestruction runs neither on a reload nor on exit
+    function save() { file.setText(Schema.dump(root.values, root.unknown)); }
 
     // at start and after edits from outside
     function load() {
-        if (save.running) return; // our own change is newer than the file
         const r = Schema.load(file.text());
         root.values = r.values;
         root.unknown = r.unknown;
@@ -47,11 +46,6 @@ Singleton {
         Quickshell.execDetached(["notify-send", "-a", "kaerice", "Some settings were not usable",
             "Using defaults for: " + r.problems.join(", ") + ". The old file is in settings.json.bak."]);
     }
-
-    Component.onDestruction: if (save.running) flush()
-
-    // one write after a burst of changes (dragging a slider)
-    Timer { id: save; interval: 300; onTriggered: root.flush() }
 
     FileView {
         id: file

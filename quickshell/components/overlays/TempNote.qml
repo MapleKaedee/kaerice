@@ -11,7 +11,7 @@ Overlay {
     color: Theme.scrimLight
     visible: Ui.note
     focusItem: edit
-    onDismissed: { Note.flush(); Ui.note = false; }
+    onDismissed: Ui.note = false
     onVisibleChanged: {
         if (!visible) return;
         edit.text = Note.text;
