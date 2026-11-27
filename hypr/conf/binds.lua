@@ -143,7 +143,7 @@ hl.bind("SUPER + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relativ
 hl.bind("SUPER + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true, description = "Window: taller" })
 
 -- === Screenshots ===
--- screenshots: saved to ~/Pictures/Screenshots + clipboard; click the notification to edit (kaerice editor)
+-- each capture opens in the kaerice editor; without the shell it goes straight to ~/Pictures/Screenshots + clipboard
 local shot = os.getenv("HOME") .. "/.config/quickshell/kaerice/scripts/screenshot.sh "
 hl.bind("Print", hl.dsp.exec_cmd(shot .. "region"), { description = "Screenshot: region" })
 hl.bind("CTRL + Print", hl.dsp.exec_cmd(shot .. "screen"), { description = "Screenshot: screen" })

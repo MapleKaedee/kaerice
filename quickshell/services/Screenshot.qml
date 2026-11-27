@@ -27,10 +27,15 @@ Singleton {
         const out = root.dir + "/" + root.editing.split("/").pop();
         Quickshell.execDetached(["sh", "-c", `
             src=$1 shot=$2 out=$3 save=$4
-            if [ "$save" = 1 ]; then
-                mkdir -p "\${out%/*}" && cp "$src" "$out" && notify-send -a Screenshot -i "$out" "Screenshot saved" "$out"
-            fi
             wl-copy --type image/png < "$src"
+            if [ "$save" = 1 ]; then
+                if ! { mkdir -p "\${out%/*}" && cp "$src" "$out"; }; then
+                    rm -f "$shot" # keep the edited copy only
+                    notify-send -a Screenshot "Screenshot not saved" "Could not write $out. It is on the clipboard and in $src."
+                    exit 1
+                fi
+                notify-send -a Screenshot -i "$out" "Screenshot saved" "$out"
+            fi
             rm -f "$src" "$shot"`, "sh", rendered, root.editing, out, save ? "1" : "0"]);
         root.editing = "";
     }
