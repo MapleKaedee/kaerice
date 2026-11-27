@@ -102,7 +102,8 @@ hl.window_rule({
 	float = true,
 })
 hl.window_rule({ match = { class = "^(zoom)$" }, float = true })
-hl.layer_rule({ match = { namespace = "^(quickshell)$" }, no_anim = true })
+-- kaerice-editor: screenshot.sh hides it before grim, and a fade-out would still be in the shot
+hl.layer_rule({ match = { namespace = "^(quickshell|kaerice-editor)$" }, no_anim = true })
 
 require("conf.colors")
 require("conf.outputs")

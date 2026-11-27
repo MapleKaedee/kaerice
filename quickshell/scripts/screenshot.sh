@@ -7,6 +7,11 @@ mode=${1:-region}
 name="$(date +%Y-%m-%d_%H-%M-%S).png"
 tmp="${XDG_RUNTIME_DIR:-/tmp}/kaerice-screenshot"
 mkdir -p "$tmp"
+ipc() { qs -c kaerice ipc call screenshot "$@" 2>/dev/null; }
+
+# an open editor would be in the shot: it steps aside, and comes back unless a new shot replaces it
+ipc hide
+trap 'ipc unhide' EXIT
 
 case $mode in
     region) geom=$(slurp) || exit 0 ;; # Esc in slurp: no screenshot
@@ -16,7 +21,7 @@ esac
 
 if [ -n "$geom" ]; then grim -g "$geom" "$tmp/$name"; else grim "$tmp/$name"; fi || exit 1
 
-qs -c kaerice ipc call screenshot edit "$tmp/$name" && exit 0
+ipc edit "$tmp/$name" && exit 0
 
 dir="$HOME/Pictures/Screenshots"
 mkdir -p "$dir" && mv "$tmp/$name" "$dir/$name" && wl-copy --type image/png < "$dir/$name"

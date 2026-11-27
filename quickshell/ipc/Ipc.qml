@@ -102,6 +102,8 @@ Scope {
         function save(): void { Screenshot.finishRequested(true); }
         function copy(): void { Screenshot.finishRequested(false); }
         function discard(): void { if (Screenshot.editing) Screenshot.discard(); }
+        function hide(): void { Screenshot.hidden = true; }
+        function unhide(): void { Screenshot.hidden = false; } // not "show": `qs ipc call x show` runs `qs ipc show`
     }
 
     IpcHandler {

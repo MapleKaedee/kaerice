@@ -11,12 +11,14 @@ Singleton {
     readonly property string script: Quickshell.shellDir + "/scripts/screenshot.sh"
     readonly property string dir: Quickshell.env("HOME") + "/Pictures/Screenshots"
     property string editing: "" // temp capture open in the editor; "" = closed
+    property bool hidden: false // screenshot.sh hides the editor while it captures, or it would be in the shot
     signal finishRequested(bool save) // IPC save/copy: the editor exports, then calls finish()
 
     function take(mode) { Quickshell.execDetached([root.script, mode]); }
 
     function edit(file) {
         if (root.editing) discard(); // a new capture replaces an unfinished one
+        root.hidden = false;
         root.editing = file;
     }
 

@@ -12,7 +12,7 @@ Overlay {
     id: root
     name: "editor"
     color: Theme.scrim
-    visible: Screenshot.editing !== ""
+    visible: Screenshot.editing !== "" && !Screenshot.hidden
     focusItem: keys
     onDismissed: Screenshot.discard()
 
@@ -23,11 +23,10 @@ Overlay {
     property var current: null              // shape being drawn
     property rect crop: Qt.rect(0, 0, 0, 0) // visible part of the image, in image pixels
     property bool busy: false               // export running
+    property string error: ""               // last failed export
 
     // fit the cropped image on screen below the toolbar; never upscale
     readonly property real fit: crop.width > 0 ? Math.min(1, (width - 120) / crop.width, (height - 240) / crop.height) : 1
-
-    onVisibleChanged: if (visible) { shapes = []; history = []; current = null; tool = "arrow"; busy = false; }
 
     function undo() {
         const last = history[history.length - 1];
@@ -40,13 +39,18 @@ Overlay {
 
     // save: keep the file (and copy); otherwise copy only
     function finish(save) {
-        if (busy || crop.width <= 0) return;
+        if (busy || !visible || crop.width <= 0) return; // hidden: grabToImage refuses and never calls back
         busy = true;
         // cropView is the image + shapes at native size, clipped to the crop
         cropView.grabToImage(result => {
             const rendered = Screenshot.editing.replace(/\.png$/, "") + "-render.png";
-            result.saveToFile(rendered);
-            Screenshot.finish(rendered, save);
+            if (result.saveToFile(rendered)) {
+                Screenshot.finish(rendered, save);
+            } else { // Screenshot.finish would delete the capture: stay open, drop the partial file
+                Quickshell.execDetached(["rm", "-f", rendered]);
+                error = "Not saved: could not write " + rendered;
+                busy = false;
+            }
         });
     }
 
@@ -82,6 +86,8 @@ Overlay {
     Connections {
         target: Screenshot
         function onFinishRequested(save) { root.finish(save); }
+        // per capture, not per show: the edits survive while screenshot.sh hides the editor
+        function onEditingChanged() { root.shapes = []; root.history = []; root.current = null; root.tool = "arrow"; root.busy = false; root.error = ""; }
     }
 
     // swallow backdrop clicks: a stray click must not discard the edits (Esc closes)
@@ -160,6 +166,17 @@ Overlay {
         }
     }
 
+    // here, not a notification: popups sit below this overlay
+    Text {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: toolbar.y + toolbar.height + 4
+        visible: root.error !== ""
+        text: root.error
+        textFormat: Text.PlainText
+        color: Theme.paper
+        font.pixelSize: 14; font.bold: true
+    }
+
     // the image, in an ink frame with a hard shadow
     Card {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -191,7 +208,7 @@ Overlay {
 
                     Image {
                         id: img
-                        source: root.visible ? "file://" + Screenshot.editing : ""
+                        source: Screenshot.editing ? "file://" + Screenshot.editing : ""
                         cache: false
                         onStatusChanged: if (status === Image.Ready) root.crop = Qt.rect(0, 0, implicitWidth, implicitHeight)
                     }
@@ -216,7 +233,7 @@ Overlay {
                 id: selection
                 visible: false
                 color: "transparent"
-                border.width: 3; border.color: Theme.accent
+                border.width: Theme.stroke(3); border.color: Theme.accent
             }
 
             MouseArea {
