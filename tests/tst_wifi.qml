@@ -39,9 +39,12 @@ TestCase {
             { tag: "undefined", payload: undefined, down: false },
             { tag: "null", payload: null, down: false },
             { tag: "number", payload: 5, down: false },
-            { tag: "no device", payload: { device: null, powered: false, scanning: false, networks: [] }, down: false },
-            { tag: "networks is no list", payload: { device: null, networks: {} }, down: false }
+            { tag: "no device", payload: { device: null, powered: false, scanning: false, networks: [] }, down: false }
         ];
+    }
+
+    function test_networks_that_are_no_list() {
+        verify(Array.isArray(State.view({ device: "wlan0", powered: true, networks: {} }, false).networks));
     }
 
     function test_nothing_to_press_without_state(d) {

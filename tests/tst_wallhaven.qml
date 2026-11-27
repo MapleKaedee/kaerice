@@ -113,7 +113,9 @@ TestCase {
     }
 
     function test_error_text() {
-        [0, 401, 429, 500].forEach(s => verify(Api.errorText(s).length > 0));
-        verify(Api.errorText(500).includes("500"));
+        compare(Api.errorText(0), "No connection to Wallhaven.");
+        compare(Api.errorText(401), "Wallhaven did not accept the API key.");
+        compare(Api.errorText(429), "Too many requests. Wait a minute.");
+        compare(Api.errorText(500), "Wallhaven answered with an error (500).");
     }
 }

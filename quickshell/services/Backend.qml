@@ -12,20 +12,32 @@ Singleton {
     property bool down: false
     property int tries: 0
     property int lastId: 0
-    property var pending: ({})   // id of a call -> its done
+    property var pending: ({})   // id of a call -> { done, until }
+    property int waiting: 0      // entries in pending, which sends no change signal
 
     // done(code, data) runs once; code is "" when the call succeeded
     function call(name, args, done) {
         if (!socket.connected) { done("Disconnected"); return; }
-        root.pending[++root.lastId] = done;
+        // past the daemon's own limit (60 s for Wi-Fi, 5 s for the rest), for a daemon that accepts but never answers
+        root.pending[++root.lastId] = { done: done, until: Date.now() + (name.startsWith("wifi.") ? 65000 : 10000) };
+        root.waiting++;
         socket.write(JSON.stringify({ id: root.lastId, call: name, args: args }) + "\n");
         socket.flush();
     }
 
     function answer(id, code, data) {
-        const done = root.pending[id];
+        const p = root.pending[id];
+        if (!p) return;
         delete root.pending[id];
-        if (done) done(code, data);
+        root.waiting--;
+        p.done(code, data);
+    }
+
+    Timer {
+        interval: 1000
+        repeat: true
+        running: root.waiting > 0
+        onTriggered: Object.keys(root.pending).forEach(id => { if (root.pending[id].until <= Date.now()) root.answer(id, "Timeout"); })
     }
 
     Socket {

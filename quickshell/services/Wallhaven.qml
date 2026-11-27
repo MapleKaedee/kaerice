@@ -23,6 +23,7 @@ Singleton {
     property string key: savedKey.text().trim()
     property bool checkingKey: false
     property string keyError: ""
+    property var keyCheck: null
 
     property var busy: ({})       // wid -> true while downloading
     property string wanted: ""    // wid to use when its download ends: the last one picked
@@ -81,7 +82,8 @@ Singleton {
         keyError = "";
         if (!Api.isKey(k)) { keyError = "That does not look like an API key."; return; }
         checkingKey = true;
-        get(Api.checkUrl, k, (x, status) => {
+        keyCheck = get(Api.checkUrl, k, (x, status) => {
+            root.keyCheck = null;
             root.checkingKey = false;
             if (status === 200) storeKey(k); else root.keyError = Api.errorText(status);
         });
@@ -120,6 +122,11 @@ Singleton {
         interval: 20000
         running: root.loading
         onTriggered: { root.stop(); root.error = Api.errorText(0); }
+    }
+    Timer { // no answer: abort() calls back with status 0
+        interval: 20000
+        running: root.checkingKey
+        onTriggered: root.keyCheck?.abort()
     }
 
     Component {

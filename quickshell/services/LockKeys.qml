@@ -19,7 +19,10 @@ Singleton {
     }
 
     function parse(json) {
-        const keyboards = JSON.parse(json).keyboards;
+        let keyboards;
+        try { keyboards = JSON.parse(json).keyboards; } catch (e) {} // hyprctl prints [] or an error text at times
+        // keep the old snapshot: an empty one makes the next press show the first keyboard's state (a power button)
+        if (!Array.isArray(keyboards)) { root.pending = []; return; }
         for (const key of root.pending) {
             // else a keyboard plugged in after the last read
             const source = keyboards.find(k => root.last[k.name] && root.last[k.name][key] !== k[key])
