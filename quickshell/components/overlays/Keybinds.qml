@@ -5,8 +5,8 @@ import qs.config
 import qs.services
 import qs.components.base
 
-// Keybind cheat sheet: every Hyprland bind from `hyprctl binds -j` (read on open), grouped by its
-// "Group: action" description (hypr/conf/binds*.lua). Binds sharing an action show on one row.
+// Keybind cheat sheet: every bind of the compositor (Compositor.bindsCommand, read on open), grouped by its
+// "Group: action" description (Binds.js). Binds sharing an action show on one row.
 // Type to filter, Up/Down to scroll, Esc closes.
 Overlay {
     id: root
@@ -35,30 +35,13 @@ Overlay {
         return out;
     }
 
-    readonly property var keyNames: ({
-        left: "←", right: "→", up: "↑", down: "↓", Return: "Enter", space: "Space", semicolon: ";", slash: "/", comma: ",",
-        period: ".", bracketleft: "[", bracketright: "]", minus: "-", equal: "=", Page_Up: "PgUp", Page_Down: "PgDn",
-        "mouse:272": "LMB", "mouse:273": "RMB", mouse_down: "Wheel ↓", mouse_up: "Wheel ↑",
-        XF86AudioRaiseVolume: "Vol +", XF86AudioLowerVolume: "Vol -", XF86AudioMute: "Mute", XF86AudioMicMute: "Mic mute",
-        XF86AudioPlay: "Play", XF86AudioPause: "Pause", XF86AudioPrev: "Prev", XF86AudioNext: "Next",
-        Caps_Lock: "Caps Lock", Num_Lock: "Num Lock", Alt_L: "Left Alt", Alt_R: "Right Alt", XF86MonBrightnessUp: "Bright +", XF86MonBrightnessDown: "Bright -"
-    })
-
-    function parse(json) {
-        const mods = [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"]];
+    function parse(text) {
         const byAction = {};
         const out = [];
-        for (const b of JSON.parse(json)) {
-            // binds without a description fall back to the dispatcher name, e.g. HL.Dispatcher(focus) -> focus
-            const desc = b.description || b.dispatcher.replace(/^HL\.Dispatcher\((.*)\)$/, "$1");
-            const i = desc.indexOf(": ");
-            const group = i > 0 ? desc.slice(0, i) : "Other", action = i > 0 ? desc.slice(i + 2) : desc;
-            // Hyprland adds the key's own mod to a modifier key bind (Alt_L: ALT)
-            const combo = mods.filter(m => b.modmask & m[0] && !b.key.toUpperCase().startsWith(m[1]))
-                .map(m => m[1]).concat([keyNames[b.key] ?? b.key]);
-            const id = group + "\n" + action;
-            if (!byAction[id]) { byAction[id] = { group: group, action: action, combos: [] }; out.push(byAction[id]); }
-            byAction[id].combos.push(combo);
+        for (const b of Compositor.parseBinds(text)) {
+            const id = b.group + "\n" + b.action;
+            if (!byAction[id]) { byAction[id] = { group: b.group, action: b.action, combos: [] }; out.push(byAction[id]); }
+            byAction[id].combos.push(b.combo);
         }
         const rank = g => { const r = groupOrder.indexOf(g); return r < 0 ? groupOrder.length : r; };
         rows = out.sort((a, b) => rank(a.group) - rank(b.group) || a.action.localeCompare(b.action));
@@ -66,7 +49,7 @@ Overlay {
 
     Process {
         id: reader
-        command: ["hyprctl", "binds", "-j"]
+        command: Compositor.bindsCommand
         stdout: StdioCollector { id: out; onStreamFinished: root.parse(out.text) }
     }
 
@@ -193,7 +176,7 @@ Overlay {
             }
 
             Text {
-                text: root.matches.length + " of " + root.rows.length + " actions  ·  from hypr/conf/binds*.lua descriptions"
+                text: root.matches.length + " of " + root.rows.length + " actions  ·  from " + Compositor.bindsSource + " descriptions"
                 color: Theme.muted
                 font.pixelSize: 12; font.bold: true
             }

@@ -32,7 +32,7 @@ Column {
     }
 
     Repeater {
-        model: [["Kernel", "kernel"], ["Hyprland", "hyprland"], ["Quickshell", "quickshell"], ["kaerice", "kaerice"]]
+        model: [["Kernel", "kernel"], [Compositor.label || "Compositor", "compositor"], ["Quickshell", "quickshell"], ["kaerice", "kaerice"]]
         Row {
             required property var modelData
             Text {

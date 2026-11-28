@@ -73,9 +73,9 @@ Singleton {
         }
     }
 
-    // X11 windows without a cursor of their own show the root's: Hyprland sets that one only when Xwayland starts
+    // X11 windows without a cursor of their own show the root's: the compositor sets that one only when Xwayland starts
     function show(copy, size) {
-        Quickshell.execDetached(["sh", "-c", `hyprctl setcursor "$1" "$2"
+        Quickshell.execDetached(["sh", "-c", `${Compositor.cursorCommand}
             pgrep -x Xwayland && command -v xsetroot && exec xsetroot -cursor_name left_ptr`, "sh", copy, String(size)]);
     }
 }

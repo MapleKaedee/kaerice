@@ -1,7 +1,6 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.UPower
 import Quickshell.Wayland
@@ -55,7 +54,7 @@ Singleton {
     IdleMonitor {
         enabled: root.runs(2)
         timeout: root.seconds(2)
-        onIsIdleChanged: Hyprland.dispatch(`hl.dsp.dpms({ action = "${isIdle ? "off" : "on"}" })`)
+        onIsIdleChanged: Compositor.dpms(!isIdle)
     }
     IdleMonitor {
         enabled: root.runs(3)

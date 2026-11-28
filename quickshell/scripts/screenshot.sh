@@ -15,7 +15,10 @@ trap 'ipc unhide' EXIT
 
 case $mode in
     region) geom=$(slurp) || exit 0 ;; # Esc in slurp: no screenshot
-    window) geom=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"') ;;
+    window) case $XDG_CURRENT_DESKTOP in
+        mango* | *:mango*) geom=$(mmsg get focusing-client | jq -r '"\(.x),\(.y) \(.width)x\(.height)"') ;;
+        *) geom=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"') ;;
+    esac ;;
     *) geom= ;;
 esac
 

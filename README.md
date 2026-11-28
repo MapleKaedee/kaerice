@@ -1,6 +1,6 @@
 # kaerice
 
-Hyprland rice with a hand-written Quickshell shell. Neo-brutal style: flat cards, thick borders, hard shadows.
+Hyprland and Mango rice with a hand-written Quickshell shell. Neo-brutal style: flat cards, thick borders, hard shadows.
 
 ## Install
 
@@ -13,11 +13,12 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | Repo | Linked to |
 | --- | --- |
 | `hypr/` | `~/.config/hypr` |
+| `mango/` | `~/.config/mango` |
 | `quickshell/` | `~/.config/quickshell/kaerice` |
-| `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
+| `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland and Mango) |
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
+Needs: `hyprland` or `mangowm`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
 
 `nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness, system usage and
@@ -51,6 +52,11 @@ Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; env MALLOC_CO
 | Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
 | `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window, straight into the editor (arrow, marker, crop). `Enter` saves one file to `~/Pictures/Screenshots` + copies, `Ctrl+C` copies only, `Esc` discards |
 
+On Mango the keys are the same (`mango/conf/binds*.conf`), except: no `SUPER+W` (group), `SUPER+Home` / `SUPER+End`
+(first / last column) and `SUPER+.` (move to next column); the switcher and overview show app icons instead of live previews
+(Quickshell 0.3.2 captures windows only on Hyprland); an Alt+Tab released within about 0.1 s leaves the switcher open: tap
+`ALT` or press `Enter`.
+
 Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
 A red card with the app name shows while the mic is recorded or a screen/camera is shared. Battery notifications come at 20 / 10 / 5 / 3 % and when the charger is connected or disconnected (warnings only). The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
 All shell actions are also IPC calls: `qs -c kaerice ipc show`.
@@ -65,7 +71,7 @@ Change the times in settings, Power.
 If the lock ever refuses a correct password:
 1. Switch to a TTY (`CTRL+ALT+F3`) and log in.
 2. Three wrong passwords lock the account for 10 min. Clear that with `faillock --user $USER --reset`, then go back (`CTRL+ALT+F1` or `F2`) and try again.
-3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` (open windows are lost).
+3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` or `pkill -x mango` (open windows are lost).
 
 ## Cursor
 
@@ -89,12 +95,13 @@ remove a theme, delete its folder. Hyprcursor and CursorFX themes, `.cape`, loos
 
 ```
 hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
+mango/                Mango: config.conf + conf/ modules (check with mango -c ~/.config/mango/config.conf -p)
 quickshell/
   shell.qml           root: places every surface
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Compositor (Hyprland or Mango), Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
   components/
     base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards

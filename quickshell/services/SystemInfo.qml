@@ -13,7 +13,7 @@ Singleton {
         const ids = [field("ID")].concat(field("ID_LIKE").split(" ")).map(id => id.replace(/-.*/, ""));
         return ids.map(id => logos[id]).find(g => g) ?? 0xf17c;
     }
-    property var versions: ({}) // kernel, hyprland, quickshell, kaerice
+    property var versions: ({}) // kernel, compositor, quickshell, kaerice
 
     // Nerd Font font-logos code points
     readonly property var logos: ({
@@ -33,7 +33,7 @@ Singleton {
         id: reader
         command: ["sh", "-c", `
             echo "kernel=$(uname -r)"
-            echo "hyprland=$(hyprctl version -j | jq -r .version)"
+            echo "compositor=$(${Compositor.versionCommand})"
             echo "quickshell=$(qs --version | grep -oE '[0-9]+(\\.[0-9]+)+' | head -1)"
             echo "kaerice=$(git -C "$1" log -1 --format='%h (%cs)')$([ -n "$(git -C "$1" status --porcelain)" ] && echo ' +')"`,
             "sh", Quickshell.shellDir + "/.."]

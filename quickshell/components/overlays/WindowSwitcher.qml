@@ -44,6 +44,9 @@ Overlay {
         Keys.onRightPressed: Switcher.step(1)
         Keys.onUpPressed: if (root.overview) Switcher.step(-root.grid.cols)
         Keys.onDownPressed: if (root.overview) Switcher.step(root.grid.cols)
+        // Mango: a release bind on Alt never fires after Tab (only the last pressed key's release does). An Alt let go
+        // before this window has the keyboard is missed: tap Alt again, or Enter.
+        Keys.onReleased: event => { if (event.key === Qt.Key_Alt || event.key === Qt.Key_AltGr) Switcher.released(); }
     }
 
     Text {
@@ -68,7 +71,7 @@ Overlay {
                 required property var modelData
                 required property int index
                 readonly property bool selected: Switcher.index === index
-                readonly property var entry: DesktopEntries.heuristicLookup(modelData.wayland?.appId ?? "")
+                readonly property var entry: DesktopEntries.heuristicLookup(modelData?.appId ?? "")
                 width: parent.cardWidth
                 height: frame.height + 62 + Theme.depth(8) // padding, label row, shadow
                 offset: Theme.depth(selected ? 8 : 5)
@@ -97,7 +100,7 @@ Overlay {
                             anchors.centerIn: parent
                             width: implicitWidth; height: implicitHeight
                             constraintSize: Qt.size(frame.width - 2 * Theme.border, frame.height - 2 * Theme.border)
-                            captureSource: root.visible ? card.modelData.wayland : null
+                            captureSource: root.visible && Compositor.windowPreviews ? card.modelData : null
                             live: true
                         }
                     }
@@ -113,14 +116,14 @@ Overlay {
                             anchors.verticalCenter: parent.verticalCenter
                             width: frame.width - 28 - wsLabel.width - 8
                             elide: Text.ElideRight
-                            text: card.entry?.name ?? card.modelData.wayland?.appId ?? ""
+                            text: card.entry?.name ?? card.modelData?.appId ?? ""
                             color: card.selected ? Theme.accentText : Theme.text
                             font.pixelSize: 14; font.bold: true
                         }
                         Text {
                             id: wsLabel
                             anchors.verticalCenter: parent.verticalCenter
-                            text: card.modelData.workspace?.name ?? ""
+                            text: Compositor.place(card.modelData)?.workspace ?? ""
                             color: card.selected ? Theme.accentText : Theme.muted
                             font.pixelSize: 12; font.bold: true
                         }

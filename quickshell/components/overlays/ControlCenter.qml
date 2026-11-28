@@ -1,6 +1,6 @@
 import Quickshell
 import Quickshell.Bluetooth
-import Quickshell.Hyprland
+import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
 import qs.config
@@ -22,7 +22,7 @@ Overlay {
     readonly property int gap: 12
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property var btConnected: Bluetooth.devices.values.filter(d => d.connected)
-    readonly property int windowCount: Hyprland.toplevels.values.length
+    readonly property int windowCount: ToplevelManager.toplevels.values.length
 
     // close the panel, then run an action that opens something else
     function then(fn) { Ui.controlCenter = false; fn(); }
@@ -182,7 +182,7 @@ Overlay {
                         font.pixelSize: 18; font.bold: true
                     }
                     Text {
-                        text: (Quickshell.env("XDG_CURRENT_DESKTOP") || "Hyprland") + (SysStats.uptime ? "  ·  " + SysStats.uptimeText : "")
+                        text: (Compositor.label || Quickshell.env("XDG_CURRENT_DESKTOP") || "") +(SysStats.uptime ? "  ·  " + SysStats.uptimeText : "")
                         color: Theme.muted
                         font.pixelSize: 12; font.bold: true
                     }

@@ -3,11 +3,11 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
 
-// Every IPC entry point (Hyprland keybinds call these): qs -c kaerice ipc call <target> <function> [args]
+// Every IPC entry point (the compositor's keybinds call these): qs -c kaerice ipc call <target> <function> [args]
 // List them with: qs -c kaerice ipc show
 Scope {
-    // Alt+Tab uses Hyprland global shortcuts (hl.dsp.global("quickshell:<name>")), not `qs ipc`:
-    // they arrive in order and without spawning a process, so fast Tab presses are not lost.
+    // Alt+Tab on Hyprland uses global shortcuts (hl.dsp.global("quickshell:<name>")), not `qs ipc`: they arrive in
+    // order and without spawning a process, so fast Tab presses are not lost. Mango has none: `switcher` below.
     GlobalShortcut {
         name: "switcherNext"
         onPressed: Switcher.step(1)
@@ -18,7 +18,7 @@ Scope {
     }
     GlobalShortcut {
         name: "switcherCommit" // a release bind on Alt: arrives as released; overview ignores it
-        onReleased: if (Switcher.mode === "switcher") Switcher.commit()
+        onReleased: Switcher.released()
     }
 
     IpcHandler {

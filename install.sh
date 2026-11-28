@@ -23,6 +23,7 @@ link() { # link <path-in-repo> <target>
 }
 
 link hypr "$cfg/hypr"
+link mango "$cfg/mango"
 link quickshell "$cfg/quickshell/kaerice"
 mkdir -p "$repo/settings" # not in git
 link settings "$cfg/kaerice" # the directory: an atomic write could replace a linked file
@@ -37,7 +38,7 @@ if ! command -v nix > /dev/null; then
     echo "nix not found: kaericed was not built, network status, the Wi-Fi menu, brightness and system usage stay unavailable" >&2
 elif mkdir -p "$(dirname "$core")" && nix --extra-experimental-features 'nix-command flakes' build "$repo#kaericed" --out-link "$core"; then
     systemctl --user enable kaericed.service
-    if systemctl --user is-active --quiet hyprland-session.target; then systemctl --user restart kaericed.service; fi
+    if systemctl --user is-active --quiet hyprland-session.target mango-session.target; then systemctl --user restart kaericed.service; fi
 else
     echo "build failed: kaericed was not changed" >&2
 fi

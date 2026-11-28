@@ -1,7 +1,7 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Hyprland
+import Quickshell.Wayland
 import QtQuick
 
 // Alt+Tab switcher and overview state: window list, selection, focus on commit.
@@ -12,17 +12,34 @@ Singleton {
     property int index: 0
     property string mode: "switcher" // or "overview"
 
-    // lastIpcObject (focusHistoryID 0 = focused now, at = position) is only fresh after refreshToplevels(), called on open
-    readonly property var windows: Hyprland.toplevels.values
-        .filter(t => t.wayland)
-        .sort(root.mode === "overview"
-            ? (a, b) => (a.workspace?.id ?? 0) - (b.workspace?.id ?? 0) || (a.lastIpcObject.at?.[0] ?? 0) - (b.lastIpcObject.at?.[0] ?? 0)
-            : (a, b) => (a.lastIpcObject.focusHistoryID ?? 999) - (b.lastIpcObject.focusHistoryID ?? 999))
+    // focus order, most recent first. Compositors do not share theirs, so it starts with the shell.
+    property var recent: []
+    readonly property var active: ToplevelManager.activeToplevel
+    onActiveChanged: remember()
+    Component.onCompleted: remember()
+    function remember() {
+        const all = ToplevelManager.toplevels.values;
+        if (root.active) root.recent = [root.active].concat(root.recent.filter(t => t !== root.active && all.includes(t)));
+    }
+
+    // empty while closed: no sorting on every focus or title change
+    readonly property var windows: {
+        if (!root.open) return [];
+        const all = ToplevelManager.toplevels.values;
+        const rank = t => { const i = root.recent.indexOf(t); return i < 0 ? root.recent.length + all.indexOf(t) : i; };
+        if (root.mode !== "overview") return all.filter(t => t).sort((a, b) => rank(a) - rank(b));
+        const place = new Map(all.map(t => [t, Compositor.place(t)]));
+        return all.filter(t => t).sort((a, b) => {
+            const pa = place.get(a), pb = place.get(b);
+            if (!pa || !pb) return !pa - !pb || all.indexOf(a) - all.indexOf(b);
+            return pa.order - pb.order || pa.x - pb.x || all.indexOf(a) - all.indexOf(b);
+        });
+    }
 
     // first press opens on the previous window (+1) or the last one (-1)
     function step(delta) {
         if (!root.open) {
-            Hyprland.refreshToplevels();
+            Compositor.refreshPlacement();
             root.mode = "switcher";
             root.index = 0;
             root.open = true;
@@ -36,17 +53,20 @@ Singleton {
         if (!root.open) return;
         const w = root.windows[root.index];
         root.open = false;
-        if (w) w.wayland.activate();
+        if (w) Compositor.activate(w);
     }
+
+    // Alt let go: the overview stays open
+    function released() { if (root.mode === "switcher") root.commit(); }
 
     function cancel() { root.open = false; }
 
     // overview starts on the focused window; a second toggle closes it
     function toggleOverview() {
         if (root.open && root.mode === "overview") { root.open = false; return; }
-        Hyprland.refreshToplevels();
+        Compositor.refreshPlacement();
         root.mode = "overview";
-        root.index = Math.max(0, root.windows.findIndex(t => t.wayland.activated));
         root.open = true;
+        root.index = Math.max(0, root.windows.findIndex(t => t.activated));
     }
 }

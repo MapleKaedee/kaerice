@@ -1,14 +1,14 @@
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
+import qs.services
 import qs.components.base
 
 // Focused window title (falls back to its app id). Browsers show only their app name,
 // not the tab title. Hidden on an empty workspace.
 TextCard {
     // ToplevelManager, not Hyprland.activeToplevel: the latter stays null until the first focus change
-    readonly property var window: Hyprland.focusedWorkspace?.toplevels.values.length ? ToplevelManager.activeToplevel : null
+    readonly property var window: Compositor.emptyWorkspace ? null : ToplevelManager.activeToplevel
     readonly property string appId: window?.appId ?? ""
     // reading applications re-runs the lookup once the async desktop-entry scan fills it
     readonly property var entry: appId && DesktopEntries.applications.values.length ? DesktopEntries.heuristicLookup(appId) : null
