@@ -1,6 +1,6 @@
 # kaerice
 
-Hyprland and Mango rice with a hand-written Quickshell shell. Neo-brutal style: flat cards, thick borders, hard shadows.
+Mango and Hyprland rice. Neo-brutal style: flat cards, thick borders, hard shadows.
 
 ## Install
 
@@ -8,135 +8,94 @@ Hyprland and Mango rice with a hand-written Quickshell shell. Neo-brutal style: 
 ./install.sh
 ```
 
-Symlinks everything into `~/.config` (existing real files are moved to `*.pre-kaerice` first):
+Links `hypr/`, `mango/`, `quickshell/` (as `quickshell/kaerice`), `settings/` (as `kaerice`) and the `kaericed` unit into
+`~/.config`; existing files move to `*.pre-kaerice`. QML changes are live at once; run it again after a `git pull` for the daemon.
 
-| Repo | Linked to |
-| --- | --- |
-| `hypr/` | `~/.config/hypr` |
-| `mango/` | `~/.config/mango` |
-| `quickshell/` | `~/.config/quickshell/kaerice` |
-| `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
+Needs: `mangowm` or `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
+`wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`, iwd + systemd-networkd. Optional: `xorg-xsetroot`.
 
-Needs: `hyprland` or `mangowm`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
-`wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
+`nix` builds the daemon `kaericed` (`core/`, see [env.md](env.md)). Without it, network, Wi-Fi, brightness, system usage and
+the cursor show `N/A`, `--` or `Unavailable`; the rest works.
 
-`nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness, system usage and
-the cursor: without it those show `N/A`, `--` or `Unavailable`, the brightness keys do nothing, and the rest works. Run `./install.sh`
-again after a `git pull`: QML changes are live at once, the daemon only after that.
-
-Working on the daemon in `core/`: see [env.md](env.md).
-
-Restart the shell after big changes: `pkill -9 -x "qs|quickshell"; env MALLOC_CONF=narenas:1 qs -c kaerice` (`qs kill` shortly after a hot reload crashes Quickshell 0.3.2)
+Restart the shell: `pkill -9 -x "qs|quickshell"; env MALLOC_CONF=narenas:1 qs -c kaerice` (not `qs kill`: it crashes after a hot reload).
 
 ## Keys
 
 | Key | Action |
 | --- | --- |
-| `SUPER+/` | Keybind cheat sheet (searchable) |
+| `SUPER+/` | Keybind cheat sheet |
 | `SUPER+Space` | Launcher |
-| `SUPER+D` | Dashboard: profile, clock, media, CPU/RAM/disk, calendar |
-| `SUPER+,` | Settings (Theme, Bar, Sound & media, Power, Notifications, Users & accounts, About); also the gear in the control center |
-| `SUPER+A` | Control center: sliders, per-app volume mixer, Wi-Fi, Bluetooth, output and input (click the tile to pick a device, its icon to mute), quick toggles (Silent, Awake, Dark for apps) |
+| `SUPER+D` | Dashboard |
+| `SUPER+,` | Settings |
+| `SUPER+A` | Control center: sliders, volume mixer, Wi-Fi, Bluetooth, devices, quick toggles |
 | `SUPER+V` | Clipboard history |
-| `SUPER+;` | Emoji picker (search, `Enter` copies; recent first) |
-| `SUPER+SHIFT+N` | Temp note (saved automatically) |
+| `SUPER+;` | Emoji picker |
+| `SUPER+SHIFT+N` | Temp note |
 | `SUPER+N` | Notification history |
-| `SUPER+Y` | Wallpaper picker, two tabs (`Tab` switches): images from `wallpapers/` and `~/Pictures/Wallpapers` (`Del` twice moves one to the Trash), and Wallhaven (search and filters; `Enter` or a click downloads and uses, `D` only downloads) |
-| `SUPER+X`, `SUPER+SHIFT+E` | Power menu: hold `Enter` or the mouse button on Suspend / Logout / Reboot / Shutdown (2 s longer, with a warning, while a package manager or download runs). Lock needs no hold |
+| `SUPER+Y` | Wallpaper picker: local images and Wallhaven (`Tab` switches) |
+| `SUPER+X`, `SUPER+SHIFT+E` | Power menu: hold `Enter` or the mouse button to confirm |
 | `SUPER+ALT+L` | Lock screen |
-| `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher with live previews; release `ALT` to switch, `Esc` cancels |
-| `SUPER+Tab` | Overview: every window by workspace; arrows + `Enter` or click to focus |
-| Volume / mute / brightness keys | Change level and show the OSD |
-| `Caps Lock` / `Num Lock` | Show ON / OFF in the OSD |
-| Media keys (`CTRL`+volume = player volume) | Control the active MPRIS player |
-| `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window, straight into the editor (arrow, marker, crop). `Enter` saves one file to `~/Pictures/Screenshots` + copies, `Ctrl+C` copies only, `Esc` discards |
+| `ALT+Tab` / `ALT+SHIFT+Tab` | Window switcher; release `ALT` to switch |
+| `SUPER+Tab` | Overview of every window |
+| `Print` / `CTRL+Print` / `ALT+Print` | Screenshot region / screen / window into the editor |
+| Volume, brightness, media, Caps/Num Lock | OSD and player control (`CTRL`+volume = player volume) |
 
-On Mango the keys are the same (`mango/conf/binds*.conf`), except: no `SUPER+W` (group), `SUPER+Home` / `SUPER+End`
-(first / last column) and `SUPER+.` (move to next column); the switcher and overview show app icons instead of live previews
-(Quickshell 0.3.2 captures windows only on Hyprland); an Alt+Tab released within about 0.1 s leaves the switcher open: tap
-`ALT` or press `Enter`.
+Hyprland only: `SUPER+W`, `SUPER+Home` / `SUPER+End`, `SUPER+.` and live previews (Mango shows app icons). On Mango a very quick
+`ALT+Tab` can leave the switcher open: tap `ALT` or press `Enter`.
 
-Click the network card for the Wi-Fi menu, the bell card for notifications, the clock for the calendar, the distro logo for the control center. Scroll the volume and brightness cards.
-A red card with the app name shows while the mic is recorded or a screen/camera is shared. Battery notifications come at 20 / 10 / 5 / 3 % and when the charger is connected or disconnected (warnings only). The media card sits between the bar rows; click it for the dashboard. While music plays, a cava spectrum rises behind the bar cards.
-All shell actions are also IPC calls: `qs -c kaerice ipc show`.
+Bar: click network (Wi-Fi), bell (notifications), clock (calendar), distro logo (control center); scroll volume and brightness.
+Every action is also an IPC call: `qs -c kaerice ipc show`.
 
 ## Lock and idle
 
-The lock screen unlocks with your login password (PAM `login`). It also locks before every suspend, with or without `kaericed`.
-Default idle stages, counted from the last input: dim at 2.5 min, lock at 5 min, screen off at 5.5 min,
-suspend at 30 min (on battery only). Apps that inhibit idle, such as video players, pause every stage, and so does Awake in the control center.
-Change the times in settings, Power.
+Unlocks with your login password. Idle: dim at 2.5 min, lock at 5 min, screen off at 5.5 min, suspend at 30 min (battery only).
+Change it in Settings, Power.
 
-If the lock ever refuses a correct password:
+If the lock refuses a correct password:
 1. Switch to a TTY (`CTRL+ALT+F3`) and log in.
-2. Three wrong passwords lock the account for 10 min. Clear that with `faillock --user $USER --reset`, then go back (`CTRL+ALT+F1` or `F2`) and try again.
-3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` or `pkill -x mango` (open windows are lost).
+2. Run `faillock --user $USER --reset` (3 wrong passwords lock the account for 10 min), go back (`CTRL+ALT+F1` or `F2`), try again.
+3. Still stuck: `rm ~/.local/state/quickshell/by-shell/*/locked`, then `pkill -x mango` or `pkill -x Hyprland` (open windows are lost).
 
 ## Login screen
 
-A greetd greeter in the same style: wallpaper, clock, your avatar and name, the password, and the session to start
-(Up/Down or a click changes it; the last one is kept). It runs as the user `greeter` in a Mango of its own, from a copy of `quickshell/`.
+A greetd greeter in the same style, run as the user `greeter` in a Mango of its own, from a copy of `quickshell/`.
 
 1. Check that a TTY login works (`CTRL+ALT+F2`): it is the way back if the greeter fails.
-2. `sudo ./install-greeter.sh` copies it to `/usr/share/kaerice-greeter`. Run it again after editing the greeter, then log out: the copy is not live.
-3. `sudo ./install-greeter.sh --enable` points `/etc/greetd/config.toml` at it; the old file becomes `config.toml.pre-kaerice`.
+2. `sudo ./install-greeter.sh` copies it to `/usr/share/kaerice-greeter`. Run it again after editing the greeter.
+3. `sudo ./install-greeter.sh --enable` points `/etc/greetd/config.toml` at it (the old file becomes `config.toml.pre-kaerice`).
 4. Reboot. Never `systemctl restart greetd` from a graphical session: that ends the session.
 
-The shell copies the theme and the wallpaper to `/var/lib/kaerice-greeter` at start and at every change (`scripts/greeter-sync.sh`).
 To go back, from a TTY: `sudo mv /etc/greetd/config.toml.pre-kaerice /etc/greetd/config.toml`, then reboot.
 
 ## Cursor
 
-Settings, Theme picks a cursor theme from `~/.local/share/icons`, `~/.icons` and `/usr/share/icons`, and a size from 16 to 96 px.
-`kaericed` copies the theme in that size to `~/.local/share/icons/kaerice-cursor-<theme>-<size>` (the theme itself stays as it is) and makes
-the copy the theme `default`, for Wayland, X11, XWayland and Flatpak apps. The first time, a `default` that is already in `~/.icons` or
-`~/.local/share/icons` moves to `default.pre-kaerice`, and the cursor theme named in the GTK `settings.ini` files, `~/.gtkrc-2.0` or `~/.Xresources`
-becomes `default`. To undo it, delete both `default` links and put `default.pre-kaerice` back.
+Settings, Theme picks a cursor theme and size (16 to 96 px). `kaericed` makes a copy in that size the theme `default` for Wayland,
+X11, XWayland and Flatpak apps. An existing `default` moves to `default.pre-kaerice`; to undo, delete the `default` links in `~/.icons`
+and `~/.local/share/icons` and put it back.
 
-Install next to it, or `quickshell/scripts/install-cursor.sh FILE`, adds a downloaded theme to `~/.local/share/icons`: Linux themes are
-copied, Windows cursors (`.cur` and `.ani`, with or without an `install.inf`) converted. It takes a folder, a `.zip`, `.7z`, `.rar`, `.cab`,
-`.tar.*`, `.deskthemepack`, or an `.exe` that holds an archive. Nothing in it is run, and a theme that is already there is never replaced. To
-remove a theme, delete its folder. Hyprcursor and CursorFX themes, `.cape`, loose images and installers that only unpack by running cannot be used.
-
-- Apps that are open and load the cursor themselves change when they are opened again. With `xorg-xsetroot`, X11 windows without a cursor
-  of their own change at once, without it at the next login.
-- Not reached: games with a cursor of their own, apps run as root and the login screen.
-- On a screen scaled above 1 the cursor is smaller than the number.
+Install (or `quickshell/scripts/install-cursor.sh FILE`) adds a downloaded Linux or Windows (`.cur`, `.ani`) theme from a folder or an
+archive. Nothing in it is run. Open apps change when opened again; games, root apps and the login screen keep their own cursor.
 
 ## Layout
 
 ```
-hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
-mango/                Mango: config.conf + conf/ modules (check with mango -c ~/.config/mango/config.conf -p)
+hypr/          Hyprland config (Lua)
+mango/         Mango config (check: mango -c ~/.config/mango/config.conf -p)
 quickshell/
-  shell.qml           root: places every surface
-  greeter.qml         the login screen, run by greetd from the copy of install-greeter.sh (README: Login screen)
-  config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
-  config/cava.conf    cava settings for the bar visualizer
-  config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Compositor (Hyprland or Mango), Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui, Greeter (login screen only), GreeterSync
-  components/
-    base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
-    dashboard/        dashboard panel and its cards
-    editor/           screenshot editor
-    lock/             session lock surface
-    greeter/          login screen surface
-    bar/              top bar and its cards
-    notifications/    popups, history panel
-    osd/              volume/brightness and Caps/Num Lock popups
-    overlays/         launcher, power menu, Wi-Fi, clipboard, emoji, note, keybinds, calendar, control center, window switcher + overview
-    settings/         settings overlay and its pages
-    wallpaper/        background layer, picker (local images, Wallhaven)
-  ipc/Ipc.qml         every IPC target used by keybinds
-  scripts/            shell helpers (screenshot.sh, install-cursor.sh, greeter-sync.sh)
-greeter/              the login screen's Mango config and start script
-settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
-wallpapers/           images for the picker
-tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
-core/                 kaericed, the daemon (Rust): sends state to the shell and takes its calls over a Unix socket, one JSON line each
-systemd/              kaericed unit
+  shell.qml    root: places every surface
+  greeter.qml  the login screen (see Login screen)
+  config/      Theme.qml (colors, fonts, card shape), cava.conf, emoji.tsv
+  services/    state + actions, no UI (singletons); Compositor.qml holds what differs per compositor
+  components/  UI: base/ widgets, bar/, dashboard/, overlays/, settings/, lock/, greeter/, ...
+  ipc/Ipc.qml  every IPC target used by keybinds
+  scripts/     shell helpers
+greeter/       the login screen's Mango config and start script
+settings/      your settings.json (not in git): only values that differ from the defaults
+wallpapers/    images for the picker
+tests/         logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
+core/          kaericed (Rust): sends state to the shell over a Unix socket, one JSON line each
+systemd/       kaericed unit
 ```
 
-Adding a feature: state and commands go in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,
-open/close flags in `services/Ui.qml`, and the keybind entry point in `ipc/Ipc.qml`.
-Imports use the shell root: `import qs.services`, `import qs.components.base`.
+Adding a feature: state and commands in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,
+open/close flags in `services/Ui.qml`, the keybind entry point in `ipc/Ipc.qml`. Imports use the shell root: `import qs.services`.
