@@ -28,6 +28,8 @@ link quickshell "$cfg/quickshell/kaerice"
 mkdir -p "$repo/settings" # not in git
 link settings "$cfg/kaerice" # the directory: an atomic write could replace a linked file
 link systemd/kaericed.service "$cfg/systemd/user/kaericed.service"
+link systemd/autostart.conf "$cfg/systemd/user/mango-session.target.d/autostart.conf"
+link systemd/autostart.conf "$cfg/systemd/user/hyprland-session.target.d/autostart.conf"
 
 systemctl --user daemon-reload
 

@@ -16,13 +16,14 @@ Overlay {
     onVisibleChanged: if (visible) { Account.refresh(); SystemInfo.refresh(); }
 
     property int current: 0
-    // icon: Nerd Font paint-brush f1fc, window-maximize f2d0, music f001, power f011, bell f0f3, user f007, circle-info f05a
+    // icon: Nerd Font paint-brush f1fc, window-maximize f2d0, music f001, power f011, bell f0f3, th f00a, user f007, circle-info f05a
     readonly property var pages: [
         { title: "Theme", icon: 0xf1fc, page: theme },
         { title: "Bar", icon: 0xf2d0, page: bar },
         { title: "Sound & media", icon: 0xf001, page: sound },
         { title: "Power", icon: 0xf011, page: power },
         { title: "Notifications", icon: 0xf0f3, page: notifications },
+        { title: "Applications", icon: 0xf00a, page: applications },
         { title: "Users & accounts", icon: 0xf007, page: users },
         { title: "About", icon: 0xf05a, page: about }
     ]
@@ -31,6 +32,7 @@ Overlay {
     Component { id: sound; SoundPage {} }
     Component { id: power; PowerPage {} }
     Component { id: notifications; NotificationsPage {} }
+    Component { id: applications; ApplicationsPage {} }
     Component { id: users; UsersPage {} }
     Component { id: about; AboutPage {} }
 

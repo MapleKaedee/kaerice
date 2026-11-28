@@ -8,11 +8,12 @@ Mango and Hyprland rice. Neo-brutal style: flat cards, thick borders, hard shado
 ./install.sh
 ```
 
-Links `hypr/`, `mango/`, `quickshell/` (as `quickshell/kaerice`), `settings/` (as `kaerice`) and the `kaericed` unit into
-`~/.config`; existing files move to `*.pre-kaerice`. QML changes are live at once; run it again after a `git pull` for the daemon.
+Links `hypr/`, `mango/`, `quickshell/` (as `quickshell/kaerice`), `settings/` (as `kaerice`), the `kaericed` unit and the
+XDG autostart drop-in of both session targets into `~/.config`; existing files move to `*.pre-kaerice`. QML changes are live at
+once; run it again after a `git pull` for the daemon.
 
 Needs: `mangowm` or `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
-`wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`, iwd + systemd-networkd. Optional: `xorg-xsetroot`.
+`wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`, `xdg-utils`, iwd + systemd-networkd. Optional: `xorg-xsetroot`.
 
 `nix` builds the daemon `kaericed` (`core/`, see [env.md](env.md)). Without it, network, Wi-Fi, brightness, system usage and
 the cursor show `N/A`, `--` or `Unavailable`; the rest works.
@@ -94,7 +95,7 @@ settings/      your settings.json (not in git): only values that differ from the
 wallpapers/    images for the picker
 tests/         logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
 core/          kaericed (Rust): sends state to the shell over a Unix socket, one JSON line each
-systemd/       kaericed unit
+systemd/       kaericed unit, XDG autostart drop-in (Settings, Applications)
 ```
 
 Adding a feature: state and commands in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,
