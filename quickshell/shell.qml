@@ -28,6 +28,8 @@ ShellRoot {
     readonly property bool polkitAgent: Polkit.agent.isRegistered
     // and the apps: the scan adds them one by one, so a launcher that starts it fills up row by row
     readonly property var apps: DesktopEntries.applications
+    // and GreeterSync: the login screen gets the theme without anyone opening the settings
+    readonly property string greeterTheme: GreeterSync.key
 
     WallpaperLayer {}
     Bar {}

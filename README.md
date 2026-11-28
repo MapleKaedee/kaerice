@@ -73,6 +73,19 @@ If the lock ever refuses a correct password:
 2. Three wrong passwords lock the account for 10 min. Clear that with `faillock --user $USER --reset`, then go back (`CTRL+ALT+F1` or `F2`) and try again.
 3. Still stuck? Run `rm ~/.local/state/quickshell/by-shell/*/locked` first, so the shell starts unlocked, then `pkill -x Hyprland` or `pkill -x mango` (open windows are lost).
 
+## Login screen
+
+A greetd greeter in the same style: wallpaper, clock, your avatar and name, the password, and the session to start
+(Up/Down or a click changes it; the last one is kept). It runs as the user `greeter` in a Mango of its own, from a copy of `quickshell/`.
+
+1. Check that a TTY login works (`CTRL+ALT+F2`): it is the way back if the greeter fails.
+2. `sudo ./install-greeter.sh` copies it to `/usr/share/kaerice-greeter`. Run it again after editing the greeter, then log out: the copy is not live.
+3. `sudo ./install-greeter.sh --enable` points `/etc/greetd/config.toml` at it; the old file becomes `config.toml.pre-kaerice`.
+4. Reboot. Never `systemctl restart greetd` from a graphical session: that ends the session.
+
+The shell copies the theme and the wallpaper to `/var/lib/kaerice-greeter` at start and at every change (`scripts/greeter-sync.sh`).
+To go back, from a TTY: `sudo mv /etc/greetd/config.toml.pre-kaerice /etc/greetd/config.toml`, then reboot.
+
 ## Cursor
 
 Settings, Theme picks a cursor theme from `~/.local/share/icons`, `~/.icons` and `/usr/share/icons`, and a size from 16 to 96 px.
@@ -98,15 +111,17 @@ hypr/                 Hyprland (Lua): hyprland.lua + conf/ modules
 mango/                Mango: config.conf + conf/ modules (check with mango -c ~/.config/mango/config.conf -p)
 quickshell/
   shell.qml           root: places every surface
+  greeter.qml         the login screen, run by greetd from the copy of install-greeter.sh (README: Login screen)
   config/Theme.qml    colors, fonts, card shape. Mode, accent and shape are chosen in settings, Theme.
   config/cava.conf    cava settings for the bar visualizer
   config/emoji.tsv    emoji list (unicode.org emoji-test.txt, filtered to Noto Color Emoji)
-  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Compositor (Hyprland or Mango), Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui
+  services/           state + actions, no UI (singletons): Audio, Backend (kaericed connection), Brightness, Network, Wifi, Notifs, Clipboard, Wallpaper, Wallhaven, Osd, Compositor (Hyprland or Mango), Media, Cava, Screenshot, Emoji, Note, AppTheme, Cursor, Privacy, Session, Battery, LockKeys, Settings, BarLayout, SystemInfo, Account, Lock, Switcher, SysStats, Idle, Ui, Greeter (login screen only), GreeterSync
   components/
     base/             Card, TextButton, IconButton, Choice, LevelSlider, DeviceList, Avatar, MonthCalendar, Overlay (full-screen layer with Esc/backdrop close)
     dashboard/        dashboard panel and its cards
     editor/           screenshot editor
     lock/             session lock surface
+    greeter/          login screen surface
     bar/              top bar and its cards
     notifications/    popups, history panel
     osd/              volume/brightness and Caps/Num Lock popups
@@ -114,7 +129,8 @@ quickshell/
     settings/         settings overlay and its pages
     wallpaper/        background layer, picker (local images, Wallhaven)
   ipc/Ipc.qml         every IPC target used by keybinds
-  scripts/            shell helpers (screenshot.sh, install-cursor.sh)
+  scripts/            shell helpers (screenshot.sh, install-cursor.sh, greeter-sync.sh)
+greeter/              the login screen's Mango config and start script
 settings/             your settings.json (not in git): only values that differ from the defaults (services/SettingsSchema.js)
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
