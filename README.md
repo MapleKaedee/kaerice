@@ -15,7 +15,6 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `hypr/` | `~/.config/hypr` |
 | `mango/` | `~/.config/mango` |
 | `quickshell/` | `~/.config/quickshell/kaerice` |
-| `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland and Mango) |
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
 Needs: `hyprland` or `mangowm`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
@@ -101,7 +100,7 @@ remove a theme, delete its folder. Hyprcursor and CursorFX themes, `.cape`, loos
 
 - Apps that are open and load the cursor themselves change when they are opened again. With `xorg-xsetroot`, X11 windows without a cursor
   of their own change at once, without it at the next login.
-- Not reached: games with a cursor of their own, apps run as root, the login screen, and Niri (its config names a theme).
+- Not reached: games with a cursor of their own, apps run as root and the login screen.
 - On a screen scaled above 1 the cursor is smaller than the number.
 
 ## Layout
@@ -135,7 +134,7 @@ settings/             your settings.json (not in git): only values that differ f
 wallpapers/           images for the picker
 tests/                logic tests: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input tests
 core/                 kaericed, the daemon (Rust): sends state to the shell and takes its calls over a Unix socket, one JSON line each
-systemd/              DMS drop-in, kaericed unit
+systemd/              kaericed unit
 ```
 
 Adding a feature: state and commands go in a `services/` singleton, UI in `components/`, colors and sizes from `Theme`,

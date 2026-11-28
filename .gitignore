@@ -1,5 +1,3 @@
-# DMS (still used on Niri/Mango) may keep writing ~/.config/hypr/dms/, which now lands here via the symlink
-hypr/dms/
 CLAUDE.md
 TODO.md
 # your own settings; the leading slash keeps quickshell/components/settings/ tracked

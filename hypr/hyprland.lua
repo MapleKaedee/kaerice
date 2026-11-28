@@ -1,6 +1,6 @@
 -- Hyprland configuration (Lua) — https://wiki.hypr.land/configuring/
 
--- session env + systemd target (formerly the DMS_STARTUP block)
+-- session env + systemd target
 hl.on("hyprland.start", function()
 	hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 	if not os.getenv("HYPRLAND_NO_SD_TARGET") then
@@ -13,8 +13,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/touchpad-auto.sh")
 end)
 
--- kaerice: own Quickshell shell (~/Projects/kaerice). DMS is skipped on Hyprland
--- via ~/.config/systemd/user/dms.service.d/skip-hyprland.conf
 hl.on("hyprland.start", function()
 	-- one jemalloc arena: the default (4 per core) keeps memory the shell has already freed
 	hl.exec_cmd("env MALLOC_CONF=narenas:1 qs -c kaerice")
@@ -25,7 +23,7 @@ hl.config({
 		-- empty inherits XKB_DEFAULT_LAYOUT (libxkbcommon), falls back to "us"
 		kb_layout = "",
 		numlock_by_default = true,
-		follow_mouse = 1, -- focus follows hover (like niri/mango)
+		follow_mouse = 1, -- focus follows hover (like mango)
 		-- conf/input.lua is required later and wins per key
 		touchpad = {
 			tap_to_click = true,
