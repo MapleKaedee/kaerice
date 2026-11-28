@@ -16,8 +16,6 @@ end)
 -- kaerice: own Quickshell shell (~/Projects/kaerice). DMS is skipped on Hyprland
 -- via ~/.config/systemd/user/dms.service.d/skip-hyprland.conf
 hl.on("hyprland.start", function()
-	-- run binary directly: the systemd unit needs WAYLAND_DISPLAY imported first (races with the session env block above)
-	hl.exec_cmd("/usr/lib/hyprpolkitagent/hyprpolkitagent")
 	-- one jemalloc arena: the default (4 per core) keeps memory the shell has already freed
 	hl.exec_cmd("env MALLOC_CONF=narenas:1 qs -c kaerice")
 end)

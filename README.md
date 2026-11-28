@@ -17,7 +17,7 @@ Symlinks everything into `~/.config` (existing real files are moved to `*.pre-ka
 | `systemd/dms.service.d/skip-hyprland.conf` | `~/.config/systemd/user/dms.service.d/` (keeps DMS off on Hyprland) |
 | `systemd/kaericed.service` | `~/.config/systemd/user/kaericed.service` |
 
-Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `hyprpolkitagent`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
+Needs: `hyprland`, `quickshell`, `ttf-jetbrains-mono-nerd`, `cava`, `cliphist`, `accountsservice`, `zenity`, `curl`,
 `wl-clipboard`, `grim`, `slurp`, `jq`, `libarchive`. Network uses iwd + systemd-networkd. Optional: `xorg-xsetroot` (see Cursor).
 
 `nix` builds the daemon `kaericed` (`core/`) and is needed for the network status, the Wi-Fi menu, brightness, system usage and

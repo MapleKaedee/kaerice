@@ -24,6 +24,8 @@ ShellRoot {
     readonly property int batteryPercent: Battery.percent
     // and LockKeys: it needs the lock state from before the first key press
     readonly property bool lockKeyOn: LockKeys.on
+    // and Polkit: the agent must be registered before the first request
+    readonly property bool polkitAgent: Polkit.agent.isRegistered
     // and the apps: the scan adds them one by one, so a launcher that starts it fills up row by row
     readonly property var apps: DesktopEntries.applications
 
@@ -41,6 +43,7 @@ ShellRoot {
     LazyLoader { active: Ui.emoji; EmojiPicker {} }
     LazyLoader { active: Switcher.open; WindowSwitcher {} }
     LazyLoader { active: Ui.wallpaperPicker; WallpaperPicker {} }
+    LazyLoader { active: Polkit.agent.isActive; PolkitDialog {} }
 
     Calendar {}
     WifiMenu {}
