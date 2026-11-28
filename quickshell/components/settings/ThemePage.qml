@@ -145,14 +145,55 @@ Column {
             onClicked: Cursor.install()
         }
     }
-    DeviceList {
+    Card { // Tab focuses it; Enter, Space or a click opens the list below
+        id: cursorBox
+        property bool open: false
         visible: Cursor.state !== null
-        nodes: Cursor.themes
+        width: parent.width; height: 44; offset: Theme.depth(3)
+        fill: cursorArea.containsMouse ? Theme.hover : Theme.face
+        line: activeFocus ? Theme.accent : Theme.line
+        activeFocusOnTab: true
+        Keys.onReturnPressed: open = !open
+        Keys.onEnterPressed: open = !open
+        Keys.onSpacePressed: open = !open
+
+        Text {
+            id: cursorIcon
+            anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
+            width: 26
+            horizontalAlignment: Text.AlignHCenter
+            text: String.fromCodePoint(0xf245) // mouse-pointer
+            color: Theme.text
+            font.family: Theme.iconFont; font.pixelSize: 17
+        }
+        Text {
+            anchors { left: cursorIcon.right; leftMargin: 12; right: chevron.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
+            elide: Text.ElideRight
+            text: Cursor.theme || "None"
+            color: Theme.text
+            font.pixelSize: 13; font.bold: true
+        }
+        Text {
+            id: chevron
+            anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+            text: String.fromCodePoint(cursorBox.open ? 0xf077 : 0xf078) // chevron-up / chevron-down
+            color: Theme.text
+            font.family: Theme.iconFont; font.pixelSize: 13
+        }
+        MouseArea { id: cursorArea; anchors.fill: parent; hoverEnabled: true; onClicked: cursorBox.open = !cursorBox.open }
+    }
+    DeviceList {
+        visible: cursorBox.visible && cursorBox.open
+        nodes: visible ? Cursor.themes : []
         current: Cursor.theme
         glyph: 0xf245 // mouse-pointer
         label: name => name
-        // a theme without a copy reports the size apps get, which cursor.set may refuse (it takes 16..96)
-        onPicked: name => Cursor.set(name, Math.min(Math.max(Cursor.size, 16), 96))
+        onPicked: name => {
+            cursorBox.forceActiveFocus(); // the focused row goes away: without this Esc stops reaching the panel
+            cursorBox.open = false;
+            // a theme without a copy reports the size apps get, which cursor.set may refuse (it takes 16..96)
+            Cursor.set(name, Math.min(Math.max(Cursor.size, 16), 96));
+        }
     }
     SettingRow {
         visible: Cursor.theme !== ""
